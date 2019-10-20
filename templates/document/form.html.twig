@@ -1,0 +1,9 @@
+{% extends base %}
+
+{% block body %}
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.role) }}
+        {{ form_row(form.text) }}
+    {{ form_end(form) }}
+{% endblock %}

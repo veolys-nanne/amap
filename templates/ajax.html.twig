@@ -1,0 +1,20 @@
+{% set flash %}
+    {% include 'flash.html.twig' %}
+{% endset %}
+{% set body %}
+    {% block body %}
+    {% endblock %}
+{% endset %}
+{% set navbar %}
+    {% include 'navbar.html.twig' %}
+{% endset %}
+{% set script %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('body').initCommon();
+        });
+    </script>
+    {% block javascripts %}
+    {% endblock %}
+{% endset %}
+{{ {'header': title|default(''), 'flash': flash|spaceless, 'body': body|spaceless, 'navbar': navbar|spaceless, 'script': script|spaceless, 'url': url}|json_encode|raw }}

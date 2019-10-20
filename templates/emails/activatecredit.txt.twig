@@ -1,0 +1,12 @@
+{% extends 'emails/email.txt.twig' %}
+
+{% block body %}
+Une demande a été émise pour l'activation de l'avoir.
+
+Consom'acteur/trice : {{ credit.member }}
+Montant total: {{ credit.totalAmount|number_format(2) }}
+Montant restant: {{ credit.currentAmount|number_format(2) }}
+Objet: {{ credit.object }}
+
+Veuillez vous connecter sur {{ url('product_form', {role : role, id: credit.id}) }} pour activer cet avoir.
+{% endblock %}

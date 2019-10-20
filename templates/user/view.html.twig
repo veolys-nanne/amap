@@ -1,0 +1,85 @@
+{% extends base %}
+
+{% block body %}
+    {% if isPdf is not defined or not isPdf %}
+        <a href="?pdf=true" class="btn-success btn-block btn">Imprimer</a>
+    {% endif %}
+    <h1>Consom'acteurs/trices</h1>
+    <div class="wrapper">
+        {% for member in members %}
+            <div class="card">
+                <h4>{{ member }}</h4>
+                <p>{{ member.email }}</p>
+                {% for broadcast in member.broadcastList %}
+                    <p class="subtext">{{ broadcast }}</p>
+                {% endfor %}
+                <p>{{ member.address }}</p>
+                <p>{{ member.zipCode }} {{ member.city }}</p>
+                {% for phoneNumber in member.phoneNumbers %}
+                    <p class="{{ loop.first ? '' : 'subtext' }}">{{ phoneNumber }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <h1>Référents/tes</h1>
+    <div class="wrapper">
+        {% for referent in referents %}
+            <div class="card" id="{{ referent.id }}">
+                <h4>{{ referent }}</h4>
+                <p>{{ referent.email }}</p>
+                {% for broadcast in referent.broadcastList %}
+                    <p class="subtext">{{ broadcast }}</p>
+                {% endfor %}
+                <p>{{ referent.address }}</p>
+                <p>{{ referent.zipCode }} {{ referent.city }}</p>
+                {% for phoneNumber in referent.phoneNumbers %}
+                    <p class="{{ loop.first ? '' : 'subtext' }}">{{ phoneNumber }}</p>
+                {% endfor %}
+                <hr>
+                <p class="subtext">Producteurs/trices: </p>
+                {% for producer in producers %}
+                    {% if producer.parent.id == referent.id %}
+                        <p>{{ producer }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <h1>Producteurs/trices</h1>
+    <div class="wrapper">
+        {% for producer in producers %}
+            <div class="card">
+                <h4>{{ producer }}</h4>
+                {% if producer.denomination != '' %}
+                    <p class="subtext">{{ producer.lastname }} {{ producer.firstname }}</p>
+                {% endif %}
+                <p>{{ producer.email }}</p>
+                {% for broadcast in producer.broadcastList %}
+                    <p class="subtext">{{ broadcast }}</p>
+                {% endfor %}
+                <p>{{ producer.address }}</p>
+                <p>{{ producer.zipCode }} {{ producer.city }}</p>
+                {% for phoneNumber in producer.phoneNumbers %}
+                    <p class="{{ loop.first ? '' : 'subtext' }}">{{ phoneNumber }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <h1>Administrateurs/trices</h1>
+    <div class="wrapper">
+        {% for admin in admins %}
+            <div class="card">
+                <h4>{{ admin }}</h4>
+                <p>{{ admin.email }}</p>
+                {% for broadcast in admin.broadcastList %}
+                    <p class="subtext">{{ broadcast }}</p>
+                {% endfor %}
+                <p>{{ admin.address }}</p>
+                <p>{{ admin.zipCode }} {{ admin.city }}</p>
+                {% for phoneNumber in admin.phoneNumbers %}
+                    <p class="{{ loop.first ? '' : 'subtext' }}">{{ phoneNumber }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

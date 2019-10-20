@@ -1,0 +1,9 @@
+.scroll {
+    height: auto !important;
+}
+.no-print {
+    display: none;
+}
+.new-page {
+    page-break-before: always;
+}

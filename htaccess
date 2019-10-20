@@ -1,0 +1,13 @@
+<VirtualHost *:80>
+    ServerName amaphommesdeterre.alwaysdata.net
+
+    DocumentRoot /home/amaphommesdeterre/www/public
+    <Directory /home/amaphommesdeterre/www/public>
+        AllowOverride All
+        Order Allow,Deny
+        Allow from All
+    </Directory>
+
+    ErrorLog /home/amaphommesdeterre/admin/logs/apache/project_error.log
+    CustomLog /home/amaphommesdeterre/admin/logs/apache/project_access.log combined
+</VirtualHost>

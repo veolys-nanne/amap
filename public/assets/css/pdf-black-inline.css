@@ -1,0 +1,14 @@
+.scroll {
+    height: auto !important;
+}
+.no-print {
+    display: none;
+}
+* {
+    background-color: transparent !important;
+    color: #000 !important;
+}
+table, tr, td, th {
+    border: 1px solid #000 !important;
+    border-collapse: collapse;
+}

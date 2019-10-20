@@ -1,0 +1,8 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        thumbnail:
+            uri_prefix: /uploads
+            upload_destination: '%media_directory%'
+            namer: vich_uploader.namer_uniqid

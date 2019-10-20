@@ -1,0 +1,14 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+    <p>
+        Une demande a été émise pour l'activation de l'avoir.
+        <ul>
+            <li>Consom'acteur/trice : {{ credit.member }}<li>
+            <li>Montant total: {{ credit.totalAmount|number_format(2) }}<li>
+            <li>Montant restant: {{ credit.currentAmount|number_format(2) }}<li>
+            <li>Objet: {{ credit.object }}<li>
+        </ul>
+    </p>
+    <p>Veuillez vous connecter sur le <a href="{{ url('product_form', {role : role, id: credit.id}) }}">formulaire</a> pour activer cet avoir.</p>
+{% endblock %}

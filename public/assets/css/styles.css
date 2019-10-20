@@ -1,0 +1,186 @@
+/*base*/
+body {
+    background: #ebeff2;
+}
+.bck1 {
+    background: #fff;
+}
+.required::after {
+    color: #cc2255;
+    content: " *";
+}
+/*generique*/
+.padded {
+    padding: 15px;
+}
+.heavily-padded {
+    padding: 10%;
+}
+.carousel-control-next, .carousel-control-prev {
+    width: 10%;
+}
+.carousel-caption {
+    opacity: .5;
+    top:0;
+    bottom:initial;
+    right: 10%;
+    left: 10%;
+}
+.carousel-caption:hover {
+    opacity: .9;
+}
+/*datatable*/
+.page-item.active .page-link {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+.page-link {
+    color:  #28a745 !important;
+}
+tr[data-url] {
+    cursor: pointer;
+}
+td.nowrap {
+    white-space: nowrap;
+}
+td {
+    vertical-align: middle !important;
+}
+/*header*/
+header#header {
+    margin-bottom: 20px;
+    padding: 10px;
+}
+header#header h1 {
+    text-align: center;
+    color: #5cb85c;
+}
+/*footer*/
+footer#footer {
+    margin-top: 20px;
+    padding: 10px;
+}
+/*form*/
+form.form-horizontal .form-group {
+    margin-bottom: 0 !important;
+    border-bottom: 1px #f8f9fa solid;
+}
+form.form-horizontal .form-check {
+    display: inline-block;
+}
+.form-group input[type="checkbox"] {
+    height: 16px !important;
+    width: 16px !important;
+    margin-top: 8px;
+}
+.form-group i {
+    margin-top: 8px;
+}
+.collection a {
+    color: #28a745 !important;
+    padding-left: 10px;
+}
+form > .form-group, form > fieldset {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding: 1rem;
+}
+form .widget-date-choice > div {
+    display: inline-block;
+}
+form .widget-date-choice li a {
+    color: black;
+}
+form .widget-date-choice .values {
+    width: calc(100% - 280px);
+}
+form .widget-date-choice .calendar {
+    width: 272px;
+    position: relative;
+    vertical-align: top;
+}
+/*list*/
+ul.max-height {
+    list-style: none;
+    width: 100%;
+}
+ul.max-height li {
+    width: 19%;
+    display: inline-block;
+}
+ul.max-height li label {
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+/*basket*/
+.basket-table {
+    display: flex;
+}
+.basket-column {
+    flex-direction:row;
+}
+.basket-cell {
+    min-height: 38px;
+    border-bottom: 1px #f8f9fa solid;
+    border-left: 1px #f8f9fa solid;
+    padding:0 5px;
+    line-height: 38px;;
+}
+.basket-cell p {
+    width: 100%;
+}
+/*table*/
+.scroll {
+    height: 600px;
+    overflow: auto;
+}
+
+
+.scroll table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+}
+.table-sm tr td:first-child, .table-sm tr th:first-child {
+    white-space: nowrap;
+}
+/*card*/
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.card {
+    flex: 0 0 auto;
+    width: auto;
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+}
+.card p {
+    margin-bottom: 0;
+}
+.subtext {
+    color: grey;
+}
+/*modal*/
+.modal .table {
+    width: 100%;
+    display: table;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-collapse: collapse;
+}
+.modal .row {
+    width: 100%;
+    display: table-row;
+}
+.modal .cell {
+    display: table-cell;
+}
+.modal .body {
+    width: 100%;
+}

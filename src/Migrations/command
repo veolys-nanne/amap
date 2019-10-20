@@ -1,0 +1,9 @@
+mysql > CREATE USER 'amaphommesdeterre'@'172.21.0.1' IDENTIFIED BY 'amaphommesdeterre';
+mysql > GRANT ALL PRIVILEGES ON amaphommesdeterre.* TO 'amaphommesdeterre'@'172.21.0.1';
+bin/console doctrine:migrations:execute --up 20190316212220
+mot de passe initialisation : amaphommesdeterre
+mysql -u amaphommesdeterre -pamaphommesdeterre
+
+SSH:
+ssh amaphommesdeterre@ssh-amaphommesdeterre.alwaysdata.net
+#AmapHommesDeTerre14

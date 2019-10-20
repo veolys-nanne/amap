@@ -1,0 +1,7 @@
+{% extends 'emails/email.txt.twig' %}
+
+{% block body %}
+Une demande a été émise pour l'activation du produit {{ product.name }}.
+
+Veuillez vous connecter sur {{ url('product_form', {role : role, id: product.id}) }} pour activer ce produit.
+{% endblock %}

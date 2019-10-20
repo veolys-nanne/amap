@@ -1,0 +1,87 @@
+{% extends base %}
+
+{% block body %}
+    <table class="table table-striped table-hover"{% if is_granted('ROLE_ADMIN') and type == 'producer' %} data-url-move="{{ path('user_move', {role: role, type: type}) }}"{% endif %}>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Nom de famille</th>
+                <th>Prénom</th>
+                <th>Actif</th>
+                {% if is_granted('ROLE_ADMIN') and type == 'producer' %}
+                    <th>Référent/e</th>
+                    <th>Ordre</th>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th>Supprimer</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                {% set class = '' %}
+                {% if loop.first %}
+                    {% set class = class~' first' %}
+                {% endif %}
+                {% if loop.last %}
+                    {% set class = class~' last' %}
+                {% endif %}
+                <tr{% if type == 'producer' %} style="background-color:{{ user.color }}"{% endif %} data-url="{{ path('user_form', {role: role, type: type, id: user.id}) }}" class="{{ class }}">
+                    <td>{{ user.order }}</td>
+                    <td>{{ user.lastname }}</td>
+                    <td>{{ user.firstname }}</td>
+                    <td>
+                        <a href="{{ path('user_active', {role: role, type: type, id: user.id}) }}">
+                            {% if user.isActive %}
+                                <i class="far fa-check-square text-dark"></i>
+                            {% else %}
+                                <i class="far fa-square text-dark"></i>
+                            {% endif %}
+                        </a>
+                    </td>
+                    {% if is_granted('ROLE_ADMIN') and type == 'producer' %}
+                        <td>{{ user.parent }}</td>
+                        <td class="move"></td>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <a href="{{ path('user_delete', {id: user.id, type: type}) }}" data-confirm="Confirmez-vous la suppression de cet utilisateur?">
+                                <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ path('user_form', {role: role, type: type}) }}" class="btn btn-success">Nouveau</a>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            console.log('Done');
+            $('table').drawDataTable({
+                url : '{{ asset('assets/json/datatable.json') }}',
+                options : {
+                    columnDefs: [
+                        {
+                            targets: [0],
+                            visible: false,
+                        },
+                    ],
+                    order: [[0, 'asc'], [1, 'asc']],
+                    {% if is_granted('ROLE_ADMIN') and type == 'producer' %}
+                        rowReorder: {
+                            selector: '.move',
+                            dataSrc: 0
+                        },
+                    {% endif %}
+                    initComplete: function(settings, json) {
+                        $('th.sorting_asc').removeClass('sorting_asc').addClass('sorting');
+                    },
+                }
+            });
+        });
+    </script>
+{% endblock %}

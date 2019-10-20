@@ -1,0 +1,14 @@
+{% extends 'emails/email.txt.twig' %}
+
+{% block body %}
+Vous pouvez saisir votre commande pour
+{% for basket in baskets %}
+    le {{ basket.date|date('d/m/Y') }}
+    {% if not loop.last %}
+        ,
+    {% endif %}
+{% endfor %}
+.
+
+Veuillez vous connecter sur {{ url('basket_form', {'role': 'member'}) }} pour passer une commande.
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'emails/email.txt.twig' %}
+
+{% block body %}
+Une demande a été émise pour la désactivation de l'avoir.
+
+Producteur/trice : {{ credit.producer }}
+Consom'acteur/trice : {{ credit.member }}
+Montant total: {{ credit.totalAmount|number_format(2) }}
+Montant restant: {{ credit.currentAmount|number_format(2) }}
+Objet: {{ credit.object }}
+
+Veuillez vous connecter sur {{ url('product_form', {role : role, id: credit.id}) }} pour déactiver cet avoir.
+{% endblock %}

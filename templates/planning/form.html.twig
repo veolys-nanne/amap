@@ -1,0 +1,61 @@
+{% extends base %}
+
+{% block body %}
+    {{ form_start(form) }}
+    {{ form_label(form.elements) }}
+    <div class="widget-date-choice form-group">
+        <div class="calendar">
+        </div>
+        <div class="values">
+            <ul
+                    data-prototype="{{ form_widget(form.elements.vars.prototype)|e }}"
+                    data-widget-counter="{{ form.elements|length }}"
+                    class="max-height"
+            >
+                {% for element in form.elements %}
+                    <li data-order="{{ element.date.vars.value|split('/')|reverse|join('-') }}"><a href="#"><i class="far fa-minus-square"></i></a> {{ element.date.vars.value }}{{ form_widget(element, {attr: {type: 'hidden'}}) }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% do form.elements.setRendered() %}
+    {{ form_label(form.members) }}
+    <ul class="max-height">
+        {% for member in form.members %}
+            <li>{{ form_widget(member) }}</li>
+        {% endfor %}
+    </ul>
+    {% do form.members.setRendered() %}
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $(document).on('click', '.widget-date-choice li .fa-minus-square', function(event) {
+                event.preventDefault();
+                $(this).parents('li')[0].remove();
+            });
+            var options = $.datepicker.regional['fr'];
+            options['minDate'] = 0;
+            options.onSelect = function(dateText) {
+                var $container = $('.widget-date-choice .values ul');
+                var counter = $container.data('widgetCounter') | $container.children().length;
+                var $newWidget = $('input', $($container.data('prototype').replace(/__name__/g, counter)))
+                    .val(dateText);
+                counter++;
+                $container.data('widget-counter', counter);
+                $container.append($('<li>', {
+                    html: '<a href="#"><i class="far fa-minus-square"></i></a> ' + dateText,
+                    'data-order': dateText.split('/').reverse().join('-'),
+                }).append($newWidget));
+                var $children = $container.children().clone(true);
+                $container.html($children.sort(function(a,b) {
+                    return $(a).data('order') < $(b).data('order') ? -1 : ($(a).data('order') > $(b).data('order') ? 1 : 0);
+                }));
+            };
+            $('.widget-date-choice .calendar').datepicker(options);
+        });
+    </script>
+{% endblock %}

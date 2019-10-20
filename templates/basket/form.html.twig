@@ -1,0 +1,90 @@
+{% extends base %}
+
+{% import 'macro/portfolio.html.twig' as portfolioMacro %}
+
+{% block body %}
+    {% set basketCount = 0 %}
+    {% for i in 0..form.children|length %}
+        {% if form['basket_'~i] is defined %}
+            {% set basketCount = basketCount + 1 %}
+        {% endif %}
+    {% endfor %}
+    {% if not isNew %}
+        <div class="container alert alert-info" role="alert">
+            Panier déjà enregistré.
+        </div>
+    {% endif %}
+    {{ form_start(form, { 'attr' : { 'class': 'form-horizontal' } }) }}
+    <div class="table-responsive scroll">
+        <table class="table table-sm">
+            <thead>
+            <tr>
+                <th colspan="2"></th>
+                {% if basketCount > 0 %}
+                    {% for i in 0..basketCount-1 %}
+                        <th>{{ form['basket_'~i].vars.value.date|date('d/m') }}</th>
+                    {% endfor %}
+                {% endif %}
+                <th>Prix unitaire</th>
+                <th>Prix total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in products %}
+                {% set producer = product.producer %}
+                {% if loop.first or producer.id != products[loop.index0 - 1].producer.id %}
+                    <tr style="background-color:{{ producer.color }}">
+                        <td>
+                            <a class="nav-link text-dark" href="{{ path('contact_form', {role: role, user: producer.id}) }}"><i class="far fa-envelope"></i></a>
+                        </td>
+                        <td colspan="{{ 2 + basketCount }}">
+                            <a href="#" class="toggle-producer"><i class="fa fa-arrow-up" aria-hidden="true" data-producer="{{ product.producer.id }}"></i></a>
+                            {{ producer }}
+                            {{ portfolioMacro.portfolio(producer.portfolio) }}
+                        </td>
+                        <td><p class="text-right total-producer-id" data-producer-id="{{ product.producer.id }}"></p></td>
+                    </tr>
+                {% endif %}
+                <tr style="background-color:{{ producer.color }}" data-producer-id="{{ product.producer.id }}">
+                    <td>
+                        <a class="nav-link text-dark" href="{{ path('contact_form_product', {role: role, user: producer.id, product: product.id}) }}"><i class="far fa-envelope"></i></a>
+                    </td>
+                    <td>
+                        {{ product.name }}
+                        {{ portfolioMacro.portfolio(product.portfolio) }}
+                    </td>
+                    {% if basketCount > 0 %}
+                        {% for i in 0..basketCount-1 %}
+                            <td>
+                            {%  for child in form['basket_'~i].productQuantityCollection.children %}
+                                {% if child.vars.value.product.id == product.id %}
+                                    {{ form_widget(child.quantity, {'attr': {'data-product-id': product.id, 'data-price': child.price??product.price, 'data-producer-id': product.producer.id}}) }}
+                                {% endif %}
+                            {% endfor %}
+                            </td>
+                        {% endfor %}
+                    {% endif %}
+                    <td><p class="text-right">{{ product.price|number_format(2) }}</p></td>
+                    <td><p class="text-right total-product-id" data-product-id="{{ product.id }}"></p></td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="{{ 3 + basketCount }}"></td>
+                <td><p class="text-right total"></p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('input[type="number"]').bind('keyup mouseup', function () {
+                $('body').initCommon();
+            });
+        });
+    </script>
+{% endblock %}

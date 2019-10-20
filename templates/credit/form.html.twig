@@ -1,0 +1,36 @@
+{% extends base %}
+
+{% block body %}
+    {{ form_start(form) }}
+        {{ form_row(form.member) }}
+        {% if form.producer is defined %}
+            {{ form_row(form.producer) }}
+        {% endif %}
+        {% if form.active is defined %}
+            {{ form_row(form.active) }}
+        {% endif %}
+        {% if form.totalAmount.vars.attr.mail is defined %}
+            {% set credit = form.vars.value %}
+            <div class="form-group">
+                {{ form_label(form.totalAmount) }}
+                <a class="nav-link text-dark d-inline-block" href="{{ path('contact_form_credit', {credit: credit.id, user: credit.producer.parent.id}) }}"><i class="far fa-envelope"></i></a>
+                {{ form_widget(form.totalAmount) }}
+            </div>
+        {% else %}
+            {{ form_row(form.totalAmount) }}
+        {% endif %}
+        {% if form.currentAmount is defined%}
+            {% if form.currentAmount.vars.attr.mail is defined %}
+                {% set credit = form.vars.value %}
+                <div class="form-group">
+                    {{ form_label(form.currentAmount) }}
+                    <a class="nav-link text-dark d-inline-block" href="{{ path('contact_form_credit', {credit: credit.id, user: credit.producer.parent.id}) }}"><i class="far fa-envelope"></i></a>
+                    {{ form_widget(form.currentAmount) }}
+                </div>
+            {% else %}
+                {{ form_row(form.currentAmount) }}
+            {% endif %}
+        {% endif %}
+        {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}

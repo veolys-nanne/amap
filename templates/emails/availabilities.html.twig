@@ -1,0 +1,8 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+    <p>
+        Un nouveau planning des permanences est disponible pour la période du {{ period.min|date('d/m/Y') }} au {{ period.max|date('d/m/Y') }}.
+    </p>
+    <p>Veuillez vous connecter sur <a href="{{ url('planning_availability') }}">"Permanences"</a> pour saisir vos disponibilités.</p>
+{% endblock %}

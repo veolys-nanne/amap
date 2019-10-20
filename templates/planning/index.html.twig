@@ -1,0 +1,66 @@
+{% extends base %}
+
+{% block body %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Date de début</th>
+                <th>Date de fin</th>
+                <th>Statut</th>
+                <th>Aller vers</th>
+                <th>Supprimer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for planning in plannings %}
+                <tr data-url="{{ path('planning_form', {id: planning.id}) }}">
+                    {% if planning.elements|first %}
+                        {% set minDate = (planning.elements|first).date %}
+                        {% set maxDate = (planning.elements|first).date %}
+                        {% for element in planning.elements %}
+                            {% set minDate = min(element.date, minDate) %}
+                            {% set maxDate = max(element.date, maxDate) %}
+                        {% endfor %}
+                        <td data-sort="{{ minDate|date('Y-m-d') }}">{{ minDate|date('d/m/Y') }}</td>
+                        <td data-sort="{{ maxDate.date|date('Y-m-d') }}">{{ maxDate|date('d/m/Y') }}</td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    <td>{{ constant('App\\Entity\\Planning::LABELS')[planning.state] }}</td>
+                    <td>
+                        {% if planning.nextState %}
+                            {% set class = 'btn btn-sm btn-success' %}
+                            {% if planning.nextState == constant('App\\Entity\\Planning::STATE_OPEN') or planning.nextState == constant('App\\Entity\\Planning::STATE_ONLINE') %}
+                                {% set class = class~' mail-extra' %}
+                            {% endif %}
+                            <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="{{ class }}">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ path('planning_delete', {id: planning.id}) }}" data-confirm="Confirmez-vous la suppression de ce planning?">
+                            <i class="fas fa-trash-alt text-danger"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ path('planning_form') }}" class="btn btn-success">Nouveau</a>
+    {% if needMail %}
+        <a href="{{ path('planning_mails_up') }}" class="btn btn-success mail-extra">Envoyer un mail de relance pour les disponibilités</a>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('table').drawDataTable({
+                url : '{{ asset('assets/json/datatable.json') }}',
+                options : {
+                    order: [[0, 'desc']],
+                }
+            });
+        });
+    </script>
+{% endblock %}

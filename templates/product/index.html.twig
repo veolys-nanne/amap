@@ -1,0 +1,90 @@
+{% extends base %}
+
+{% block body %}
+    <table class="table table-striped table-hover" data-url-move="{{ path('product_move', {role: role}) }}">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Nom</th>
+                <th>Prix</th>
+                {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
+                    <th>Producteur/trice</th>
+                    <th>Actif</th>
+                {% elseif is_granted('ROLE_PRODUCER') %}
+                    <th>Activation</th>
+                {% endif %}
+                <th>Ordre</th>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th>Supprimer</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% set producer = null %}
+            {% for product in products %}
+                {% set class = '' %}
+                {% if producer != product.producer.id %}
+                    {% set class = class~' first' %}
+                    {% set producer = product.producer.id %}
+                {% endif %}
+                {% if loop.last or producer != products[loop.index].producer.id %}
+                    {% set class = class~' last' %}
+                {% endif %}
+                <tr style="background-color:{{ product.producer.color }}" data-url="{{ path('product_form', {role: role, id: product.id}) }}" class="{{ class }}">
+                    <td>{{ 100 + product.producer.order}}-{{ 1000 + product.order }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price|number_format(2) }}</td>
+                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
+                        <td>{{ product.producer }}</td>
+                        <td>
+                            <a href="{{ path('product_active', {role: role, id: product.id}) }}">
+                                {% if product.isActive %}
+                                    <i class="far fa-check-square text-dark"></i>
+                                {% else %}
+                                    <i class="far fa-square text-dark"></i>
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% elseif is_granted('ROLE_PRODUCER') %}
+                        <td>
+                            {% set texte = product.isActive ? 'Demander la désactivation' : 'Demander l\'activation' %}
+                            <a href="{{ path('product_ask_active', {role: 'producer', id: product.id}) }}" class="btn btn-sm btn-success mail-extra">{{ texte }}</a>
+                        </td>
+                    {% endif %}
+                    <td class="move"></td>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <a href="{{ path('product_delete', {id: product.id}) }}" data-confirm="Confirmez-vous la suppression de ce produit?">
+                                <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ path('product_form', {role: role}) }}" class="btn btn-success">Nouveau</a>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('table').drawDataTable({
+                url : '{{ asset('assets/json/datatable.json') }}',
+                options : {
+                    columnDefs: [
+                        {
+                            targets: [0],
+                            visible: false,
+                        },
+                    ],
+                    rowReorder: {
+                        selector: '.move',
+                        dataSrc: 0
+                    },
+                    order: [[0, 'asc']],
+                }
+            });
+        });
+    </script>
+{% endblock %}

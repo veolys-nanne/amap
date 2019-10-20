@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+        {% block title %}
+            {% if title is defined %}{{ title }} | {% endif %}AMAP Hommes de terre
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{{ absolute_url(asset('assets/css/styles.css'~'?'~date().timestamp)) }}" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.2.5/css/rowReorder.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.2.5/css/rowReorder.dataTables.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://jqueryui.com/resources/demos/datepicker/i18n/datepicker-fr.js"></script>
+    <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cloud.tinymce.com/5/tinymce.min.js?apiKey=mtsze9mf9k2qic8sg695rxk3dwbbfjlp27qd18w9wrgsjgh9"></script>
+    <script src="https://cdn.datatables.net/rowreorder/1.2.5/js/dataTables.rowReorder.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-fixes@0.5.6/dist/html2canvas.min.js"></script>
+    <script src="{{ absolute_url(asset('assets/js/helper.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/datatable.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/jquery.collection.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/multiselect.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/confirm.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/mailextra.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/tinymce.js'~'?'~date().timestamp)) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/initcommon.js'~'?'~date().timestamp)) }}"></script>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+</head>
+<body>
+{% block header %}
+    {% if isPdf is not defined or not isPdf %}
+        <header id="header" class="bck1 border-bottom">
+            <div class="container">
+                <img src="{{ absolute_url(asset('assets/image/header.jpg')) }}" style="max-width:100%" />
+                <h1 id="container-header">{{ title|default('') }}</h1>
+            </div>
+        </header>
+    {% endif %}
+{% endblock %}
+
+<nav class="container navbar navbar-expand-lg navbar-light bg-light" id="container-navbar">
+    {% include 'navbar.html.twig' %}
+</nav>
+
+<div id="container-flash">
+{% block flash %}
+    {% if isPdf is not defined or not isPdf %}
+        {% include 'flash.html.twig' %}
+    {% endif %}
+{% endblock %}
+</div>
+
+<div class="container bck1 padded" id="container-body">
+    {% block body %}
+    {% endblock %}
+</div>
+
+<footer id="footer" class="bck1 border-top">
+{% block footer %}
+    {% if isPdf is not defined or not isPdf %}
+        <div class="container">
+        </div>
+    {% endif %}
+{% endblock %}
+</footer>
+
+<script type="application/javascript">
+    $(document).ready(function() {
+        $('body').initCommon();
+    });
+</script>
+{% block javascripts %}
+{% endblock %}
+</body>
+</html>

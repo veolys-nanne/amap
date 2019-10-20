@@ -1,0 +1,149 @@
+{% extends base %}
+{% form_theme form _self %}
+
+{% block checkbox_widget %}
+    <input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} />
+{% endblock checkbox_widget %}
+
+{% block body %}
+    {% set date = form.vars.value.date ? form.vars.value.date|date('Y-m-d') : '' %}
+    {% set dateLabel = form.vars.value.date ? form.vars.value.date|date('d/m')~'<br />S'~form.vars.value.date|date('W') : '' %}
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>S1</th>
+                    <th>S2</th>
+                    <th>S3</th>
+                    <th>S4</th>
+                    <th>S5</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for producer in producers %}
+                <tr>
+                    <td>{{ producer }}</td>
+                    <td>{% if 1 in producer.deleveries %}X{% endif %}</td>
+                    <td>{% if 2 in producer.deleveries %}X{% endif %}</td>
+                    <td>{% if 3 in producer.deleveries %}X{% endif %}</td>
+                    <td>{% if 4 in producer.deleveries %}X{% endif %}</td>
+                    <td>{% if 5 in producer.deleveries %}X{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ form_start(form, { 'attr' : { 'class': 'form-horizontal' } }) }}
+        {{ form_label(form.date) }} <div class="helper d-inline"></div>
+        {{ form_widget(form.date) }}
+        <div class="table-responsive scroll">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th></th>
+                    {% set rendered = false %}
+                    {% for model in models %}
+                        <th data-order="{{ model.date|date('Y-m-d') }}">{{ model.date|date('d/m') }}<br />s{{ model.date|date('W') }}</th>
+                    {% endfor %}
+                    <th data-order="{{ date }}" data-date>{{ dateLabel|raw }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    {% set producer = product.producer %}
+                    {% if loop.first or producer.id != products[loop.index0 - 1].producer.id %}
+                        <tr style="background-color:{{ producer.color }}">
+                            <td>
+                                <a href="#" class="toggle-producer no-print"><i class="fa fa-arrow-up" aria-hidden="true" data-producer="{{ producer.id }}"></i></a>
+                                {{ producer }}
+                            </td>
+                            {% for model in models %}
+                                <td data-order="{{ model.date|date('Y-m-d') }}"></td>
+                            {% endfor %}
+                            <td data-order="{{ date }}" data-date><input type="checkbox" data-producer-id="{{ producer.id }}" class="select-all"></td>
+                        </tr>
+                    {% endif %}
+                    <tr style="background-color:{{ producer.color }}" data-producer-id="{{ producer.id }}">
+                        <td>{{ product.name }}</td>
+                        {% for model in models %}
+                            {% set iconClass = "far fa-square text-dark" %}
+                            {% for productQuantity in model.productQuantityCollection %}
+                                {% if product.id == productQuantity.product.id and productQuantity.quantity == 1 %}
+                                    {% set iconClass = "far fa-check-square text-dark" %}
+                                {% endif %}
+                            {% endfor %}
+                            <td data-order="{{ model.date|date('Y-m-d') }}"><i class="{{ iconClass }}"></i></td>
+                        {% endfor %}
+                        {% set rendered = false %}
+                        {% for child in form.productQuantityCollection.children %}
+                            {% if product.id == child.vars.value.product.id %}
+                                {% set rendered = true %}
+                                <td data-order="{{ date }}" data-date>{{ form_widget(child.active) }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not rendered %}
+                            <td data-order="{{ date }}" data-date></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {% set count = 0 %}
+    {% for model in models %}
+        {% if model.id != form.vars.value.id %}
+            {% set count = count + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <script type="application/javascript">
+        $(document).ready(function() {
+            var reorderColumn = function() {
+                $('tr').each(function(){
+                    var $children = $(this).children().clone(true);
+                    $(this).html($children.sort(function(a,b) {
+                        return $(a).data('order') < $(b).data('order') ? -1 : ($(a).data('order') > $(b).data('order') ? 1 : 0);
+                    }));
+                });
+            }
+            $('#model_date').datepicker('option', 'minDate', 0);
+            $('#model_date').on('change', function() {
+                var date = $(this).datepicker('getDate')
+                var day = ('0' + date.getDate()).slice(-2);
+                var technicalMonth = date.getMonth();
+                var month = ('0' + (technicalMonth+1)).slice(-2);
+                var rankInMonth = 0;
+                while (technicalMonth == date.getMonth()) {
+                    date = new Date(date.getTime() - 60 * 60 * 24 * 7 * 1000);
+                    rankInMonth++;
+                }
+                rankInMonth = rankInMonth == 1 ? rankInMonth + 'er' : rankInMonth + 'ème';
+                var weekOfYear = $.datepicker.iso8601Week(date);
+                $('.helper') .html('(' + rankInMonth + ' ' + $.datepicker.regional.fr.dayNames[date.getDay()] + ' du mois / semaine ' + weekOfYear + ' de l\'année)');
+                $('th[data-date]').html(day + '/' + month + '<br />s' + weekOfYear);
+                $('[data-date]').data('order', date.getFullYear() + '-' + month + '-' + day);
+                reorderColumn();
+            });
+            $('input.select-all').each(function(event) {
+                $(this).prop('checked', $('tr[data-producer-id="' + $(this).data('producerId') + '"] input:not(":checked")').length == 0);
+            });
+            $('input.select-all').on('change', function(event) {
+                event.preventDefault();
+                var checked = $(this).is(':checked');
+                $('tr[data-producer-id="' + $(this).data('producerId') + '"] input').prop('checked', checked);
+            });
+            $('tr[data-producer-id] input').on('change', function(event) {
+                event.preventDefault();
+                var producerId = $(this).parents('tr').data('producerId');
+                $('input.select-all[data-producer-id="' + producerId + '"]').prop('checked', $('tr[data-producer-id="' + producerId + '"] input:not(":checked")').length == 0);
+            });
+            reorderColumn();
+        });
+    </script>
+{% endblock %}

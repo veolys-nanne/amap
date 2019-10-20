@@ -1,0 +1,35 @@
+{% extends base %}
+
+{% block body %}
+    <label>Nombre de familles par permanence: </label><input type="number" id="column_number"required="required" style="width: 50px" min="1" class="form-control d-inline" value="3">
+    {{ form_start(form) }}
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th></th>
+                <th>Date</th>
+                <th class="model d-none">Famille</th>
+            </tr>
+            {% for element in form.elements.children %}
+                <tr>
+                    <td><a href="{{ path('change_planning_availability', {date: element.members.vars.label_attr['data-date'], id: form.vars.value.id}) }}"><i class="fas fa-pen text-success text-primary"></i></a></td>
+                    <td>{{ form_label(element.members) }}</td>
+                    <td class="model d-none">{{ form_widget(element.members) }}</td>
+                </tr>
+            {% endfor %}
+            {% do form.elements.setRendered() %}
+        </table>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('tr:has(.model)').drawMultiSelect({columnNumber : $('#column_number').val()});
+            $('#column_number').on('change', function () {
+                $('tr:has(.model)').drawMultiSelect('addColumns', $(this).val());
+            })
+        });
+    </script>
+{% endblock %}

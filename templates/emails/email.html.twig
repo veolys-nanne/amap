@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|default('fr') }}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ message.subject }}</title>
+    </head>
+    <body>
+        <h1>{{ message.subject }}</h1>
+        {% if app.user is defined and app.user.email is defined %}<h4>Mail de {{ app.user }}</h4>{% endif %}
+        {% if extra is defined %}
+            {{ extra|raw }}
+        {% endif %}
+        {% block body %}
+        {% endblock %}
+        <p><a href="{{ url('login') }}">L'équipe AMAP Hommes de terre</a></p>
+        <p><a href="{{ url('unsubscribe') }}">Se désinscrire</a></p>
+    </body>
+</html>

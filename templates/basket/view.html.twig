@@ -1,0 +1,85 @@
+{% extends base %}
+
+{% import 'macro/portfolio.html.twig' as portfolioMacro %}
+
+{% block body %}
+    {% if isPdf is not defined or not isPdf %}
+        {{ form(form) }}
+    {% endif %}
+    {% if baskets|length > 0 %}
+        {% if isPdf is not defined or not isPdf %}
+            <div class="form-group">
+                <a href="#" class="btn-success btn-block btn submit">Imprimer</a>
+            </div>
+        {% endif %}
+        <div class="table-responsive scrol">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th></th>
+                    {% for basket in baskets %}
+                        <th>{{ basket.date|date('d/m') }}</th>
+                    {% endfor %}
+                    <th>Prix total</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    {% set producer = product.producer %}
+                    {% if loop.first or producer.id != products[loop.index0 - 1].producer.id %}
+                        <tr style="background-color:{{ producer.color }}">
+                            <td>
+                                <a href="#" class="toggle-producer no-print"><i class="fa fa-arrow-up" aria-hidden="true" data-producer="{{ product.producer.id }}"></i></a>
+                                {{ producer }}
+                                <div class="no-print">{{ portfolioMacro.portfolio(producer.portfolio) }}</div>
+                            </td>
+                            {% for basket in baskets %}
+                                <td></td>
+                            {% endfor %}
+                            <td><p class="text-right total-producer-id" data-producer-id="{{ product.producer.id }}"></p></td>
+                        </tr>
+                    {% endif %}
+                    <tr style="background-color:{{ producer.color }}" data-producer-id="{{ product.producer.id }}">
+                        <td>
+                            {{ product.name }}
+                            <div class="no-print">{{ portfolioMacro.portfolio(product.portfolio) }}</div>
+                        </td>
+                        {% for basket in baskets %}
+                            <td>
+                            {%  for productQuantity in basket.productQuantityCollection %}
+                                {% if productQuantity.product.id == product.id and productQuantity.quantity > 0 %}
+                                    <span data-product-id="{{ product.id }}" data-price="{{ productQuantity.price ? productQuantity.price : product.price }}" data-producer-id="{{ product.producer.id }}">{{ productQuantity.quantity }}</span>
+                                {% endif %}
+                            {% endfor %}
+                            </td>
+                        {% endfor %}
+                        <td><p class="text-right total-product-id" data-product-id="{{ product.id }}"></p></td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="{{ baskets|length + 1 }}">Total</td>
+                    <td><p class="text-right total"></p></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <h3>Aucun enregistrement trouvé</h3>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('#bill_filter_start').on('change', function() {
+                $('#bill_filter_end').datepicker('option', 'minDate', $(this).datepicker('getDate'));
+            });
+            $('a.submit').on('click', function(event) {
+                event.preventDefault();
+                var $form = $('form[name="bill_filter"]');
+                $('[name="bill_filter[pdf]"]', $form).val(1);
+                $form.submit();
+            })
+        });
+    </script>
+{% endblock %}

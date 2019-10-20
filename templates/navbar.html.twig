@@ -1,0 +1,93 @@
+{% if is_granted('IS_AUTHENTICATED_FULLY') and (isPdf is not defined or not isPdf) %}
+    {% set role = 'member' %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set role = 'admin' %}
+    {% elseif is_granted('ROLE_REFERENT') and app.user.isActive %}
+        {% set role = 'referent' %}
+    {% elseif is_granted('ROLE_PRODUCER') %}
+        {% set role = 'producer' %}
+    {% endif %}
+    <a class="navbar-brand" href="{{ path('document_view', {role: role, name: 'homepage'}) }}"><i class="fa fa-home text-secondary"></i></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            {% if is_granted('ROLE_ADMIN') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Utilisateurs
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownUser">
+                        <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'referent'}) }}">Référents/es</a>
+                        <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'producer'}) }}">Producteurs/trices</a>
+                        <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'member'}) }}">Consom'acteurs/trices</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBasket" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Panier
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownBasket">
+                        <a class="dropdown-item" href="{{ path('product_index', {role: 'admin'}) }}">Produits</a>
+                        <a class="dropdown-item" href="{{ path('basket_models') }}">Modèles</a>
+                        <a class="dropdown-item" href="{{ path('credit_index', {role: 'admin'}) }}">Avoirs</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Administration
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                        <a class="dropdown-item" href="{{ path('basket_syntheses') }}">Extraction</a>
+                        <a class="dropdown-item" href="{{ path('planning_index') }}">Permanences</a>
+                        <a class="dropdown-item" href="{{ path('document_index') }}">Documents</a>
+                    </div>
+                </li>
+            {% elseif is_granted('ROLE_REFERENT') and app.user.isActive %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('user_index', {role: 'referent', type: 'producer'}) }}">Producteurs/trices</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('product_index', {role: 'referent'}) }}">Produits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('credit_index', {role: 'referent'}) }}">Avoirs</a>
+                </li>
+            {% elseif is_granted('ROLE_PRODUCER') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('product_index', {role: 'producer'}) }}">Produits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('credit_index', {role: 'producer'}) }}">Avoirs</a>
+                </li>
+            {% endif %}
+            {% if is_granted('ROLE_MEMBER') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('basket_form', {role: role}) }}">Mon panier</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('basket_view', {role: role}) }}">Mes commandes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('planning_availability') }}">Permanences</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('document_view', {role: role, name: 'rules'}) }}">Règlement</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('user_profil', {role: role}) }}"><i class="fas fa-user"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}"><i class="far fa-envelope"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('user_view', {role: role}) }}"><i class="fas fa-users"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+            </li>
+        </ul>
+    </div>
+{% endif %}

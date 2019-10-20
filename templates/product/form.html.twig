@@ -1,0 +1,23 @@
+{% extends base %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {% if form.active is defined %}
+            {{ form_row(form.active) }}
+        {% endif %}
+        {% if form.price.vars.attr.mail is defined %}
+            {% set product = form.vars.value %}
+            <div class="form-group">
+                {{ form_label(form.price) }}
+                <a class="nav-link text-dark d-inline-block" href="{{ path('contact_form_product_price', {product: product.id, user: product.producer.parent.id}) }}"><i class="far fa-envelope"></i></a>
+                {{ form_widget(form.price) }}
+            </div>
+        {% else %}
+            {{ form_row(form.price) }}
+        {% endif %}
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}

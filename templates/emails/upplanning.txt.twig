@@ -1,0 +1,7 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+Vous n'avez saisi aucune disponibilité pour le planning sur la période du {{ period.min|date('d/m/Y') }} au {{ period.max|date('d/m/Y') }}.
+
+Veuillez vous connecter sur {{ url('planning_availability') }} pour les saisir.
+{% endblock %}

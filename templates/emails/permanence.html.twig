@@ -1,0 +1,7 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+    <p>
+        Vous êtes de permanence le {{ date|date('d/m/Y') }}.
+    </p>
+{% endblock %}

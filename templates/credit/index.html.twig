@@ -1,0 +1,76 @@
+{% extends base %}
+
+{% block body %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Consom'acteur/trice</th>
+                <th>Montant total</th>
+                <th>Montant restant</th>
+                <th>Objet</th>
+                {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
+                    <th>Producteur/trice</th>
+                    <th>Actif</th>
+                {% elseif is_granted('ROLE_PRODUCER') %}
+                    <th>Activation</th>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th>Supprimer</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for credit in credits %}
+                <tr style="background-color:{{ credit.producer.color }}" data-url="{{ path('credit_form', {role: role, id: credit.id}) }}">
+                    <td data-sort="{{ credit.date|date('Y-m-d') }}">{{ credit.date|date('d/m/Y') }}</td>
+                    <td>{{ credit.member }}</td>
+                    <td>{{ credit.totalAmount|number_format(2) }}</td>
+                    <td>{{ credit.currentAmount|number_format(2) }}</td>
+                    <td>{{ credit.object|length > 50 ? credit.object|slice(0, 47) ~ '...' : credit.object }}</td>
+
+                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
+                        <td>{{ credit.producer }}</td>
+                        <td>
+                            <a href="{{ path('credit_active', {role: role, id: credit.id}) }}">
+                                {% if credit.isActive %}
+                                    <i class="far fa-check-square text-dark"></i>
+                                {% else %}
+                                    <i class="far fa-square text-dark"></i>
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% elseif is_granted('ROLE_PRODUCER') %}
+                        <td>
+                            {% set texte = credit.isActive ? 'Demander la désactivation' : 'Demander l\'activation' %}
+                            <a href="{{ path('credit_ask_active', {role: 'producer', id: credit.id}) }}" class="btn btn-sm btn-success mail-extra">{{ texte }}</a>
+                        </td>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <a href="{{ path('credit_delete', {id: credit.id}) }}" data-confirm="Confirmez-vous la suppression de cet avoir?">
+                                <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
+        <a href="{{ path('credit_form', {role: role}) }}" class="btn btn-success">Nouveau</a>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('table').drawDataTable({
+                url : '{{ asset('assets/json/datatable.json') }}',
+                options : {
+                    order: [[0, 'desc']],
+                }
+            });
+        });
+    </script>
+{% endblock %}

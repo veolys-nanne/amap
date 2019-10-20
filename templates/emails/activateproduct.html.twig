@@ -1,0 +1,8 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+    <p>
+        Une demande a été émise pour l'activation du produit {{ product.name }}.
+    </p>
+    <p>Veuillez vous connecter sur le <a href="{{ url('product_form', {role : role, id: product.id}) }}">formulaire</a> pour activer ce produit.</p>
+{% endblock %}

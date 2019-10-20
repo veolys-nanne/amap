@@ -1,0 +1,10 @@
+{{ message.subject }}
+
+{% if app.user is defined and app.user.email is defined %}Mail de {{ app.user }}{% endif %}
+
+{% block body %}
+{% endblock %}
+
+désinscription : {{ url('unsubscribe') }}
+L'équipe AMAP Hommes de terre
+{{ url('login') }}

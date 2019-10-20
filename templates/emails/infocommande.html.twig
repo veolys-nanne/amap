@@ -1,0 +1,15 @@
+{% extends 'emails/email.html.twig' %}
+
+{% block body %}
+    <p>
+        Vous pouvez saisir votre commande pour
+        {% for basket in baskets %}
+            le {{ basket.date|date('d/m/Y') }}
+            {% if not loop.last %}
+                ,
+            {% endif %}
+        {% endfor %}
+        .
+    </p>
+    <p>Veuillez vous connecter sur <a href="{{ url('basket_form', {'role': 'member'}) }}">"Mes paniers"</a> pour passer une commande.</p>
+{% endblock %}

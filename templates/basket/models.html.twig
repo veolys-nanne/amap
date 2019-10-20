@@ -1,0 +1,54 @@
+{% extends base %}
+
+{% block body %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Cloturé</th>
+                <th>Supprimer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for basket in baskets %}
+                <tr data-url="{{ path('basket_model', {id: basket.id}) }}">
+                    <td data-sort="{{ basket.date|date('Y-m-d') }}">{{ basket.date|date('d/m/Y') }}</td>
+                    <td>
+                        <a href="{{ path('basket_frozen', {id: basket.id}) }}">
+                            {% if null == basket.isFrozen %}
+                                <i class="fa fa-lock-open text-dark"></i>
+                            {% else %}
+                                <i class="fa fa-lock text-dark"></i>
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('basket_delete', {id: basket.id}) }}" data-confirm="Confirmez-vous la suppression de ce modèle?">
+                            <i class="fas fa-trash-alt text-danger"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ path('basket_model') }}" class="btn btn-success">Nouveau</a>
+    {% if needMail %}
+        <a href="{{ path('basket_mails_info') }}" class="btn btn-success mail-extra">Envoyer un mail de mise à disposition des paniers</a>
+    {% endif %}
+    {% if needMailUp %}
+        <a href="{{ path('basket_mails_up') }}" class="btn btn-success mail-extra">Envoyer un mail de relance pour la commande</a>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('table').drawDataTable({
+                url : '{{ asset('assets/json/datatable.json') }}',
+                options : {
+                    order: [[0, 'desc']],
+                }
+            });
+        });
+    </script>
+{% endblock %}

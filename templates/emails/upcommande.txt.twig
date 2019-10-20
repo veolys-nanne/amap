@@ -1,0 +1,7 @@
+{% extends 'emails/email.txt.twig' %}
+
+{% block body %}
+Vous n'avez aucun panier validé.
+Veuillez vous connecter sur {{ url('basket_form', {'role': 'member'}) }} pour passer une commande.
+Pour ne plus recevoir ce mail de relance, vous pouvez juste valider vos paniers vides.
+{% endblock %}
