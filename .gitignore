@@ -22,6 +22,6 @@
 ###< symfony/web-server-bundle ###
 
 ###> php-cs-fixer ###
-.php-cs-fixer
+.php_cs.dist
 .php_cs.cache
 ###< php-cs-fixer ###
