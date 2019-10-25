@@ -27,13 +27,29 @@
             $('form', $(this)).initCommon('ajax');
             $(this, $(this)).initCommon('addTotals');
             $("input[type=file]", $(this)).change(function () {
-                var fieldVal = $(this).val();
-                fieldVal = fieldVal.replace("C:\\fakepath\\", "");
-                if (fieldVal != undefined || fieldVal != "") {
-                    $(this).next(".custom-file-label").attr('data-content', fieldVal);
-                    $(this).next(".custom-file-label").text(fieldVal);
-                }
+                $(this).next(".custom-file-label").attr('data-content', this.files[0].name);
+                $(this).next(".custom-file-label").text(this.files[0].name);
             });
+            if(null == window.history.state) {
+                window.history.replaceState({url: window.location.href}, document.title, window.location.href)
+            }
+            window.onpopstate = function(event) {
+                if (null !== event.state) {
+                    $.ajax({
+                        url : event.state.url,
+                        method: 'get',
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        success: function(data) {
+                            document.title = data.header;
+                            $.refreshFromAjax(data);
+                        }
+                    });
+                } else {
+                    window.location.href = window.location.href;
+                }
+            };
 
             return this;
         },
@@ -78,6 +94,7 @@
                         processData: false,
                         contentType: false,
                         success: function(data) {
+                            document.title = data.header;
                             window.history.pushState({url: data.url}, data.header, data.url);
                             $.refreshFromAjax(data);
                         }

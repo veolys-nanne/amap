@@ -29,6 +29,9 @@ class AjaxSubscriber implements EventSubscriberInterface
     public function onKernelController(FilterControllerEvent $event)
     {
         $route = $event->getRequest()->attributes->all();
+        if (array_key_exists('_route', $route) && 'home' == $route['_route']) {
+            $this->twig->addGlobal('needNavbar', true);
+        }
         $this->twig->addGlobal('url', $this->router->generate($route['_route'], array_diff_key($route, ['_route' => '', '_route_params' => '', '_firewall_context' => '','_controller' => ''])));
         $this->twig->addGlobal('base', 'base.html.twig');
         if ($event->getRequest()->isXmlHttpRequest()) {

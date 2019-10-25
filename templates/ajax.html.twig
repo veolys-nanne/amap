@@ -1,13 +1,19 @@
+{% set json = {} %}
 {% set flash %}
     {% include 'flash.html.twig' %}
 {% endset %}
+{% set json = json|merge({flash: flash|spaceless}) %}
 {% set body %}
     {% block body %}
     {% endblock %}
 {% endset %}
-{% set navbar %}
-    {% include 'navbar.html.twig' %}
-{% endset %}
+{% set json = json|merge({body: body|spaceless}) %}
+{% if needNavbar|default(false) %}
+    {% set navbar %}
+        {% include 'navbar.html.twig' %}
+    {% endset %}
+    {% set json = json|merge({navbar: navbar|spaceless}) %}
+{% endif %}
 {% set script %}
     <script type="application/javascript">
         $(document).ready(function() {
@@ -17,4 +23,6 @@
     {% block javascripts %}
     {% endblock %}
 {% endset %}
-{{ {'header': title|default(''), 'flash': flash|spaceless, 'body': body|spaceless, 'navbar': navbar|spaceless, 'script': script|spaceless, 'url': url}|json_encode|raw }}
+{% set json = json|merge({script: script|spaceless}) %}
+{% set json = json|merge({url: url}) %}
+{{ json|json_encode|raw }}

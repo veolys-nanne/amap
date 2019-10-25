@@ -6,7 +6,7 @@ security:
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        our_db_provider:
+        email_provider:
             entity:
                 class: App\Entity\User
                 property: email
@@ -15,7 +15,7 @@ security:
         main:
             pattern:   ^/
             http_basic: ~
-            provider: our_db_provider
+            provider: email_provider
             anonymous: ~
             form_login:
                 login_path: login

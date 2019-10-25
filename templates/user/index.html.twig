@@ -60,7 +60,6 @@
 {% block javascripts %}
     <script type="application/javascript">
         $(document).ready(function() {
-            console.log('Done');
             $('table').drawDataTable({
                 url : '{{ asset('assets/json/datatable.json') }}',
                 options : {
