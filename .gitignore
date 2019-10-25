@@ -3,6 +3,9 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+/.env*
+/*.lock
+/phpunit.xml.dist
 /public/bundles/
 /public/uploads/
 /var/

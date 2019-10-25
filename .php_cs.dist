@@ -1,0 +1,20 @@
+<?php
+
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__.'/src')
+    ->in(__DIR__.'/templates')
+    ->in(__DIR__.'/config')
+;
+
+return PhpCsFixer\Config::create()
+    ->setRiskyAllowed(true)
+    ->setRules([
+        '@Symfony' => true,
+        '@PSR2' => true,
+        '@PSR1' => true,
+        '@PHP70Migration' => true,
+        'single_import_per_statement' => false,
+        'array_syntax' => ['syntax' => 'short'],
+    ])
+    ->setFinder($finder)
+;
