@@ -3,6 +3,9 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+/.env*
+/*.lock
+/phpunit.xml.dist
 /public/bundles/
 /public/uploads/
 /var/
@@ -19,6 +22,6 @@
 ###< symfony/web-server-bundle ###
 
 ###> php-cs-fixer ###
-php-cs-fixer
+.php-cs-fixer
 .php_cs.cache
 ###< php-cs-fixer ###
