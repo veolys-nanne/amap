@@ -11,12 +11,14 @@ class DateTimeToStringTransformer implements DataTransformerInterface
         if (null === $datetime) {
             return '';
         }
+
         return $datetime->format('d/m/Y');
     }
 
     public function reverseTransform($datetimeString): \DateTime
     {
         $datetime = \DateTime::createFromFormat('d/m/Y', $datetimeString);
+
         return $datetime;
     }
 }

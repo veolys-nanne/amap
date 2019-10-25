@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,7 @@ class HomepageController extends AbstractController
                 'name' => 'homepage',
             ]);
         }
+
         return $this->redirectToRoute('document_view', [
             'role' => 'member',
             'name' => 'homepage',

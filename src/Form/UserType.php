@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -26,9 +27,9 @@ class UserType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class)
-            ->add('lastname', TextType::class, ['label'=>'Nom'])
-            ->add('firstname', TextType::class, ['label'=>'Prénom', 'required' => false]);
-        if ($options['role'] == 'admin') {
+            ->add('lastname', TextType::class, ['label' => 'Nom'])
+            ->add('firstname', TextType::class, ['label' => 'Prénom', 'required' => false]);
+        if ('admin' == $options['role']) {
             $builder->add('roles', ChoiceType::class, [
                 'label' => 'Role',
                 'multiple' => true,
@@ -38,10 +39,10 @@ class UserType extends AbstractType
                     'référent/e' => 'ROLE_REFERENT',
                     'producteur/trice' => 'ROLE_PRODUCER',
                     'consom\'acteur/trice' => 'ROLE_MEMBER',
-                ]
+                ],
             ]);
         }
-        if ($options['role'] == 'referent' && !$options['isAccount']) {
+        if ('referent' == $options['role'] && !$options['isAccount']) {
             $builder->add('roles', ChoiceType::class, [
                 'label' => 'Role',
                 'multiple' => true,
@@ -50,23 +51,23 @@ class UserType extends AbstractType
                     'référent/e' => 'ROLE_REFERENT',
                     'producteur/trice' => 'ROLE_PRODUCER',
                     'consom\'acteur/trice' => 'ROLE_MEMBER',
-                ]
+                ],
             ]);
         }
-        if ($options['role'] == 'admin' && $options['type'] == 'producer') {
+        if ('admin' == $options['role'] && 'producer' == $options['type']) {
             $builder->add('parent', EntityType::class, [
                 'class' => User::class,
                 'query_builder' => function (ServiceEntityRepository $entityRepository) {
                     return $entityRepository->getQueryBuilderForFindByRole('ROLE_REFERENT');
                 },
-                'label'=>'Référent'
+                'label' => 'Référent',
             ]);
         }
-        if ($options['role'] == 'producer' || $options['type'] == 'producer') {
+        if ('producer' == $options['role'] || 'producer' == $options['type']) {
             $builder
-                ->add('color', ColorType::class, ['label'=>'Couleur', 'required' => false])
-                ->add('denomination', TextType::class, ['label'=>'Dénomination', 'required' => false])
-                ->add('payto', TextType::class, ['label'=>'Ordre chèque', 'required' => false])
+                ->add('color', ColorType::class, ['label' => 'Couleur', 'required' => false])
+                ->add('denomination', TextType::class, ['label' => 'Dénomination', 'required' => false])
+                ->add('payto', TextType::class, ['label' => 'Ordre chèque', 'required' => false])
                 ->add('deleveries', ChoiceType::class, [
                     'label' => 'Semaine de livraison',
                     'required' => false,
@@ -78,13 +79,13 @@ class UserType extends AbstractType
                         'S3' => 3,
                         'S4' => 4,
                         'S5' => 5,
-                ]])
+                ], ])
                 ->add('portfolio', PortfolioType::class, ['label' => false, 'required' => false]);
         }
         $builder
-            ->add('address', TextType::class, ['label'=>'Adresse', 'required' => false])
-            ->add('city', TextType::class, ['label'=>'Ville', 'required' => false])
-            ->add('zipCode', IntegerType::class, ['label'=>'Code postal', 'required' => false])
+            ->add('address', TextType::class, ['label' => 'Adresse', 'required' => false])
+            ->add('city', TextType::class, ['label' => 'Ville', 'required' => false])
+            ->add('zipCode', IntegerType::class, ['label' => 'Code postal', 'required' => false])
             ->add('phoneNumbers', CollectionType::class, [
                 'label' => 'Numéros de téléphone',
                 'entry_type' => TelType::class,
@@ -111,7 +112,7 @@ class UserType extends AbstractType
                 'allow_delete' => true,
                 'prototype' => true,
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']])
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $user = $event->getData();

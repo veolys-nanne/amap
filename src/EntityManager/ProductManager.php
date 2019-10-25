@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EntityManager;
 
 use App\Entity\Basket;
@@ -49,17 +50,19 @@ class ProductManager
         if (null !== $portfolio) {
             $thumbnailCollection = $portfolio->getThumbnailCollection();
             $nextIds = array_map(
-                function(Thumbnail $thumbnail) {return $thumbnail->getId();}
-                , $thumbnailCollection->toArray()
+                function (Thumbnail $thumbnail) {
+                    return $thumbnail->getId();
+                },
+                $thumbnailCollection->toArray()
             );
         }
-        foreach($previousThumbnailCollection as $thumbnail) {
+        foreach ($previousThumbnailCollection as $thumbnail) {
             if (!in_array($thumbnail->getId(), $nextIds)) {
                 $this->entityManager->remove($thumbnail);
             }
         }
-        foreach($thumbnailCollection as $thumbnail) {
-            if(null == $thumbnail->getId()) {
+        foreach ($thumbnailCollection as $thumbnail) {
+            if (null == $thumbnail->getId()) {
                 $thumbnail->setPortfolio($portfolio);
                 $this->entityManager->persist($thumbnail);
             }
@@ -71,14 +74,15 @@ class ProductManager
         }
     }
 
-
-    public function orderProducts(array &$products) {
+    public function orderProducts(array &$products)
+    {
         usort($products, function (Product $productA, Product $productB) {
             return $this->orderProduct($productA, $productB);
         });
     }
 
-    public function orderProduct(Product $productA, Product $productB) {
+    public function orderProduct(Product $productA, Product $productB)
+    {
         $producerA = $productA->getProducer();
         $producerB = $productB->getProducer();
 
@@ -102,7 +106,8 @@ class ProductManager
         return $value;
     }
 
-    public function getProductsFromBaskets(array $baskets, int $quantity = 0, array $products = []) {
+    public function getProductsFromBaskets(array $baskets, int $quantity = 0, array $products = [])
+    {
         foreach ($baskets as $basket) {
             foreach ($basket->getProductQuantityCollection() as $productQuantity) {
                 if ($productQuantity->getQuantity() > $quantity && !in_array($productQuantity->getProduct(), $products)) {
@@ -114,7 +119,8 @@ class ProductManager
         return $products;
     }
 
-    public function setDeleted(Product $product) {
+    public function setDeleted(Product $product)
+    {
         $product->setDeleted(true);
         $product->setActive(false);
         $this->changeProductActivity($product);

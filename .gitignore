@@ -4,9 +4,9 @@
 /.env.local.php
 /.env.*.local
 /public/bundles/
+/public/uploads/
 /var/
 /vendor/
-/public/uploads/
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
@@ -17,3 +17,8 @@
 ###> symfony/web-server-bundle ###
 /.web-server-pid
 ###< symfony/web-server-bundle ###
+
+###> php-cs-fixer ###
+php-cs-fixer
+.php_cs.cache
+###< php-cs-fixer ###

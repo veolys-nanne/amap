@@ -2,10 +2,10 @@
 
 namespace App\Entity\Traits;
 
-use App\Entity\Portfolio;
 use Doctrine\ORM\Mapping as ORM;
 
-Trait SoftDeletableTrait {
+trait SoftDeletableTrait
+{
     /**
      * @ORM\Column(type="boolean", options={"default" : 0})
      */

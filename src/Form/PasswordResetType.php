@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -18,13 +19,13 @@ class PasswordResetType extends AbstractType
                 'first_options' => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmation du mot de passe'],
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']]);
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'data_class' => null,
-        ));
+        ]);
     }
 }

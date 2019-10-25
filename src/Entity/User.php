@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Entity;
 
 use App\Entity\Traits\SoftDeletableTrait;

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -29,6 +30,6 @@ class BillFilterType extends AbstractType
             ->add('pdf', HiddenType::class, [
                 'data' => '0',
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Extraire', 'attr'=>['class'=>'btn-success btn-block']]);
+            ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']]);
     }
 }

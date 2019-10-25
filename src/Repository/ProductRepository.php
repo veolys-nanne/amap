@@ -49,11 +49,11 @@ class ProductRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.producer', 'producer')
-            ->where("producer.order = :producerOrder")
-            ->andWhere("p.order = :productOrder")
+            ->where('producer.order = :producerOrder')
+            ->andWhere('p.order = :productOrder')
             ->setParameters([
                 'producerOrder' => $producerOrder,
-                'productOrder' => $productOrder
+                'productOrder' => $productOrder,
             ])
             ->getQuery()
             ->getSingleResult()
@@ -64,7 +64,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->select('MAX(p.order) as max')
-            ->where("p.producer = :producer")
+            ->where('p.producer = :producer')
             ->setParameter('producer', $producer)
             ->getQuery()
             ->getSingleScalarResult()

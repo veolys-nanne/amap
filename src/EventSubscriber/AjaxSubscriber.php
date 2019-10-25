@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -32,23 +33,23 @@ class AjaxSubscriber implements EventSubscriberInterface
         if (array_key_exists('_route', $route) && 'home' == $route['_route']) {
             $this->twig->addGlobal('needNavbar', true);
         }
-        $this->twig->addGlobal('url', $this->router->generate($route['_route'], array_diff_key($route, ['_route' => '', '_route_params' => '', '_firewall_context' => '','_controller' => ''])));
+        $this->twig->addGlobal('url', $this->router->generate($route['_route'], array_diff_key($route, ['_route' => '', '_route_params' => '', '_firewall_context' => '', '_controller' => ''])));
         $this->twig->addGlobal('base', 'base.html.twig');
         if ($event->getRequest()->isXmlHttpRequest()) {
             $this->twig->addGlobal('base', 'ajax.html.twig');
-        };
+        }
     }
 
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        if ($event->getRequest()->isXmlHttpRequest() && $event->getResponse()->getStatusCode() == Response::HTTP_FOUND) {
+        if ($event->getRequest()->isXmlHttpRequest() && Response::HTTP_FOUND == $event->getResponse()->getStatusCode()) {
             $urlInfos = parse_url($event->getResponse()->getTargetUrl());
             $route = $this->router->match($urlInfos['path']);
             $request = $this->requestStack->getCurrentRequest();
             $subRequest = $request->duplicate([], null, $route);
             $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
             $event->setResponse($response);
-        };
+        }
     }
 
     public static function getSubscribedEvents()

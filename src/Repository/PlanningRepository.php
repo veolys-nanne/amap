@@ -17,9 +17,9 @@ class PlanningRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.elements', 'e')
-            ->where("p.state = :state")
+            ->where('p.state = :state')
             ->andWhere('p.deleted = 0')
-            ->andWhere("e.date >= :date")
+            ->andWhere('e.date >= :date')
             ->setParameters([
                 'state' => Planning::STATE_ONLINE,
                 'date' => new \DateTime(),
@@ -35,7 +35,7 @@ class PlanningRepository extends ServiceEntityRepository
             ->select('MIN(e.date) as min')
             ->addSelect('MAX(e.date) as max')
             ->innerJoin('p.elements', 'e')
-            ->where("p = :planning")
+            ->where('p = :planning')
             ->andWhere('p.deleted = 0')
             ->setParameters([
                 'planning' => $planning,

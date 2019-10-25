@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\AvailabilitySchedule;
@@ -47,14 +48,16 @@ class PlanningController extends AbstractController
         $list = $entityManager->getRepository(AvailabilitySchedule::class)->findMemberByEmptyAvailability();
         $messages = [];
         if (count($list) > 0) {
-            $plannings = array_map(function(int $id) use ($entityManager) {
+            $plannings = array_map(function (int $id) use ($entityManager) {
                 return $entityManager->getRepository(Planning::class)->find($id);
             }, array_keys(array_column($list, null, 'planning')));
             foreach ($plannings as $planning) {
-                $message = $mailHelper->getMailForList('Relance Disponibilité AMAP hommes de terre',
+                $message = $mailHelper->getMailForList(
+                    'Relance Disponibilité AMAP hommes de terre',
                     array_filter($list, function ($item) use ($planning) {
                         return $item['planning'] == $planning->getId();
-                }));
+                    })
+                );
                 if (null !== $message) {
                     $message
                         ->setBody(
@@ -89,10 +92,10 @@ class PlanningController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function planningEditAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, Planning $planning=null)
+    public function planningEditAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, Planning $planning = null)
     {
         $isNew = $planning ? false : true;
-        $planning = $planning??new Planning();
+        $planning = $planning ?? new Planning();
         $isPlanningWithMember = Planning::STATE_CLOSE == $planning->getState() || Planning::STATE_ONLINE == $planning->getState();
         $form = $this->createForm($isPlanningWithMember ? PlanningWithMemberType::class : PlanningType::class, $planning);
         $originalElements = new ArrayCollection();
@@ -119,7 +122,7 @@ class PlanningController extends AbstractController
 
         return $this->render($isPlanningWithMember ? 'planning/formwithmember.html.twig' : 'planning/form.html.twig', [
             'form' => $form->createView(),
-            'title' => $isNew ? 'Création planning permanences' : 'Mise à jour planning permanences'
+            'title' => $isNew ? 'Création planning permanences' : 'Mise à jour planning permanences',
         ]);
     }
 
@@ -133,7 +136,7 @@ class PlanningController extends AbstractController
     {
         $planning->setState($state);
         $response = $planningManager->changeState($request, $this->redirectToRoute('planning_index'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
-        if(!$request->request->get('preview')) {
+        if (!$request->request->get('preview')) {
             $entityManager->persist($planning);
             $entityManager->flush();
             $this->addFlash('success', 'Le planning de permanences a été passé dans l\'état "'.Planning::LABELS[$state].'".');
@@ -150,7 +153,7 @@ class PlanningController extends AbstractController
      */
     public function availabilityAction(Request $request, EntityManagerInterface $entityManager)
     {
-        $options = ['title' => 'Permanences',];
+        $options = ['title' => 'Permanences'];
         $availabilityScheduleElements = $entityManager->getRepository(AvailabilityScheduleElement::class)->findByMemberAndByState($this->getUser(), Planning::STATE_OPEN);
         if (count($availabilityScheduleElements) > 0) {
             $form = $this->createForm(AvailabilityScheduleElementsType::class, $availabilityScheduleElements, ['label' => 'Mes disponibilités']);
@@ -165,7 +168,7 @@ class PlanningController extends AbstractController
             $options['form'] = $form->createView();
         }
         $plannings = $entityManager->getRepository(Planning::class)->findByOnline();
-        if(!empty($plannings)) {
+        if (!empty($plannings)) {
             $options['plannings'] = $plannings;
         }
 
@@ -181,7 +184,7 @@ class PlanningController extends AbstractController
      */
     public function changeAvailabilityAction(Request $request, EntityManagerInterface $entityManager, \DateTime $date, Planning $planning)
     {
-        $options = ['title' => 'Permanences',];
+        $options = ['title' => 'Permanences'];
         $date->setTime(0, 0, 0);
         $availabilityScheduleElements = $entityManager->getRepository(AvailabilityScheduleElement::class)->findByPlanningAndDate($planning, $date);
         if (count($availabilityScheduleElements) > 0) {
@@ -199,7 +202,7 @@ class PlanningController extends AbstractController
             $options['form'] = $form->createView();
         }
         $plannings = $entityManager->getRepository(Planning::class)->findByOnline();
-        if(!empty($plannings)) {
+        if (!empty($plannings)) {
             $options['plannings'] = $plannings;
         }
 

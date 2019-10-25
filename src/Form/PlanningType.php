@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\AvailabilitySchedule;
@@ -16,7 +17,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Count;
-use Symfony\Component\Validator\Constraints\Valid;
 
 class PlanningType extends AbstractType
 {
@@ -43,7 +43,7 @@ class PlanningType extends AbstractType
                     new Count(['min' => 1]),
                 ],
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']])
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
@@ -64,7 +64,7 @@ class PlanningType extends AbstractType
                     'query_builder' => function (ServiceEntityRepository $entityRepository) {
                         return $entityRepository->getQueryBuilderForFindByRoleAndActive('ROLE_MEMBER');
                     },
-                    'label'=>'Consom\'acteur/trice',
+                    'label' => 'Consom\'acteur/trice',
                     'mapped' => false,
                     'multiple' => true,
                     'expanded' => true,

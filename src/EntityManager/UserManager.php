@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EntityManager;
 
 use App\Entity\Credit;
@@ -21,10 +22,10 @@ class UserManager
     {
         if (!in_array('ROLE_ADMIN', $user->getRoles()) && !in_array('ROLE_PRODUCER', $user->getRoles())) {
             if (in_array('ROLE_MEMBER', $user->getRoles()) && !$user->isActive()) {
-                $user->removeRole("ROLE_MEMBER");
+                $user->removeRole('ROLE_MEMBER');
             }
             if (!in_array('ROLE_MEMBER', $user->getRoles()) && $user->isActive()) {
-                $user->addRole("ROLE_MEMBER");
+                $user->addRole('ROLE_MEMBER');
             }
         }
         if (in_array('ROLE_PRODUCER', $user->getRoles())) {
@@ -38,7 +39,8 @@ class UserManager
         }
     }
 
-    public function setDeleted(User $user) {
+    public function setDeleted(User $user)
+    {
         $user->setDeleted(true);
         $user->setActive(false);
         $this->changeUserActivity($user);

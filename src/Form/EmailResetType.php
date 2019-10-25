@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -13,15 +14,15 @@ class EmailResetType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Email associé au compte'
+                'label' => 'Email associé au compte',
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']]);
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'data_class' => null,
-        ));
+        ]);
     }
 }

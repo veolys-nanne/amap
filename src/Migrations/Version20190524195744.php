@@ -12,15 +12,15 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20190524195744 extends AbstractMigration
 {
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return '';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf('mysql' !== $this->connection->getDatabasePlatform()->getName(), 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE amap_user ADD deleted TINYINT(1) DEFAULT \'0\' NOT NULL, CHANGE is_active active TINYINT(1) NOT NULL');
         $this->addSql('ALTER TABLE amap_basket ADD deleted TINYINT(1) DEFAULT \'0\' NOT NULL');
@@ -30,10 +30,10 @@ final class Version20190524195744 extends AbstractMigration
         $this->addSql('ALTER TABLE amap_document ADD deleted TINYINT(1) DEFAULT \'0\' NOT NULL');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf('mysql' !== $this->connection->getDatabasePlatform()->getName(), 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE amap_basket DROP deleted');
         $this->addSql('ALTER TABLE amap_credit DROP deleted, CHANGE active is_active TINYINT(1) NOT NULL');

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EntityManager;
 
 use App\Entity\AvailabilitySchedule;
@@ -29,7 +30,7 @@ class PlanningManager
     {
         $availabilitySchedules = $this->entityManager->getRepository(AvailabilitySchedule::class)->findByPlanning($planning);
         $previousMembers = [];
-        foreach($availabilitySchedules as $availabilitySchedule) {
+        foreach ($availabilitySchedules as $availabilitySchedule) {
             $previousMembers[] = $availabilitySchedule->getMember();
         }
         $removeMembers = array_diff($previousMembers, $members);
@@ -37,13 +38,13 @@ class PlanningManager
         $updateMembers = array_intersect($members, $previousMembers);
 
         /*remove*/
-        foreach($availabilitySchedules as $availabilitySchedule) {
+        foreach ($availabilitySchedules as $availabilitySchedule) {
             if (in_array($availabilitySchedule->getMember(), $removeMembers)) {
                 $this->entityManager->remove($availabilitySchedule);
             }
         }
         /*add*/
-        foreach($addMembers as $member) {
+        foreach ($addMembers as $member) {
             $availabilitySchedule = new AvailabilitySchedule();
             $availabilitySchedule->setPlanning($planning);
             $availabilitySchedule->setMember($member);
@@ -59,14 +60,14 @@ class PlanningManager
         }
         /*update*/
         $dates = [];
-        foreach($planning->getElements() as $element) {
+        foreach ($planning->getElements() as $element) {
             $dates[] = $element->getDate()->format('Y-m-d');
         }
-        foreach($availabilitySchedules as $availabilitySchedule) {
+        foreach ($availabilitySchedules as $availabilitySchedule) {
             if (in_array($availabilitySchedule->getMember(), $updateMembers)) {
                 $elements = $availabilitySchedule->getElements();
                 $previousDates = [];
-                foreach($elements as $element) {
+                foreach ($elements as $element) {
                     $previousDates[] = $element->getDate()->format('Y-m-d');
                 }
                 $removeDates = array_diff($previousDates, $dates);
@@ -80,7 +81,7 @@ class PlanningManager
                     $this->entityManager->persist($availabilityScheduleElement);
                 }
                 foreach ($availabilitySchedule->getElements() as $element) {
-                    if(in_array($element->getDate()->format('Y-m-d'), $removeDates)) {
+                    if (in_array($element->getDate()->format('Y-m-d'), $removeDates)) {
                         $availabilitySchedule->getElements()->removeElement($element);
                         $this->entityManager->remove($element);
                     }
@@ -88,12 +89,12 @@ class PlanningManager
                 $this->entityManager->persist($availabilitySchedule);
             }
         }
-        foreach ($originalElements as $element)  {
+        foreach ($originalElements as $element) {
             if (false === $planning->getElements()->contains($element)) {
                 $this->entityManager->remove($element);
             }
         }
-        foreach($planning->getElements() as $element) {
+        foreach ($planning->getElements() as $element) {
             $element->setPlanning($planning);
         }
 
@@ -105,16 +106,16 @@ class PlanningManager
         $removeElements = array_diff($originalElements, $planning->getElements()->toArray());
         $addElements = array_diff($planning->getElements()->toArray(), $originalElements);
 
-        foreach ($removeElements as $element)  {
+        foreach ($removeElements as $element) {
             $this->entityManager->remove($element);
         }
 
-        foreach ($addElements as $element)  {
+        foreach ($addElements as $element) {
             $this->entityManager->persist($element);
         }
     }
 
-    public function changeState(Request $request, RedirectResponse $redirectResponse, Planning $planning, string $extra) :Response
+    public function changeState(Request $request, RedirectResponse $redirectResponse, Planning $planning, string $extra): Response
     {
         $messages = [];
         switch ($planning->getState()) {

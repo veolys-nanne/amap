@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\AvailabilityScheduleElement;
@@ -34,7 +35,7 @@ class PlanningElementWithMemberType extends AbstractType
                     $membersInfo[] = [
                         'member' => $member,
                         'name' => $member->__toString(),
-                        'isAvailable' => $availabilityScheduleElement->getIsAvailable()
+                        'isAvailable' => $availabilityScheduleElement->getIsAvailable(),
                     ];
                 }
             }
@@ -47,7 +48,7 @@ class PlanningElementWithMemberType extends AbstractType
                 ->add('members', EntityType::class, [
                     'class' => User::class,
                     'choices' => array_column($membersInfo, 'member'),
-                    'choice_attr' => function($choiceValue, $key, $value) use ($membersInfo) {
+                    'choice_attr' => function ($choiceValue, $key, $value) use ($membersInfo) {
                         return !$membersInfo[$key]['isAvailable'] ? [
                             'class' => 'fas text-danger',
                             'data-icon' => ' &#xf071;',
@@ -61,7 +62,7 @@ class PlanningElementWithMemberType extends AbstractType
                         'title' => $unavailableMembersListing,
                         'data-date' => $planningElement->getDate()->format('Y-m-d'),
                     ],
-                    'label'=> $planningElement->getDate()->format('d/m/Y'),
+                    'label' => $planningElement->getDate()->format('d/m/Y'),
                     'multiple' => true,
                     'required' => false,
                 ]);

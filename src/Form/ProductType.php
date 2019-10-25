@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\Basket;
@@ -35,15 +36,15 @@ class ProductType extends AbstractType
                     'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
                         return $entityRepository->getQueryBuilderForFindByRole('ROLE_PRODUCER', $options['user']);
                     },
-                    'label'=>'Producteur'
+                    'label' => 'Producteur',
                 ])
-                ->add('active', CheckboxType::class, ['label'=>'Actif']);
+                ->add('active', CheckboxType::class, ['label' => 'Actif']);
         }
-        $builder->add('name', TextType::class, ['label'=>'Dénomination']);
+        $builder->add('name', TextType::class, ['label' => 'Dénomination']);
         if (in_array('ROLE_PRODUCER', $options['user']->getRoles())) {
             $builder->add('portfolio', PortfolioType::class, ['label' => false, 'required' => false]);
         }
-        $builder->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']]);
+        $builder->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $mailOptions = [];
             $product = $event->getData();

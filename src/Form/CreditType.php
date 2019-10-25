@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\Credit;
@@ -24,7 +25,7 @@ class CreditType extends AbstractType
             'query_builder' => function (ServiceEntityRepository $entityRepository) {
                 return $entityRepository->getQueryBuilderForFindByRole('ROLE_MEMBER');
             },
-            'label'=>'Consom\'acteur/trice'
+            'label' => 'Consom\'acteur/trice',
         ]);
         if (in_array('ROLE_ADMIN', $options['user']->getRoles()) || in_array('ROLE_REFERENT', $options['user']->getRoles())) {
             $builder
@@ -33,15 +34,15 @@ class CreditType extends AbstractType
                     'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
                         return $entityRepository->getQueryBuilderForFindByRole('ROLE_PRODUCER', $options['user']);
                     },
-                    'label'=>'Producteur/trice'
+                    'label' => 'Producteur/trice',
                 ])
-                ->add('active', CheckboxType::class, ['label'=>'Actif']);
+                ->add('active', CheckboxType::class, ['label' => 'Actif']);
         }
         $builder
             ->add('object', TextType::class, ['label' => 'Object'])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']])
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options){
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $credit = $event->getData();
             $builder = $event->getForm();
             $mailOptions = [];
@@ -73,7 +74,7 @@ class CreditType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Credit::class,
-            'user' => false
+            'user' => false,
         ]);
     }
 }

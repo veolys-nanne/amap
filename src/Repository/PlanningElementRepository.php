@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Planning;
 use App\Entity\PlanningElement;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -23,7 +22,7 @@ class PlanningElementRepository extends ServiceEntityRepository
             ->addSelect('u.email as email')
             ->addSelect('u.broadcastList as broadcastList')
             ->where('p.deleted = 0')
-            ->andWhere("pe.date = :date")
+            ->andWhere('pe.date = :date')
             ->setParameters([
                 'date' => $date->setTime(0, 0, 0),
             ])

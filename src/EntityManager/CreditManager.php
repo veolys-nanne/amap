@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EntityManager;
 
 use App\Entity\Credit;

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Helper;
 
 use App\Entity\User;
@@ -27,12 +28,12 @@ class MailHelper
         $this->router = $router;
     }
 
-    public function getMailForMembers (string $subject) :?\Swift_Message
+    public function getMailForMembers(string $subject): ?\Swift_Message
     {
         return $this->getMailForList($subject, $this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'));
     }
 
-    public function getMailForList (string $subject, array $list) :?\Swift_Message
+    public function getMailForList(string $subject, array $list): ?\Swift_Message
     {
         $message = null;
         $broadcastList = [$this->adminEmail];
@@ -50,14 +51,14 @@ class MailHelper
             if (isset($_SERVER['SERVER_NAME'])) {
                 $headers->addIdHeader('Message-ID', time().'@'.$_SERVER['SERVER_NAME']);
             }
-            $headers->addTextHeader('X-Mailer', 'PHP v' . phpversion());
+            $headers->addTextHeader('X-Mailer', 'PHP v'.phpversion());
             $headers->addTextHeader('List-Unsubscribe', $this->router->generate('unsubscribe'));
         }
 
         return $message;
     }
 
-    public function sendMessages(Request $request, array $messages, RedirectResponse $redirectResponse) :Response
+    public function sendMessages(Request $request, array $messages, RedirectResponse $redirectResponse): Response
     {
         if ($request->request->get('preview')) {
             $jsonResponse = [];

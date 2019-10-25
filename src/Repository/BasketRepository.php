@@ -144,8 +144,7 @@ class BasketRepository extends ServiceEntityRepository
         \DateTime $start,
         \DateTime $end,
         int $type
-    ): array
-    {
+    ): array {
         switch ($type) {
             case SynthesesType::INVOICE_BY_MEMBER:
                 return ['Total', 'Avoir'];
@@ -339,7 +338,7 @@ class BasketRepository extends ServiceEntityRepository
 
     public function isProductInActiveBasket(Product $product): bool
     {
-        return $this->createQueryBuilder('b')
+        return 0 != $this->createQueryBuilder('b')
             ->select('count(b.id) as count')
             ->join('b.productQuantityCollection', 'pqc')
             ->where('b.parent IS NOT NULL')
@@ -351,10 +350,11 @@ class BasketRepository extends ServiceEntityRepository
                 'product' => $product,
             ])
             ->getQuery()
-            ->getSingleScalarResult() != 0;
+            ->getSingleScalarResult();
     }
 
-    public function updateFrozenByParent($isFrozen, Basket $basket) {
+    public function updateFrozenByParent($isFrozen, Basket $basket)
+    {
         $this->createQueryBuilder('b')
             ->update()
             ->set('b.frozen', ':isFrozen')
