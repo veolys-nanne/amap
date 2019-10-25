@@ -87,7 +87,7 @@ class DocumentController extends AbstractController
      *     }
      * )
      */
-    public function documentViewAction(Request $request, EntityManagerInterface $entityManager, string $role, string $name)
+    public function documentViewAction(EntityManagerInterface $entityManager, string $role, string $name)
     {
         $document = $entityManager->getRepository(Document::class)->findByNameAndRole($name, 'ROLE_'.strtoupper($role));
         return $this->render('document/view.html.twig', [

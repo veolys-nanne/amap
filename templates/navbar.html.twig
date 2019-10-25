@@ -7,7 +7,7 @@
     {% elseif is_granted('ROLE_PRODUCER') %}
         {% set role = 'producer' %}
     {% endif %}
-    <a class="navbar-brand" href="{{ path('document_view', {role: role, name: 'homepage'}) }}"><i class="fa fa-home text-secondary"></i></a>
+    <a class="navbar-brand" href="{{ path('document_view', {role: role, name: 'homepage'}) }}" title="Accueil"><i class="fa fa-home text-secondary"></i></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -77,16 +77,16 @@
                 <a class="nav-link" href="{{ path('document_view', {role: role, name: 'rules'}) }}">Règlement</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('user_profil', {role: role}) }}"><i class="fas fa-user"></i></a>
+                <a class="nav-link" href="{{ path('user_profil', {role: role}) }}" title="Mon profil"><i class="fas fa-user"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}"><i class="far fa-envelope"></i></a>
+                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}" title="Envoyer un mail"><i class="far fa-envelope"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('user_view', {role: role}) }}"><i class="fas fa-users"></i></a>
+                <a class="nav-link" href="{{ path('user_view', {role: role}) }}" title="fiche-contact des utilisateurs"><i class="fas fa-users"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                <a class="nav-link" href="{{ path('logout') }}" title="Se déconnecter"><i class="fas fa-sign-out-alt"></i></a>
             </li>
         </ul>
     </div>
