@@ -19,14 +19,13 @@ class SecurityController extends AbstractController
     /**
      * @Route("/login", name="login")
      */
-    public function login(Request $request, AuthenticationUtils $authenticationUtils)
+    public function login(AuthenticationUtils $authenticationUtils)
     {
         /*if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('home');
         }*/
 
         $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
 
         $form = $this->get('form.factory')
             ->createNamedBuilder(null)
@@ -37,7 +36,6 @@ class SecurityController extends AbstractController
         return $this->render('security/login.html.twig', [
             'title' => 'Connexion',
             'form' => $form->createView(),
-            'last_username' => $lastUsername,
             'error' => $error,
         ]);
     }
