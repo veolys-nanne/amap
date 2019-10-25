@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\Document;
@@ -33,12 +34,12 @@ class DocumentType extends AbstractType
                     'référent/e' => 'ROLE_REFERENT',
                     'producteur/trice' => 'ROLE_PRODUCER',
                     'consom\'acteur/trice' => 'ROLE_MEMBER',
-            ]]);
+            ], ]);
         });
 
         $builder
             ->add('text', TextareaType::class, ['label' => 'Texte'])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']])
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
     }
 

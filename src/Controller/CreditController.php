@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Credit;
@@ -46,10 +47,10 @@ class CreditController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function creditEditAction(Request $request, EntityManagerInterface $entityManager, CreditManager $creditManager, string $role, Credit $credit=null)
+    public function creditEditAction(Request $request, EntityManagerInterface $entityManager, CreditManager $creditManager, string $role, Credit $credit = null)
     {
         $isNew = $credit ? false : true;
-        $credit = $credit??$creditManager->createCredit();
+        $credit = $credit ?? $creditManager->createCredit();
         $roles = $this->getUser()->getRoles();
         $disabled = (!in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_REFERENT', $roles)) || $credit->isActive();
         $options = array_merge(['disabled' => $disabled], ['user' => $this->getUser()]);
@@ -68,7 +69,7 @@ class CreditController extends AbstractController
 
         return $this->render('credit/form.html.twig', [
             'form' => $form->createView(),
-            'title' => $isNew ? 'Création avoir' : 'Mise à jour avoir'
+            'title' => $isNew ? 'Création avoir' : 'Mise à jour avoir',
         ]);
     }
 
@@ -89,10 +90,9 @@ class CreditController extends AbstractController
         $this->addFlash('success', $active ? 'L\'avoir a été activé.' : 'L\'avoir a été désactivé.');
 
         return $this->redirectToRoute('credit_index', [
-            "role" => $role,
+            'role' => $role,
         ]);
     }
-
 
     /**
      * @Route(
@@ -128,7 +128,6 @@ class CreditController extends AbstractController
                     );
                 $messages[] = $message;
             }
-
         } else {
             $message = $mailHelper->getMailForList('Demande d\'activation d\'avoir AMAP hommes de terre', [$referent]);
             if (null !== $message) {

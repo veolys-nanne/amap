@@ -45,7 +45,6 @@ class Basket
      */
     private $creditBasketAmountCollection;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Basket", inversedBy="children")
      */
@@ -60,7 +59,6 @@ class Basket
      * @ORM\Column(type="boolean")
      */
     private $frozen = false;
-
 
     public function __construct()
     {
@@ -166,6 +164,6 @@ class Basket
 
     public function __toString(): string
     {
-        return $this->getId()??'';
+        return $this->getId() ?? '';
     }
 }

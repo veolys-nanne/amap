@@ -14,7 +14,8 @@ class ProductQuantityRepository extends ServiceEntityRepository
         parent::__construct($registry, ProductQuantity::class);
     }
 
-    public function updateByBasket(Basket $basket) {
+    public function updateByBasket(Basket $basket)
+    {
         $entityManager = $this->getEntityManager();
         if ($basket->isFrozen()) {
             $sql = '

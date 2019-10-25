@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -56,8 +57,8 @@ class SynthesesType extends AbstractType
                     self::LABELS[self::INVOICE_BY_PRODUCER_BY_MEMBER] => self::INVOICE_BY_PRODUCER_BY_MEMBER,
                 ],
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Extraire', 'attr'=>['class'=>'btn-success btn-block']]);
-        if (null !== $options['type'] && ($options['type'] == self::INVOICE_BY_MEMBER || $options['type'] == self::INVOICE_BY_PRODUCER || $options['type'] == self::INVOICE_BY_PRODUCER_BY_MEMBER)) {
+            ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']]);
+        if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
             $builder
                 ->add('email', SubmitType::class, ['label' => 'Envoyer', 'attr' => [
                     'class' => 'btn-success btn-block mail-extra',
@@ -74,7 +75,6 @@ class SynthesesType extends AbstractType
                 ]]);
         }
     }
-
 
     public function configureOptions(OptionsResolver $resolver)
     {

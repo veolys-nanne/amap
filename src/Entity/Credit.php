@@ -64,7 +64,6 @@ class Credit
      */
     private $active = false;
 
-
     public function getId(): ?int
     {
         return $this->id;
@@ -111,6 +110,7 @@ class Credit
 
         return $this;
     }
+
     public function setProducer(User $producer): self
     {
         $this->producer = $producer;

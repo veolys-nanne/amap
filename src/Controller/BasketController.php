@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Basket;
@@ -35,11 +36,10 @@ class BasketController extends AbstractController
         $baskets = [];
         if ($form->isSubmitted() && $form->isValid() && null !== $form->get('start')->getData() && null !== $form->get('end')->getData()) {
             $baskets = $entityManager->getRepository(Basket::class)->findByUserAndDate($this->getUser(), $form->get('start')->getData(), $form->get('end')->getData());
-        }
-        else {
+        } else {
             $modelBaskets = $entityManager->getRepository(Basket::class)->findByFrozenAndModel(0);
             foreach ($modelBaskets as $modelBasket) {
-                $baskets[] = $entityManager->getRepository(Basket::class)->findOneByParentAndUser($modelBasket, $this->getUser())??$basketManager->createBasket($modelBasket);
+                $baskets[] = $entityManager->getRepository(Basket::class)->findOneByParentAndUser($modelBasket, $this->getUser()) ?? $basketManager->createBasket($modelBasket);
             }
         }
 
@@ -56,10 +56,15 @@ class BasketController extends AbstractController
         if ($isPdf) {
             $filename = 'mes_commandes';
             if (count($baskets) > 0) {
-                $maxDate = max(array_map(function(Basket $basket) { return $basket->getDate(); }, $baskets));
-                $minDate = min(array_map(function(Basket $basket) { return $basket->getDate(); }, $baskets));
+                $maxDate = max(array_map(function (Basket $basket) {
+                    return $basket->getDate();
+                }, $baskets));
+                $minDate = min(array_map(function (Basket $basket) {
+                    return $basket->getDate();
+                }, $baskets));
                 $filename .= '_'.$minDate->format('dmY').'_'.$maxDate->format('dmY');
             }
+
             return new PdfResponse(
                 $knpSnappy->getOutputFromHtml($html, ['user-style-sheet' => $parameterBag->get('kernel.project_dir').'/public/assets/css/pdf-color-page-break.css']),
                 $filename.'.pdf'
@@ -84,7 +89,7 @@ class BasketController extends AbstractController
         foreach ($modelBaskets as $modelBasket) {
             $basket = $entityManager->getRepository(Basket::class)->findOneByParentAndUser($modelBasket, $this->getUser());
             $isNew = $isNew && (null == $basket);
-            $baskets[] = $basket??$basketManager->createBasket($modelBasket);
+            $baskets[] = $basket ?? $basketManager->createBasket($modelBasket);
         }
         $products = $productManager->getProductsFromBaskets($baskets, -1);
         $productManager->orderProducts($products);
@@ -95,7 +100,7 @@ class BasketController extends AbstractController
             $key = 0;
             while ($form->has('basket_'.$key)) {
                 $entityManager->persist($form->get('basket_'.$key)->getData());
-                $key++;
+                ++$key;
             }
             $entityManager->flush();
             $this->addFlash('success', 'Le panier a été mis à jour.');
@@ -156,7 +161,7 @@ class BasketController extends AbstractController
                     )
                     ->addPart(
                         $this->renderView('emails/upcommande.txt.twig', [
-                            'message' => $message
+                            'message' => $message,
                         ]),
                         'text/plain'
                     );
@@ -175,11 +180,11 @@ class BasketController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function modelEditAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager, Basket $basket=null)
+    public function modelEditAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager, Basket $basket = null)
     {
         $producers = $entityManager->getRepository(User::class)->findByDeleveries();
         $isNew = $basket ? false : true;
-        $basket = $basket??$basketManager->createModel();
+        $basket = $basket ?? $basketManager->createModel();
         $models = array_diff($entityManager->getRepository(Basket::class)->findByFrozenAndModel(0), [$basket]);
 
         $products = $productManager->getProductsFromBaskets($models, -1);
@@ -187,7 +192,7 @@ class BasketController extends AbstractController
         $productManager->orderProducts($products);
 
         $form = $this->createForm(ModelType::class, $basket, [
-            'disabled' => $basket->isFrozen()
+            'disabled' => $basket->isFrozen(),
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -259,7 +264,7 @@ class BasketController extends AbstractController
     {
         $type = $request->request->has('syntheses') ? $request->request->get('syntheses')['type'] : null;
         $form = $this->createForm(SynthesesType::class, null, [
-            'type' => $type
+            'type' => $type,
         ]);
         $form->handleRequest($request);
         $tables = [];
@@ -269,7 +274,7 @@ class BasketController extends AbstractController
             list($tables, $parameters) = $basketManager->generateSyntheses($form);
             if (($form->has('email') && $form->get('email')->isClicked()) || $request->request->get('preview')) {
                 foreach ($tables as $tableName => $table) {
-                    $message = $mailHelper->getMailForList('AMAP Hommes de terre ' . SynthesesType::LABELS[$form->get('type')->getData()], [$parameters[$tableName]]);
+                    $message = $mailHelper->getMailForList('AMAP Hommes de terre '.SynthesesType::LABELS[$form->get('type')->getData()], [$parameters[$tableName]]);
                     if (null !== $message) {
                         $message
                             ->setBody(
@@ -309,7 +314,6 @@ class BasketController extends AbstractController
             'parameters' => $parameters,
             'form' => $form->createView(),
             'isPdf' => $isPdf,
-
         ]);
         if ($isPdf) {
             $css = $form->has('css') ? $form->get('css')->getData() : 'pdf-color-page-break';

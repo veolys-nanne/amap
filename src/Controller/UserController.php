@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Form\NewPasswordType;
@@ -30,17 +31,17 @@ class UserController extends AbstractController
      */
     public function userListingAction(Request $request, EntityManagerInterface $entityManager, string $type, string $role)
     {
-        if ($type != 'member') {
-            $users = $entityManager->getRepository(User::class)->findByRole("ROLE_".strtoupper($type), $this->getUser());
+        if ('member' != $type) {
+            $users = $entityManager->getRepository(User::class)->findByRole('ROLE_'.strtoupper($type), $this->getUser());
         } else {
-            $users = $entityManager->getRepository(User::class)->findByRoleOrNoRole("ROLE_".strtoupper($type), $this->getUser());
+            $users = $entityManager->getRepository(User::class)->findByRoleOrNoRole('ROLE_'.strtoupper($type), $this->getUser());
         }
         $title = '';
-        if ($type == 'referent') {
+        if ('referent' == $type) {
             $title = 'Référents/es';
-        } elseif ($type == 'producer') {
+        } elseif ('producer' == $type) {
             $title = 'Producteurs/trices';
-        } elseif ($type == 'member') {
+        } elseif ('member' == $type) {
             $title = 'Consom\'acteurs/trices';
         }
 
@@ -106,12 +107,12 @@ class UserController extends AbstractController
      *     },
      * )
      */
-    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role, string $type=null, User $user=null, RouterInterface $router)
+    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role, string $type = null, User $user = null, RouterInterface $router)
     {
         $isAccount = null == $type;
         $user = $isAccount ? $this->getUser() : $user;
         $isNew = $user ? false : true;
-        $user = $user??new User();
+        $user = $user ?? new User();
         if (!$isNew) {
             $user->setPlainPassword($user->getPassword());
         } else {
@@ -132,8 +133,8 @@ class UserController extends AbstractController
                 if (null === $user->getParent()) {
                     $user->setParent($this->getUser());
                 }
-                if ($type == 'producer') {
-                    $user->setOrder(($entityManager->getRepository(User::class)->findMaxOrder()??0) + 1);
+                if ('producer' == $type) {
+                    $user->setOrder(($entityManager->getRepository(User::class)->findMaxOrder() ?? 0) + 1);
                 }
             }
             $entityManager->persist($user);
@@ -142,22 +143,22 @@ class UserController extends AbstractController
             if ($isAccount) {
                 return $this->forward('document_view', [
                     'role' => $role,
-                    'name' => 'homepage'
+                    'name' => 'homepage',
                 ]);
             }
 
             return $this->redirectToRoute('user_index', [
                 'role' => $role,
-                'type' => $type
+                'type' => $type,
             ]);
         }
 
         $title = $isNew ? 'Inscription ' : 'Mise à jour ';
-        if ($type == 'referent') {
+        if ('referent' == $type) {
             $title .= 'référent/e';
-        } elseif ($type == 'producer') {
+        } elseif ('producer' == $type) {
             $title .= 'producteur/trice';
-        } elseif ($type == 'member') {
+        } elseif ('member' == $type) {
             $title .= 'consom\'acteur/trice';
         }
         if ($isAccount) {
@@ -195,7 +196,7 @@ class UserController extends AbstractController
         $isAccount = null == $user;
         $user = $isAccount ? $this->getUser() : $user;
         $form = $this->createForm(NewPasswordType::class, $user, [
-            'isAccount' => $isAccount
+            'isAccount' => $isAccount,
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -219,7 +220,7 @@ class UserController extends AbstractController
         return $this->render('user/password.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
-            'title' => $title
+            'title' => $title,
         ]);
     }
 
@@ -243,8 +244,8 @@ class UserController extends AbstractController
         $this->addFlash('success', $active ? 'Le compte a été activé.' : 'Le compte a été désactivé.');
 
         return $this->redirectToRoute('user_index', [
-            "role" => $role,
-            "type" => $type,
+            'role' => $role,
+            'type' => $type,
         ]);
     }
 
@@ -272,8 +273,8 @@ class UserController extends AbstractController
         }
 
         return $this->redirectToRoute('user_index', [
-            "role" => 'admin',
-            "type" => 'producer',
+            'role' => 'admin',
+            'type' => 'producer',
         ]);
     }
 

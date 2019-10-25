@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\Thumbnail;
@@ -14,7 +15,7 @@ class ThumbnailType extends AbstractType
     {
         $builder
             ->add('description', TextareaType::class, [
-                'label'=>'Description',
+                'label' => 'Description',
             ])
             ->add('file', VichImageType::class, [
                 'allow_delete' => true,

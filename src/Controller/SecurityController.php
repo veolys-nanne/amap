@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -33,6 +34,7 @@ class SecurityController extends AbstractController
             ->add('_password', PasswordType::class, ['label' => 'Mot de passe'])
             ->add('ok', SubmitType::class, ['label' => 'Ok', 'attr' => ['class' => 'btn-success btn-block']])
             ->getForm();
+
         return $this->render('security/login.html.twig', [
             'title' => 'Connexion',
             'form' => $form->createView(),
@@ -50,7 +52,7 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $entityManager->getRepository(User::class)->findOneByEmail($form->getData()['email']);
-            if ($user !== null) {
+            if (null !== $user) {
                 $token = uniqid();
                 $user->setResetPassword($token);
                 $entityManager->persist($user);
@@ -77,13 +79,14 @@ class SecurityController extends AbstractController
                     return $mailHelper->sendMessages($request, [$message], $this->redirectToRoute('login'));
                 }
             }
+
             return $this->redirectToRoute('login');
         }
 
-        return $this->render('security/resetpassword.html.twig', array(
+        return $this->render('security/resetpassword.html.twig', [
             'title' => 'Mot de passe oublié',
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
@@ -93,9 +96,9 @@ class SecurityController extends AbstractController
     {
         $token = $request->query->get('token');
         $error = false;
-        if ($token !== null) {
+        if (null !== $token) {
             $user = $entityManager->getRepository(User::class)->findOneByResetPassword($token);
-            if ($user !== null) {
+            if (null !== $user) {
                 $form = $this->createForm(PasswordResetType::class);
                 $form->handleRequest($request);
                 if ($form->isSubmitted()) {

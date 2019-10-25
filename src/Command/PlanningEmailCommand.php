@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Command;
 
 use App\Entity\PlanningElement;
@@ -37,7 +38,8 @@ class PlanningEmailCommand extends Command
         $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate(new \DateTime()));
     }
 
-    protected function sendMail($list) {
+    protected function sendMail($list)
+    {
         $message = $this->mailHelper->getMailForList('Permanence AMAP hommes de terre', $list);
         if (null !== $message) {
             $message

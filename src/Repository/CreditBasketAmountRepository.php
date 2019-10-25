@@ -14,7 +14,8 @@ class CreditBasketAmountRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditBasketAmount::class);
     }
 
-    public function deleteByBasket(Basket $basket) {
+    public function deleteByBasket(Basket $basket)
+    {
         $entityManager = $this->getEntityManager();
         $sql = '
             UPDATE amap_credit, amap_credit_basket_amount, amap_basket
@@ -29,7 +30,8 @@ class CreditBasketAmountRepository extends ServiceEntityRepository
         $statement->execute();
     }
 
-    public function insert(array $creditBasketAmounts) {
+    public function insert(array $creditBasketAmounts)
+    {
         $entityManager = $this->getEntityManager();
         foreach ($creditBasketAmounts as $creditBasketAmount) {
             $sql = '

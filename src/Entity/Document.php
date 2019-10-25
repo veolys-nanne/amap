@@ -64,6 +64,7 @@ class Document
 
         return $this;
     }
+
     public function setRole(string $role): self
     {
         $this->role = $role;

@@ -2,9 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Basket;
 use App\Entity\Credit;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -49,7 +47,7 @@ class CreditRepository extends ServiceEntityRepository
     public function updateAmount(array $credits)
     {
         $entityManager = $this->getEntityManager();
-        foreach($credits as $credit) {
+        foreach ($credits as $credit) {
             $sql = '
                 UPDATE amap_credit
                 SET amap_credit.current_amount = :current_amount

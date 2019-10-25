@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Credit;
@@ -10,7 +11,6 @@ use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -43,7 +43,7 @@ class ContactController extends AbstractController
 
         return $this->render('contact/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Contact'
+            'title' => 'Contact',
         ]);
     }
 
@@ -77,7 +77,7 @@ class ContactController extends AbstractController
 
         return $this->render('contact/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Contact'
+            'title' => 'Contact',
         ]);
     }
 
@@ -114,7 +114,7 @@ class ContactController extends AbstractController
 
         return $this->render('contact/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Contact'
+            'title' => 'Contact',
         ]);
     }
 
@@ -148,7 +148,7 @@ class ContactController extends AbstractController
 
         return $this->render('contact/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Contact'
+            'title' => 'Contact',
         ]);
     }
 
@@ -185,7 +185,7 @@ class ContactController extends AbstractController
 
         return $this->render('contact/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Contact'
+            'title' => 'Contact',
         ]);
     }
 
@@ -243,7 +243,7 @@ class ContactController extends AbstractController
 
         return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('document_view', [
             'role' => $role,
-            'name' => 'homepage'
+            'name' => 'homepage',
         ]));
     }
 }

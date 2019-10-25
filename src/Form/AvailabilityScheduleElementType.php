@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\AvailabilityScheduleElement;
@@ -18,7 +19,7 @@ class AvailabilityScheduleElementType extends AbstractType
             $builder = $event->getForm();
             $builder
                 ->add('isAvailable', CheckboxType::class, [
-                    'label' => $options['type'] == 'date' ? $availabilityScheduleElement->getDate()->format('d/m/y') : $availabilityScheduleElement->getAvailabilitySchedule()->getMember(),
+                    'label' => 'date' == $options['type'] ? $availabilityScheduleElement->getDate()->format('d/m/y') : $availabilityScheduleElement->getAvailabilitySchedule()->getMember(),
                     'required' => false,
                 ]);
         });
@@ -28,7 +29,7 @@ class AvailabilityScheduleElementType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => AvailabilityScheduleElement::class,
-            'type' => 'date'
+            'type' => 'date',
         ]);
     }
 }

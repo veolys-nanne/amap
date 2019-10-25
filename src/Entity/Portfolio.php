@@ -24,7 +24,6 @@ class Portfolio
      */
     private $thumbnailCollection;
 
-
     public function getId(): ?int
     {
         return $this->id;

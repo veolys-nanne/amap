@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Product;
@@ -48,10 +49,10 @@ class ProductController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function productEditAction(Request $request, EntityManagerInterface $entityManager, ProductManager $productManager, string $role, Product $product=null)
+    public function productEditAction(Request $request, EntityManagerInterface $entityManager, ProductManager $productManager, string $role, Product $product = null)
     {
         $isNew = $product ? false : true;
-        $product = $product??$productManager->createProduct();
+        $product = $product ?? $productManager->createProduct();
         $form = $this->createForm(ProductType::class, $product, [
             'user' => $this->getUser(),
         ]);
@@ -64,7 +65,7 @@ class ProductController extends AbstractController
             if ($isNew) {
                 $entityManager->persist($product);
                 $productManager->changeProductActivity($product);
-                $product->setOrder(($entityManager->getRepository(Product::class)->findMaxOrder($product->getProducer())??0) + 1);
+                $product->setOrder(($entityManager->getRepository(Product::class)->findMaxOrder($product->getProducer()) ?? 0) + 1);
             }
             $productManager->changeThumbnailCollection($product, $previousThumbnailCollection);
             $entityManager->flush();
@@ -75,7 +76,7 @@ class ProductController extends AbstractController
 
         return $this->render('product/form.html.twig', [
             'form' => $form->createView(),
-            'title' => $isNew ? 'Création produit' : 'Mise à jour produit'
+            'title' => $isNew ? 'Création produit' : 'Mise à jour produit',
         ]);
     }
 
@@ -101,7 +102,7 @@ class ProductController extends AbstractController
         }
 
         return $this->redirectToRoute('product_index', [
-            "role" => $role,
+            'role' => $role,
         ]);
     }
 
@@ -139,7 +140,6 @@ class ProductController extends AbstractController
                     );
                 $messages[] = $message;
             }
-
         } else {
             $message = $mailHelper->getMailForList('Demande d\'activation de produit AMAP hommes de terre', [$referent]);
             if (null !== $message) {
@@ -186,11 +186,11 @@ class ProductController extends AbstractController
         if ($request->request->has('moves')) {
             foreach ($request->request->get('moves') as $move) {
                 list($originalProducerOrder, $originalProductOrder) = explode('-', $move[0]);
-                $originalProducerOrder -=100;
-                $originalProductOrder -=1000;
+                $originalProducerOrder -= 100;
+                $originalProductOrder -= 1000;
                 list($nextProducerOrder, $nextProductOrder) = explode('-', $move[1]);
-                $nextProducerOrder -=100;
-                $nextProductOrder -=1000;
+                $nextProducerOrder -= 100;
+                $nextProductOrder -= 1000;
                 if ($nextProducerOrder == $originalProducerOrder) {
                     $product = $entityManager->getRepository(Product::class)->findOneByOrders($originalProducerOrder, $originalProductOrder);
                     $product->setOrder($nextProductOrder);
@@ -205,9 +205,8 @@ class ProductController extends AbstractController
             $this->addFlash('info', 'Ce changement d\'ordre n\'est pas valide.');
         }
 
-
         return $this->redirectToRoute('product_index', [
-            "role" => $role,
+            'role' => $role,
         ]);
 
         return new Response();

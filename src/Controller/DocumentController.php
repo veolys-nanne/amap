@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Document;
 use App\Form\DocumentType;
-use App\EntityManager\DocumentManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
@@ -37,10 +37,10 @@ class DocumentController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function documentEditAction(Request $request, EntityManagerInterface $entityManager, Document $document=null)
+    public function documentEditAction(Request $request, EntityManagerInterface $entityManager, Document $document = null)
     {
         $isNew = $document ? false : true;
-        $document = $document??new Document();
+        $document = $document ?? new Document();
         $form = $this->createForm(DocumentType::class, $document);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -53,7 +53,7 @@ class DocumentController extends AbstractController
 
         return $this->render('document/form.html.twig', [
             'form' => $form->createView(),
-            'title' => $isNew ? 'Création document' : 'Mise à jour document'
+            'title' => $isNew ? 'Création document' : 'Mise à jour document',
         ]);
     }
 
@@ -90,8 +90,9 @@ class DocumentController extends AbstractController
     public function documentViewAction(EntityManagerInterface $entityManager, string $role, string $name)
     {
         $document = $entityManager->getRepository(Document::class)->findByNameAndRole($name, 'ROLE_'.strtoupper($role));
+
         return $this->render('document/view.html.twig', [
-            'document' => $document
+            'document' => $document,
         ]);
     }
 
@@ -110,7 +111,7 @@ class DocumentController extends AbstractController
         return $this->redirectToRoute('document_index');
     }
 
-    private function generateUniqueFileName() : string
+    private function generateUniqueFileName(): string
     {
         return md5(uniqid());
     }

@@ -5,7 +5,6 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -40,7 +39,6 @@ class PlanningElement
      * @Assert\NotBlank()
      */
     private $date;
-
 
     public function __construct()
     {

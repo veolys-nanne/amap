@@ -36,7 +36,6 @@ class AvailabilitySchedule
      */
     private $elements;
 
-
     public function __construct()
     {
         $this->elements = new ArrayCollection();

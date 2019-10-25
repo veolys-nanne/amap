@@ -5,7 +5,8 @@ namespace App\Entity\Traits;
 use App\Entity\Portfolio;
 use Doctrine\ORM\Mapping as ORM;
 
-Trait PortfolioTrait {
+trait PortfolioTrait
+{
     /**
      * @ORM\OneToOne(targetEntity="Portfolio", cascade={"persist"})
      */

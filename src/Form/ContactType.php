@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -72,7 +73,7 @@ class ContactType extends AbstractType
 
         $builder
             ->add('object', TextType::class, [
-                'label'=>'Objet',
+                'label' => 'Objet',
             ])
             ->add('to', ChoiceType::class, [
                 'label' => 'À',
@@ -83,7 +84,7 @@ class ContactType extends AbstractType
             ->add('body', TextareaType::class, [
                 'label' => 'Corps',
             ])
-            ->add('submit', SubmitType::class, ['label'=>'Envoyer', 'attr'=>['class'=>'btn-success btn-block']])
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
             ->add('preview', SubmitType::class, ['label' => 'Prévisualiser', 'attr' => ['class' => 'btn-info btn-block preview']]);
     }
 
@@ -98,7 +99,7 @@ class ContactType extends AbstractType
     {
         $this->choices[$label][$entry->__toString()] = $value;
         if ($user instanceof User && $user->getId() == $entry->getId()) {
-            $this->to = $this->to??$value;
+            $this->to = $this->to ?? $value;
         }
     }
 }

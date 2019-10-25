@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EntityManager;
 
 use App\Entity\Basket;
@@ -41,11 +42,11 @@ class BasketManager
         $invoices = [];
         foreach ($this->entityManager->getRepository(Basket::class)->getInvoiceByBasket($basket) as $invoice) {
             $invoices[$invoice['member_id']][$invoice['producer_id']][$invoice['basket_id']] = $invoice['invoice'];
-        };
+        }
         $credits = [];
         foreach ($this->entityManager->getRepository(Credit::class)->findByAmount() as $credit) {
             $credits[$credit['member_id']][$credit['producer_id']][$credit['credit_id']] = $credit['amount'];
-        };
+        }
         if (count($credits) > 0) {
             $creditBasketAmounts = [];
             foreach ($credits as $membre => $credit) {
@@ -73,8 +74,10 @@ class BasketManager
                         'id' => key($credit),
                         'currentAmount' => current($credit),
                     ];
-                }, call_user_func_array('array_merge', $credits))
-                , null, 'id');
+                }, call_user_func_array('array_merge', $credits)),
+                null,
+                'id'
+            );
             $this->entityManager->getRepository(Credit::class)->updateAmount(array_intersect_key($credits, $creditBasketAmounts));
             $this->entityManager->getRepository(CreditBasketAmount::class)->insert($creditBasketAmounts);
         }
@@ -82,7 +85,7 @@ class BasketManager
 
     public function removeCredit(Basket $basket)
     {
-        $creditBasketAmounts =$this->entityManager->getRepository(CreditBasketAmount::class)->findByBasket($basket);
+        $creditBasketAmounts = $this->entityManager->getRepository(CreditBasketAmount::class)->findByBasket($basket);
         foreach ($creditBasketAmounts as $creditBasketAmount) {
             $credit = $creditBasketAmount->getCredit();
             $credit->setCurrentAmount($credit->getCurrentAmount() + $creditBasketAmount->getAmount());
@@ -98,7 +101,7 @@ class BasketManager
                 return $productQuantity->getProduct();
             },
             array_filter($basket->getProductQuantityCollection()->toArray(), function (ProductQuantity $productQuantity) {
-                return $productQuantity->getQuantity() == 1;
+                return 1 == $productQuantity->getQuantity();
             })
         );
     }
@@ -168,7 +171,7 @@ class BasketManager
         return $basket;
     }
 
-    public function generateSyntheses(FormInterface $form) : array
+    public function generateSyntheses(FormInterface $form): array
     {
         $extra = [];
         if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $form->get('type')->getData()) {
@@ -177,7 +180,7 @@ class BasketManager
                 $form->get('end')->getData()
             );
             foreach ($credits as $credit) {
-                $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs']??[];
+                $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (bénéficiaire: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
         } elseif (SynthesesType::INVOICE_BY_MEMBER == $form->get('type')->getData()) {
@@ -186,7 +189,7 @@ class BasketManager
                 $form->get('end')->getData()
             );
             foreach ($credits as $credit) {
-                $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs']??[];
+                $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (producteur: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
         }
@@ -211,17 +214,17 @@ class BasketManager
             $table = $item['table'];
             $line = $item['line'];
             $id = $item['id'];
-            $column = isset($item['column']) ? $item['column'] : null;
+            $column = $item['column'] ?? null;
             $column = $column instanceof \DateTime ? $column->format('d/m') : $column;
             if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $form->get('type')->getData()) {
                 $tbody = $item['tbody'];
-                $tables[$table][$tbody][$line] = $tables[$table][$tbody][$line]??$columns;
+                $tables[$table][$tbody][$line] = $tables[$table][$tbody][$line] ?? $columns;
                 $parameters[$table][$tbody][$line]['color'] = $item['color'];
-                $localTable =& $tables[$table][$tbody][$line];
+                $localTable = &$tables[$table][$tbody][$line];
             } else {
-                $tables[$table][$line] = $tables[$table][$line]??$columns;
+                $tables[$table][$line] = $tables[$table][$line] ?? $columns;
                 $parameters[$table][$line]['color'] = $item['color'];
-                $localTable =& $tables[$table][$line];
+                $localTable = &$tables[$table][$line];
             }
             if (null != $column) {
                 $localTable[$column] = $item['value'];
@@ -246,7 +249,8 @@ class BasketManager
         return [$tables, $parameters];
     }
 
-    public function setDeleted(Basket $basket) {
+    public function setDeleted(Basket $basket)
+    {
         $basket->setDeleted(true);
         $baskets = $this->entityManager->getRepository(Basket::class)->findByParentAndFrozen($basket, 0);
         foreach ($baskets as $subBasket) {
