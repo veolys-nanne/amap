@@ -7,17 +7,19 @@
             $('.mail-extra', $(this)).addMailExtra();
             $('.preview', $(this)).addMailExtra({preview: true});
             $('select[multiple="multiple"]:visible', $(this)).select2();
-            $('.collection').collection({
-                allow_up : false,
-                allow_down : false,
-                add: '<a href="#"><i class="far fa-plus-square"></i></a>',
-                remove: '<a href="#"><i class="far fa-minus-square"></i></a>',
-                drag_drop: false,
-                after_add: function (collection, element) {
-                    $(element).initCommon();
-                    return true;
-                },
-            });
+            if ($('.collection').length) {
+                $('.collection').collection({
+                    allow_up : false,
+                    allow_down : false,
+                    add: '<a href="#"><i class="far fa-plus-square"></i></a>',
+                    remove: '<a href="#"><i class="far fa-minus-square"></i></a>',
+                    drag_drop: false,
+                    after_add: function (collection, element) {
+                        $(element).initCommon();
+                        return true;
+                    },
+                });
+            }
             $('.toggle-producer', $(this)).on('click', function (event) {
                 event.preventDefault();
                 var $i = $('i', $(this)).toggleClass('fa-arrow-up fa-arrow-down');
@@ -32,24 +34,24 @@
             });
             if(null == window.history.state) {
                 window.history.replaceState({url: window.location.href}, document.title, window.location.href)
+                window.addEventListener("popstate", function (event) {
+                    if (null !== event.state) {
+                        $.ajax({
+                            url: event.state.url,
+                            method: 'get',
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                document.title = event.state.title;
+                                $.refreshFromAjax(data);
+                            }
+                        });
+                    } else {
+                        window.location.href = window.location.href;
+                    }
+                });
             }
-            window.onpopstate = function(event) {
-                if (null !== event.state) {
-                    $.ajax({
-                        url : event.state.url,
-                        method: 'get',
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        success: function(data) {
-                            document.title = data.header;
-                            $.refreshFromAjax(data);
-                        }
-                    });
-                } else {
-                    window.location.href = window.location.href;
-                }
-            };
 
             return this;
         },
@@ -80,7 +82,7 @@
         ajax : function() {
             var url = $(this).attr('href') || $(this).data('url');
             if ($(this).is('form')) {
-                url = $(this).attr('action') || window.location.hash;
+                url = $(this).attr('action') || window.location.href;
             }
             if (undefined == $._data($(this)[0], "events") && url != '#' && url) {
                 $(this).data('url', url);
@@ -95,7 +97,7 @@
                         contentType: false,
                         success: function(data) {
                             document.title = data.header;
-                            window.history.pushState({url: data.url}, data.header, data.url);
+                            window.history.pushState({url: data.url, title: data.header}, data.header, data.url);
                             $.refreshFromAjax(data);
                         }
                     });

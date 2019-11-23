@@ -1,4 +1,8 @@
 {% set json = {} %}
+{% set header %}
+    {{ title|default('') }}
+{% endset %}
+{% set json = json|merge({header: header|spaceless}) %}
 {% set flash %}
     {% include 'flash.html.twig' %}
 {% endset %}
@@ -17,7 +21,10 @@
 {% set script %}
     <script type="application/javascript">
         $(document).ready(function() {
-            $('body').initCommon();
+            $('#container-body').initCommon();
+            {% if needNavbar|default(false) %}
+                $('#container-navbar').initCommon();
+            {% endif %}
         });
     </script>
     {% block javascripts %}

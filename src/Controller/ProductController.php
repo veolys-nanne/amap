@@ -22,7 +22,7 @@ class ProductController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function productListingAction(Request $request, EntityManagerInterface $entityManager, string $role)
+    public function productListingAction(EntityManagerInterface $entityManager, string $role)
     {
         $roles = $this->getUser()->getRoles();
 

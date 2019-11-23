@@ -4,7 +4,7 @@
         init : function(params) {
             var $context = $(this);
             if (null == language) {
-                $.getJSON(params.url, function(data) {
+                $.getJSON('/assets/json/datatable.json', function(data) {
                     language = data;
                     $context.drawDataTable('callback', language, params);
                 });

@@ -1,87 +1,88 @@
 {% block header %}
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
 {% endblock %}
 
 {% block body %}
-    {% if extra is defined %}
-        {{ extra|raw }}
-    {% endif %}
-    {% if title is not defined %}
-        <h4>
-            {{ constant('App\\Form\\SynthesesType::LABELS')[form.type.vars.value] }}
-            du {{ form.start.vars.value }} au {{ form.end.vars.value }}
-        </h4>
-    {% endif %}
-    <table class="table table-striped table-hover">
-        <thead>
-        <tr>
-            <th>{{ tableName }}</th>
-            {% if form.type.vars.value == constant('App\\Form\\SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER') %}
-                {% for name, column in table|first|first %}
-                    <th>{{ name }}</th>
-                {% endfor %}
-            {% else %}
-                {% for name, column in table|first %}
-                    <th>{{ name }}</th>
-                {% endfor %}
-            {% endif %}
-        </tr>
-        </thead>
-        <tbody>
-        {% if form.type.vars.value == constant('App\\Form\\SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER') %}
-            {% for tbody, lines in table %}
-                {% for lineName, columns in lines %}
-                    {% if loop.first %}
-                        <tr style="background-color:{{ parameters[tbody][lineName].color }}">
-                            <th colspan="{{ 1 + columns|length }}">{{ tbody }}</th>
-                        </tr>
-                    {% endif %}
-                    <tr style="background-color:{{ parameters[tbody][lineName].color }}">
-                        <td>{{ lineName }}</td>
-                        {% for name, column in columns %}
-                            <td>{{ column }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
+{% if extra is defined %}
+    {{ extra|raw }}
+{% endif %}
+{% if title is not defined %}
+    <h4>
+        {{ constant('App\\Form\\SynthesesType::LABELS')[form.type.vars.value] }}
+        du {{ form.start.vars.value }} au {{ form.end.vars.value }}
+    </h4>
+{% endif %}
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>{{ tableName }}</th>
+        {% if table|first|first is iterable %}
+            {% for name, column in table|first|first %}
+                <th>{{ name }}</th>
             {% endfor %}
         {% else %}
-            {% for lineName, columns in table %}
-                <tr style="background-color:{{ parameters[lineName].color }}">
-                    <th>{{ lineName }}</th>
+            {% for name, column in table|first %}
+                <th>{{ name }}</th>
+            {% endfor %}
+        {% endif %}
+    </tr>
+    </thead>
+    {% if table|first|first is iterable %}
+        {% for tbody, lines in table %}
+            <tbody>
+            {% for lineName, columns in lines %}
+                {% if loop.first %}
+                    <tr style="background-color:{{ parameters[tbody][lineName].color }}">
+                        <th colspan="{{ 1 + columns|length }}">{{ tbody }}</th>
+                    </tr>
+                {% endif %}
+                <tr style="background-color:{{ parameters[tbody][lineName].color }}">
+                    <td>{{ lineName }}</td>
                     {% for name, column in columns %}
                         <td>{{ column }}</td>
                     {% endfor %}
                 </tr>
             {% endfor %}
-        {% endif %}
-        </tbody>
-    </table>
-    {% if parameters.extra is defined %}
-        {% for label, extra in parameters.extra %}
-            <div class="informations">
-                <label>{{ label }}: </label>
-                {% if extra is not iterable %}
-                    <span>{{ extra }}</span>
-                {% else %}
-                    <ul>
-                        {% for subextra in extra %}
-                            <li>{{ subextra }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
+            </tbody>
         {% endfor %}
+    {% else %}
+        <tbody>
+        {% for lineName, columns in table %}
+            <tr style="background-color:{{ parameters[lineName].color }}">
+                <th>{{ lineName }}</th>
+                {% for name, column in columns %}
+                    <td>{{ column }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
     {% endif %}
-    </body>
+</table>
+{% if parameters.extra is defined %}
+    {% for label, extra in parameters.extra %}
+        <div class="informations">
+            <label>{{ label }}: </label>
+            {% if extra is not iterable %}
+                <span>{{ extra }}</span>
+            {% else %}
+                <ul>
+                    {% for subextra in extra %}
+                        <li>{{ subextra }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}
+</body>
 {% endblock %}
+
 {% block footer %}
-        <p><a href="{{ url('login') }}">L'équipe AMAP Hommes de terre</a></p>
-        <p><a href="{{ url('unsubscribe') }}">Se désinscrire</a></p>
-    </body>
+</body>
 </html>
 {% endblock %}

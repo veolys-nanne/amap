@@ -29,7 +29,7 @@ class UserController extends AbstractController
      *     }
      * )
      */
-    public function userListingAction(Request $request, EntityManagerInterface $entityManager, string $type, string $role)
+    public function userListingAction(EntityManagerInterface $entityManager, string $type, string $role)
     {
         if ('member' != $type) {
             $users = $entityManager->getRepository(User::class)->findByRole('ROLE_'.strtoupper($type), $this->getUser());
@@ -141,7 +141,7 @@ class UserController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le compte a été créé.' : 'Le compte a été mis à jour.');
             if ($isAccount) {
-                return $this->forward('document_view', [
+                return $this->redirectToRoute('document_view', [
                     'role' => $role,
                     'name' => 'homepage',
                 ]);

@@ -55,8 +55,7 @@
 {% block javascripts %}
     <script type="application/javascript">
         $(document).ready(function() {
-            $('table').drawDataTable({
-                url : '{{ asset('assets/json/datatable.json') }}',
+            $('.table').drawDataTable({
                 options : {
                     order: [[0, 'desc']],
                 }
