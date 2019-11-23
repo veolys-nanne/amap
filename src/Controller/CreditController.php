@@ -21,7 +21,7 @@ class CreditController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function creditListingAction(Request $request, EntityManagerInterface $entityManager, string $role)
+    public function creditListingAction(EntityManagerInterface $entityManager, string $role)
     {
         $roles = $this->getUser()->getRoles();
         $credits = [];

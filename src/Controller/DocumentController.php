@@ -6,7 +6,6 @@ use App\Entity\Document;
 use App\Form\DocumentType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,7 +18,7 @@ class DocumentController extends AbstractController
      *     name="document_index",
      * )
      */
-    public function documentListingAction(Request $request, EntityManagerInterface $entityManager)
+    public function documentListingAction(EntityManagerInterface $entityManager)
     {
         $documents = $entityManager->getRepository(Document::class)->findByDeleted(false);
 
@@ -63,7 +62,7 @@ class DocumentController extends AbstractController
      *     name="document_form_image",
      * )
      */
-    public function imageAction(Request $request, Packages $package)
+    public function imageAction(Request $request)
     {
         $file = $request->files->get('file');
         $fileName = $this->generateUniqueFileName().'.'.$file->guessExtension();
@@ -93,6 +92,7 @@ class DocumentController extends AbstractController
 
         return $this->render('document/view.html.twig', [
             'document' => $document,
+            'title' => $document->getName(),
         ]);
     }
 

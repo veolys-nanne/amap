@@ -1,0 +1,60 @@
+{% block header %}
+{% endblock %}
+
+{% block body %}
+    {% if extra is defined %}
+{{ extra|raw|striptags }}
+    {% endif %}
+    {% if title is not defined %}
+{{ constant('App\\Form\\SynthesesType::LABELS')[form.type.vars.value] }}
+du {{ form.start.vars.value }} au {{ form.end.vars.value }}
+    {% endif %}
+    {% set thead = {0: tableName} %}
+    {% if table|first|first is iterable %}
+        {% for name, column in table|first|first %}
+            {% set thead = thead|merge({(loop.index): name}) %}
+        {% endfor %}
+    {% else %}
+        {% for name, column in table|first %}
+            {% set thead = thead|merge({(loop.index): name}) %}
+        {% endfor %}
+    {% endif %}
+{{ thead|join('|') }}
+    {% if table|first|first is iterable %}
+        {% for tbody, lines in table %}
+            {% for lineName, columns in lines %}
+                {% if loop.first %}
+{{ tbody }}
+                {% endif %}
+                {% set tr = {0: lineName} %}
+                {% for name, column in columns %}
+                    {% set tr = tr|merge({(loop.index): column}) %}
+                {% endfor %}
+{{ tr|join('|') }}
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        {% for lineName, columns in table %}
+            {% set tr = {0: lineName} %}
+            {% for name, column in columns %}
+                {% set tr = tr|merge({(loop.index): column}) %}
+            {% endfor %}
+{{ tr|join('|') }}
+        {% endfor %}
+    {% endif %}
+    {% if parameters.extra is defined %}
+        {% for label, extra in parameters.extra %}
+{{ label }}:
+                {% if extra is not iterable %}
+{{ extra|raw|striptags }}
+                {% else %}
+                    {% for subextra in extra %}
+{{ subextra }}
+                    {% endfor %}
+                {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

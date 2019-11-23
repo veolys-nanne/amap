@@ -26,7 +26,7 @@ class PlanningController extends AbstractController
      *     name="planning_index",
      * )
      */
-    public function planningListingAction(Request $request, EntityManagerInterface $entityManager)
+    public function planningListingAction(EntityManagerInterface $entityManager)
     {
         $plannings = $entityManager->getRepository(Planning::class)->findByDeleted(false);
 
