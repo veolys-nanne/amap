@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -82,7 +83,7 @@ class UserRepository extends ServiceEntityRepository
             return $this->createQueryBuilder('u')
                 ->addSelect('u.email as email')
                 ->addSelect('u.broadcastList as broadcastList')
-                ->leftJoin('u.baskets', 'basket', 'WITH', 'basket.parent IN (:models)')
+                ->leftJoin('u.baskets', 'basket', Join::WITH, 'basket.parent IN (:models)')
                 ->where('u.roles LIKE :role')
                 ->andWhere('u.deleted  = 0')
                 ->setParameters([
