@@ -7,6 +7,7 @@ use App\Entity\Product;
 use App\Entity\User;
 use App\Form\SynthesesType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 class BasketRepository extends ServiceEntityRepository
@@ -174,9 +175,13 @@ class BasketRepository extends ServiceEntityRepository
         \DateTime $end,
         int $type
     ): array {
+        $needExtra = false;
+        $start->setTime(0, 0, 0);
+        $end->setTime(23, 59, 59);
         $queryBuilder = $this->createQueryBuilder('b')
             ->select('producer.color as color')
-            ->join('b.productQuantityCollection', 'pqc', 'WITH', 'pqc.quantity > 0')
+            ->addSelect('CONCAT(producer.id, \'_\', user.id) as index')
+            ->join('b.productQuantityCollection', 'pqc', Join::WITH, 'pqc.quantity > 0')
             ->join('b.user', 'user')
             ->join('pqc.product', 'p')
             ->join('p.producer', 'producer')
@@ -184,27 +189,24 @@ class BasketRepository extends ServiceEntityRepository
             ->andWhere('b.parent IS NOT NULL')
             ->andWhere('b.deleted = 0')
             ->setParameters([
-                'start' => $start->setTime(0, 0, 0),
-                'end' => $end->setTime(23, 59, 59),
+                'start' => $start,
+                'end' => $end,
             ]);
         switch ($type) {
             case SynthesesType::INVOICE_BY_MEMBER:
                 $queryBuilder
-                    ->leftJoin('b.creditBasketAmountCollection', 'cba')
-                    ->leftJoin('cba.credit', 'c')
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as table')
                     ->addSelect('user.email as email')
                     ->addSelect('user.broadcastList as broadcastList')
                     ->addSelect('user.id as id')
                     ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\'), coalesce(CONCAT(\'(ordre: \', producer.payto, \')\'), \'\')) as line')
                     ->addSelect('SUM(coalesce(pqc.price, p.price) * coalesce(pqc.quantity, 0)) as Total')
-                    ->addSelect('SUM(coalesce(cba.amount, 0)) as Avoir')
-                    ->andWhere('c.producer = p.producer OR c IS NULL')
                     ->orderBy('user.lastname', 'asc')
                     ->addOrderBy('producer.order', 'asc')
                     ->addOrderBy('producer.lastname', 'asc')
                     ->groupBy('producer.id')
                     ->addGroupBy('user.id');
+                $needExtra = true;
                 break;
             case SynthesesType::PRODUCT_BY_PRODUCER:
                 $queryBuilder
@@ -258,7 +260,6 @@ class BasketRepository extends ServiceEntityRepository
             case SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER:
                 $queryBuilder
                     ->join('producer.parent', 'referent')
-                    ->leftJoin('b.creditBasketAmountCollection', 'cba')
                     ->addSelect('CONCAT(referent.lastname, \' \', coalesce(referent.firstname, \'\')) as table')
                     ->addSelect('referent.email as email')
                     ->addSelect('referent.broadcastList as broadcastList')
@@ -266,25 +267,51 @@ class BasketRepository extends ServiceEntityRepository
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as line')
                     ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\')) as tbody')
                     ->addSelect('SUM(coalesce(pqc.price, p.price) * coalesce(pqc.quantity, 0)) as Total')
-                    ->addSelect('SUM(coalesce(cba.amount, 0)) as Avoir')
                     ->orderBy('producer.order', 'asc')
                     ->addOrderBy('producer.lastname', 'asc')
                     ->addOrderBy('user.lastname', 'asc')
                     ->addOrderBy('referent.lastname', 'asc')
                     ->groupBy('user.id')
                     ->addGroupBy('producer.id');
+                $needExtra = true;
                 break;
         }
 
-        return $queryBuilder
+        $results = $queryBuilder
             ->getQuery()
             ->getArrayResult();
+        if ($needExtra) {
+            $extraResults = $this->createQueryBuilder('b')
+                ->join('b.creditBasketAmountCollection', 'cba')
+                ->join('cba.credit', 'c')
+                ->join('c.member', 'user')
+                ->join('c.producer', 'producer')
+                ->select('SUM(cba.amount) as Avoir')
+                ->addSelect('CONCAT(producer.id, \'_\', user.id) as index')
+                ->where('b.date BETWEEN :start AND :end')
+                ->andWhere('b.parent IS NOT NULL')
+                ->andWhere('b.deleted = 0')
+                ->setParameters([
+                    'start' => $start->setTime(0, 0, 0),
+                    'end' => $end->setTime(23, 59, 59),
+                ])
+                ->addGroupBy('producer.id')
+                ->addGroupBy('user.id')
+                ->getQuery()
+                ->getArrayResult();
+            $results = array_merge_recursive(
+                array_column($results, null, 'index'),
+                array_column($extraResults, null, 'index')
+            );
+        }
+
+        return $results;
     }
 
     public function getInvoiceByBasket(Basket $basket): array
     {
         return $this->createQueryBuilder('b')
-            ->join('b.productQuantityCollection', 'pqc', 'WITH', 'pqc.quantity > 0')
+            ->join('b.productQuantityCollection', 'pqc', Join::WITH, 'pqc.quantity > 0')
             ->join('b.user', 'user')
             ->join('pqc.product', 'p')
             ->join('p.producer', 'producer')
