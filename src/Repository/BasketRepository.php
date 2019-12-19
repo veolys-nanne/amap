@@ -155,7 +155,7 @@ class BasketRepository extends ServiceEntityRepository
                 break;
             default:
                 return array_column($this->createQueryBuilder('b')
-                    ->select('b.date')
+                    ->select('DATE_FORMAT(b.date, \'%d/%m\') as date')
                     ->where('b.date BETWEEN :start AND :end')
                     ->andWhere('b.deleted = 0')
                     ->setParameters([
@@ -180,7 +180,6 @@ class BasketRepository extends ServiceEntityRepository
         $end->setTime(23, 59, 59);
         $queryBuilder = $this->createQueryBuilder('b')
             ->select('producer.color as color')
-            ->addSelect('CONCAT(producer.id, \'_\', user.id) as index')
             ->join('b.productQuantityCollection', 'pqc', Join::WITH, 'pqc.quantity > 0')
             ->join('b.user', 'user')
             ->join('pqc.product', 'p')
@@ -195,6 +194,7 @@ class BasketRepository extends ServiceEntityRepository
         switch ($type) {
             case SynthesesType::INVOICE_BY_MEMBER:
                 $queryBuilder
+                    ->addSelect('CONCAT(producer.id, \'_\', user.id) as index')
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as table')
                     ->addSelect('user.email as email')
                     ->addSelect('user.broadcastList as broadcastList')
@@ -208,24 +208,15 @@ class BasketRepository extends ServiceEntityRepository
                     ->addGroupBy('user.id');
                 $needExtra = true;
                 break;
-            case SynthesesType::PRODUCT_BY_PRODUCER:
-                $queryBuilder
-                    ->addSelect('b.date as column')
-                    ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\')) as table')
-                    ->addSelect('\'\' as id')
-                    ->addSelect('p.name as line')
-                    ->addSelect('SUM(coalesce(pqc.quantity, 0)) as value')
-                    ->orderBy('producer.order', 'asc')
-                    ->addOrderBy('producer.lastname', 'asc')
-                    ->addOrderBy('p.order', 'asc')
-                    ->addOrderBy('p.name', 'asc')
-                    ->addOrderBy('b.date', 'asc')
-                    ->groupBy('b.date')
-                    ->addGroupBy('p.id');
-                break;
             case SynthesesType::PRODUCT_BY_MEMBER:
                 $queryBuilder
-                    ->addSelect('b.date as column')
+                    ->addSelect('p.id as credit_product')
+                    ->addSelect('DATE_FORMAT(b.date, \'%Y-%m-%d\') as credit_date')
+                    ->addSelect('user.id as credit_member')
+                    ->addSelect('SUM(coalesce(pqc.quantity, 0)) as credit_quantity')
+                    ->addSelect('CONCAT(\'Créer un avoir à "\', user.lastname, \' \', coalesce(user.firstname, \'\'), \'" pour tous les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
+                    ->addSelect('CONCAT(\'Créer un avoir à "\', user.lastname, \' \', coalesce(user.firstname, \'\'), \'" pour les "\', p.name, \'" à la date \', DATE_FORMAT(b.date, \'%d/%m\')) as credit_column_text')
+                    ->addSelect('DATE_FORMAT(b.date, \'%d/%m\') as column')
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as table')
                     ->addSelect('user.id as id')
                     ->addSelect('p.name as line')
@@ -242,7 +233,11 @@ class BasketRepository extends ServiceEntityRepository
                 break;
             case SynthesesType::INVOICE_BY_PRODUCER:
                 $queryBuilder
-                    ->addSelect('b.date as column')
+                    ->addSelect('p.id as credit_product')
+                    ->addSelect('DATE_FORMAT(b.date, \'%Y-%m-%d\') as credit_date')
+                    ->addSelect('CONCAT(\'Créer un avoir à tous les consom\'\'acteurs/trices pour tous les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
+                    ->addSelect('CONCAT(\'Créer un avoir à tous les consom\'\'acteurs/trices pour les "\', p.name, \'" à la date \', DATE_FORMAT(b.date, \'%d/%m\')) as credit_column_text')
+                    ->addSelect('DATE_FORMAT(b.date, \'%d/%m\') as column')
                     ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\')) as table')
                     ->addSelect('producer.email as email')
                     ->addSelect('producer.broadcastList as broadcastList')
@@ -260,6 +255,7 @@ class BasketRepository extends ServiceEntityRepository
             case SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER:
                 $queryBuilder
                     ->join('producer.parent', 'referent')
+                    ->addSelect('CONCAT(producer.id, \'_\', user.id) as index')
                     ->addSelect('CONCAT(referent.lastname, \' \', coalesce(referent.firstname, \'\')) as table')
                     ->addSelect('referent.email as email')
                     ->addSelect('referent.broadcastList as broadcastList')
@@ -392,5 +388,35 @@ class BasketRepository extends ServiceEntityRepository
             ])
             ->getQuery()
             ->execute();
+    }
+
+    public function findAmoutByIntervalAndProductAndUser(\DateTime $start, \DateTime $end, Product $product, User $user = null, int $quantity = null): array
+    {
+        $parameters = [
+            'start' => $start->setTime(0, 0, 0),
+            'end' => $end->setTime(23, 59, 59),
+            'product' => $product,
+        ];
+
+        $qb = $this->createQueryBuilder('b')
+            ->select('pqc.price * '.(null != $quantity ? $quantity : 'pqc.quantity').' as totalAmount')
+            ->join('b.productQuantityCollection', 'pqc', Join::WITH, 'pqc.quantity > 0')
+            ->where('b.date BETWEEN :start AND :end')
+            ->andWhere('b.parent IS NOT NULL')
+            ->andWhere('b.deleted = 0')
+            ->andWhere('pqc.product = :product');
+
+        if (null !== $user) {
+            $parameters['user'] = $user;
+            $qb->andWhere('b.user = :user');
+        } else {
+            $qb->addSelect('u.id as member')
+                ->join('b.user', 'u');
+        }
+
+        return $qb
+            ->setParameters($parameters)
+            ->getQuery()
+            ->getResult();
     }
 }

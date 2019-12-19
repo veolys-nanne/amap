@@ -5,7 +5,6 @@ namespace App\Helper;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -58,9 +57,9 @@ class MailHelper
         return $message;
     }
 
-    public function sendMessages(Request $request, array $messages, RedirectResponse $redirectResponse): Response
+    public function sendMessages(bool $isPreview, array $messages, RedirectResponse $redirectResponse): Response
     {
-        if ($request->request->get('preview')) {
+        if ($isPreview) {
             $jsonResponse = [];
             foreach ($messages as $message) {
                 $jsonResponse[] = [

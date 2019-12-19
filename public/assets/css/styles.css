@@ -16,6 +16,10 @@ body {
 .heavily-padded {
     padding: 10%;
 }
+.hidden {
+    display: none;
+}
+/*carousel*/
 .carousel-control-next, .carousel-control-prev {
     width: 10%;
 }
