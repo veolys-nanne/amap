@@ -241,7 +241,7 @@ class ContactController extends AbstractController
             $messages[] = $message;
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('document_view', [
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('document_view', [
             'role' => $role,
             'name' => 'homepage',
         ]));

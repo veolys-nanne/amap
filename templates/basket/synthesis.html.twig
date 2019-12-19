@@ -1,3 +1,24 @@
+{% macro tbody(lines, parameters, type) %}
+    {% for lineName, columns in lines %}
+        <tr style="background-color:{{ parameters[lineName].color }}">
+            <th>
+                {{ lineName }}
+                {% if parameters[lineName].credit is defined %}
+                    <a href="#" class="no-print text-dark create-credit form-popin" data-action="#syntheses_submitCredit" data-target=".credit" data-values="{{ parameters[lineName].credit }}" data-text="{{ parameters[lineName].credit_text }}"><i class="fas fa-coins"></i></a>
+                {% endif %}
+            </th>
+            {% for column, value in columns %}
+                <td>
+                    {{ value }}
+                    {% if parameters[lineName][column].credit is defined %}
+                        <a href="#" class="no-print text-dark create-credit form-popin" data-action="#syntheses_submitCredit" data-target=".credit" data-values="{{ parameters[lineName][column].credit }}" data-text="{{ parameters[lineName][column].credit_text }}"><i class="fas fa-coins"></i></a>
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+{% endmacro %}
+
 {% block header %}
     <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
@@ -35,31 +56,15 @@
     {% if table|first|first is iterable %}
         {% for tbody, lines in table %}
             <tbody>
-            {% for lineName, columns in lines %}
-                {% if loop.first %}
-                    <tr style="background-color:{{ parameters[tbody][lineName].color }}">
-                        <th colspan="{{ 1 + columns|length }}">{{ tbody }}</th>
-                    </tr>
-                {% endif %}
-                <tr style="background-color:{{ parameters[tbody][lineName].color }}">
-                    <td>{{ lineName }}</td>
-                    {% for name, column in columns %}
-                        <td>{{ column }}</td>
-                    {% endfor %}
+                <tr style="background-color:{{ parameters[tbody][lines|keys|first].color }}">
+                    <th colspan="{{ 1 + lines|first|length }}">{{ tbody }}</th>
                 </tr>
-            {% endfor %}
+                {{ _self.tbody(lines, parameters[tbody], type) }}
             </tbody>
         {% endfor %}
     {% else %}
         <tbody>
-        {% for lineName, columns in table %}
-            <tr style="background-color:{{ parameters[lineName].color }}">
-                <th>{{ lineName }}</th>
-                {% for name, column in columns %}
-                    <td>{{ column }}</td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
+            {{ _self.tbody(table, parameters, type) }}
         </tbody>
     {% endif %}
 </table>

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Basket;
 use App\Entity\User;
+use App\EntityManager\CreditManager;
 use App\EntityManager\ProductManager;
 use App\Form\BillFilterType;
 use App\Form\CommandType;
@@ -169,7 +170,7 @@ class BasketController extends AbstractController
             }
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('basket_models'));
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('basket_models'));
     }
 
     /**
@@ -251,7 +252,7 @@ class BasketController extends AbstractController
             $messages[] = $message;
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('basket_models'));
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('basket_models'));
     }
 
     /**
@@ -260,21 +261,38 @@ class BasketController extends AbstractController
      *     name="basket_syntheses",
      * )
      */
-    public function synthesesAction(Request $request, MailHelper $mailHelper, BasketManager $basketManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
+    public function synthesesAction(Request $request, MailHelper $mailHelper, BasketManager $basketManager, CreditManager $creditManager, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
     {
         $type = $request->request->has('syntheses') ? $request->request->get('syntheses')['type'] : null;
         $form = $this->createForm(SynthesesType::class, null, [
             'type' => $type,
         ]);
         $form->handleRequest($request);
-        $tables = [];
-        $parameters = [];
-        $messages = [];
+        $type = $form->has('type') ? $form->get('type')->getData() : '';
+        $isEmail = $form->has('email') && $form->get('email')->isClicked();
+        $isPdf = $form->has('pdf') && $form->get('pdf')->isClicked();
+        $isCredit = $form->has('submitCredit') && $form->get('submitCredit')->isClicked();
+        $isPreview = $request->request->get('preview');
         if ($form->isSubmitted() && $form->isValid()) {
             list($tables, $parameters) = $basketManager->generateSyntheses($form);
-            if (($form->has('email') && $form->get('email')->isClicked()) || $request->request->get('preview')) {
+            if ($isCredit) {
+                $credit = $form->get('credit');
+                $creditManager->generateCredit(
+                    $credit->has('date') ? $credit->get('date')->getData() : $form->get('start')->getData(),
+                    $credit->has('date') ? clone $credit->get('date')->getData() : $form->get('end')->getData(),
+                    $credit->has('product') ? $credit->get('product')->getData() : null,
+                    $credit->has('member') ? $credit->get('member')->getData() : null,
+                    $credit->has('quantity') ? $credit->get('quantity')->getData() : null
+                );
+                $entityManager->flush();
+
+                return $this->redirectToRoute('credit_index', ['role' => 'admin']);
+            }
+            if ($isEmail || $isPreview) {
+                $messages = [];
+                $subject = 'AMAP Hommes de terre '.SynthesesType::LABELS[$type];
                 foreach ($tables as $tableName => $table) {
-                    $message = $mailHelper->getMailForList('AMAP Hommes de terre '.SynthesesType::LABELS[$form->get('type')->getData()], [$parameters[$tableName]]);
+                    $message = $mailHelper->getMailForList($subject, [$parameters[$tableName]]);
                     if (null !== $message) {
                         $message
                             ->setBody(
@@ -285,6 +303,7 @@ class BasketController extends AbstractController
                                     'table' => $table,
                                     'parameters' => $parameters[$tableName],
                                     'form' => $form->createView(),
+                                    'type' => $type,
                                 ]),
                                 'text/html'
                             )
@@ -303,16 +322,16 @@ class BasketController extends AbstractController
                     }
                 }
 
-                return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('basket_syntheses'));
+                return $mailHelper->sendMessages($isPreview, $messages, $this->redirectToRoute('basket_syntheses'));
             }
         }
 
-        $isPdf = $form->has('pdf') && $form->get('pdf')->isClicked();
         $html = $this->renderView('basket/syntheses.html.twig', [
             'title' => 'Extraction',
-            'tables' => $tables,
-            'parameters' => $parameters,
+            'tables' => $tables ?? [],
+            'parameters' => $parameters ?? [],
             'form' => $form->createView(),
+            'type' => $type,
             'isPdf' => $isPdf,
         ]);
         if ($isPdf) {

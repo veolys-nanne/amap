@@ -154,7 +154,7 @@ class CreditController extends AbstractController
             }
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('credit_index', [
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('credit_index', [
             'role' => 'producer',
         ]));
     }

@@ -64,7 +64,7 @@
                         );
                         $('.modal-body', $modal).append($formClone)
                         $('.submit', $modal).on('click', function(event) {
-                            $buttonClone.click();
+                            $buttonClone.parents('form').first().submit();
                         });
                     }
                     $('body').append($modal);

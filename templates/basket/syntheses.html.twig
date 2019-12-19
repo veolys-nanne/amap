@@ -7,7 +7,7 @@
     {% endif %}
     <h4>{{ title }}</h4>
     {% for tableName, table in tables %}
-        {% embed 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName]} %}
+        {% embed 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName], type: type} %}
             {% block header '' %}
             {% block footer '' %}
         {% endembed %}
@@ -18,62 +18,10 @@
 {% endblock %}
 
 {% block javascripts %}
-    {% set modal %}
-        <div class="modal" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="css" value="pdf-black-inline" checked>
-                            <label class="form-check-label">en noir et blanc sans saut de page</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="css" value="pdf-black-page-break">
-                            <label class="form-check-label">en noir et blanc avec sauts de page</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="css" value="pdf-color-inline">
-                            <label class="form-check-label">en couleur sans saut de page</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="css" value="pdf-color-page-break">
-                            <label class="form-check-label">en couleur avec sauts de page</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success">Imprimer</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endset %}
     <script type="application/javascript">
         $(document).ready(function() {
-            var bindModal = function (event, $button) {
-                event.preventDefault();
-                $modal = $('{{ modal|spaceless|raw }}');
-                $('button', $modal).on('click', function(event) {
-                    event.preventDefault();
-                    $('#syntheses_css').val($('[name="css"]:checked', $modal).val());
-                    $button.unbind('click');
-                    $button.click();
-                    $modal.modal('hide');
-                    $('#syntheses_pdf').on('click', function(event) {
-                        bindModal(event, $(this));
-                    });
-                });
-                $('body').append($modal);
-                $modal.modal({show: true});
-                $modal.on('hidden.bs.modal', function (e) {
-                    $(this).remove();
-                });
-            };
-
             $('#syntheses_start').on('change', function() {
                 $('#syntheses_end').datepicker('option', 'minDate', $(this).datepicker('getDate'));
-            });
-            $('#syntheses_pdf').on('click', function(event) {
-                bindModal(event, $(this));
             });
         });
     </script>

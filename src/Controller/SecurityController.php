@@ -76,7 +76,7 @@ class SecurityController extends AbstractController
                             'text/plain'
                         );
 
-                    return $mailHelper->sendMessages($request, [$message], $this->redirectToRoute('login'));
+                    return $mailHelper->sendMessages($request->request->get('preview'), [$message], $this->redirectToRoute('login'));
                 }
             }
 

@@ -6,6 +6,7 @@
             $('a[data-confirm]', $(this)).addConfirm();
             $('.mail-extra', $(this)).addMailExtra();
             $('.preview', $(this)).addMailExtra({preview: true});
+            $('.form-popin', $(this)).addFormPopin();
             $('select[multiple="multiple"]:visible', $(this)).select2();
             if ($('.collection').length) {
                 $('.collection').collection({
@@ -86,19 +87,42 @@
             }
             if (undefined == $._data($(this)[0], "events") && url != '#' && url) {
                 $(this).data('url', url);
+                if ($(this).is('form')) {
+                    var $form = $(this);
+                    $('[type="submit"]', $(this)).on('click', function(event) {
+                        $('[type="submit"]', $form).val(0);
+                        $(this).val(1);
+                    });
+                }
                 $(this).on($(this).is('form') ? 'submit' : 'click', function(event) {
                     event.preventDefault();
+                    var data = $(this).is('form') ? new FormData($(this)[0]) : null;
+                    $('[type="submit"]', $(this)).each(function() {
+                        if (true == $(this).val()) {
+                            data.append($(this)[0].name, $(this).val());
+                        }
+                    });
                     $.ajax({
                         url : $(this).data('url'),
                         method: $(this).is('form') ? 'post' : 'get',
-                        data: $(this).is('form') ? new FormData($(this)[0]) : null,
-                        dataType: 'json',
+                        data: data,
+                        dataType: 'text',
                         processData: false,
                         contentType: false,
                         success: function(data) {
-                            document.title = data.header;
-                            window.history.pushState({url: data.url, title: data.header}, data.header, data.url);
-                            $.refreshFromAjax(data);
+                            try {
+                                eval('data = ' + data + ';')
+                                document.title = data.header;
+                                window.history.pushState({url: data.url, title: data.header}, data.header, data.url);
+                                $.refreshFromAjax(data);
+                            } catch (e) {
+                                var $link = $('<a>', {
+                                    'href':  window.URL.createObjectURL(new Blob([data])),
+                                    'download': 'test.pdf',
+                                }).appendTo('body');
+                                $link[0].click();
+                                $link.remove();
+                            }
                         }
                     });
                 });

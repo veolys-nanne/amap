@@ -166,7 +166,7 @@ class ProductController extends AbstractController
             }
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('product_index', [
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('product_index', [
             'role' => 'producer',
         ]));
     }

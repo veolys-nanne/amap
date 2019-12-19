@@ -5,7 +5,6 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -13,20 +12,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class SynthesesType extends AbstractType
 {
     const INVOICE_BY_MEMBER = 0;
-    const PRODUCT_BY_PRODUCER = 1;
-    const PRODUCT_BY_MEMBER = 2;
-    const INVOICE_BY_PRODUCER = 3;
-    const INVOICE_BY_PRODUCER_BY_MEMBER = 4;
+    const PRODUCT_BY_MEMBER = 1;
+    const INVOICE_BY_PRODUCER = 2;
+    const INVOICE_BY_PRODUCER_BY_MEMBER = 3;
     const LABELS = [
         self::INVOICE_BY_MEMBER => 'Facture des consom\'acteurs/trices',
-        self::PRODUCT_BY_PRODUCER => 'Pointage permanence des producteurs/trices',
         self::PRODUCT_BY_MEMBER => 'Paniers des consom\'acteurs/trices',
-        self::INVOICE_BY_PRODUCER => 'Commande des producteurs/trices',
+        self::INVOICE_BY_PRODUCER => 'Pointage permanence et commande des producteurs/trices',
         self::INVOICE_BY_PRODUCER_BY_MEMBER => 'Pointage paiement des consom\'acteurs/trices',
     ];
     const FILES = [
         self::INVOICE_BY_MEMBER => 'facture_des_consomacteurs_trices',
-        self::PRODUCT_BY_PRODUCER => 'pointage_permanence_des_producteurs_trices',
         self::PRODUCT_BY_MEMBER => 'paniers_des_consom_acteurs_trices',
         self::INVOICE_BY_PRODUCER => 'commande_des_producteurs_trices',
         self::INVOICE_BY_PRODUCER_BY_MEMBER => 'pointage_paiement_des_consom_acteurs_trices',
@@ -49,15 +45,15 @@ class SynthesesType extends AbstractType
             ])
             ->add('type', ChoiceType::class, [
                 'label' => 'Type',
-                'choices' => [
-                    self::LABELS[self::INVOICE_BY_MEMBER] => self::INVOICE_BY_MEMBER,
-                    self::LABELS[self::PRODUCT_BY_PRODUCER] => self::PRODUCT_BY_PRODUCER,
-                    self::LABELS[self::PRODUCT_BY_MEMBER] => self::PRODUCT_BY_MEMBER,
-                    self::LABELS[self::INVOICE_BY_PRODUCER] => self::INVOICE_BY_PRODUCER,
-                    self::LABELS[self::INVOICE_BY_PRODUCER_BY_MEMBER] => self::INVOICE_BY_PRODUCER_BY_MEMBER,
-                ],
+                'choices' => array_flip(self::LABELS),
             ])
-            ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']]);
+            ->add('credit', MassCreditType::class, [
+                'label' => false,
+                'attr' => ['class' => 'hidden credit'],
+            ])
+            ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
+            ->add('submitCredit', SubmitType::class, ['label' => false, 'attr' => ['class' => 'hidden']])
+        ;
         if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
             $builder
                 ->add('email', SubmitType::class, ['label' => 'Envoyer', 'attr' => [
@@ -67,11 +63,22 @@ class SynthesesType extends AbstractType
         }
         if (null !== $options['type']) {
             $builder
-                ->add('css', HiddenType::class, [
-                    'data' => 'pdf-color-page-break',
+                ->add('css', ChoiceType::class, [
+                    'label' => false,
+                    'empty_data' => 'pdf-black-inline',
+                    'choices' => [
+                        'en noir et blanc sans saut de page' => 'pdf-black-inline',
+                        'en noir et blanc avec sauts de page' => 'pdf-black-page-break',
+                        'en couleur sans saut de page' => 'pdf-color-inline',
+                        'en couleur avec sauts de page' => 'pdf-color-page-break',
+                    ],
+                    'expanded' => true,
+                    'attr' => ['class' => 'hidden css'],
                 ])
                 ->add('pdf', SubmitType::class, ['label' => 'Imprimer', 'attr' => [
-                    'class' => 'btn-success btn-block',
+                    'class' => 'btn-success btn-block form-popin',
+                    'data-button' => 'Imprimer',
+                    'data-target' => '.css',
                 ]]);
         }
     }

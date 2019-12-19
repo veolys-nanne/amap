@@ -8,7 +8,6 @@ use App\Entity\Planning;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
@@ -115,7 +114,7 @@ class PlanningManager
         }
     }
 
-    public function changeState(Request $request, RedirectResponse $redirectResponse, Planning $planning, string $extra): Response
+    public function changeState(bool $isPreview, RedirectResponse $redirectResponse, Planning $planning, string $extra): Response
     {
         $messages = [];
         switch ($planning->getState()) {
@@ -167,6 +166,6 @@ class PlanningManager
                 break;
         }
 
-        return $this->mailHelper->sendMessages($request, $messages, $redirectResponse);
+        return $this->mailHelper->sendMessages($isPreview, $messages, $redirectResponse);
     }
 }

@@ -81,7 +81,7 @@ class PlanningController extends AbstractController
             }
         }
 
-        return $mailHelper->sendMessages($request, $messages, $this->redirectToRoute('planning_index'));
+        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('planning_index'));
     }
 
     /**
@@ -135,7 +135,7 @@ class PlanningController extends AbstractController
     public function stateAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, string $state, Planning $planning)
     {
         $planning->setState($state);
-        $response = $planningManager->changeState($request, $this->redirectToRoute('planning_index'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
+        $response = $planningManager->changeState($request->request->get('preview'), $this->redirectToRoute('planning_index'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
         if (!$request->request->get('preview')) {
             $entityManager->persist($planning);
             $entityManager->flush();

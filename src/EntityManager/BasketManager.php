@@ -174,75 +174,81 @@ class BasketManager
     public function generateSyntheses(FormInterface $form): array
     {
         $extra = [];
-        if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $form->get('type')->getData()) {
-            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForProducer(
-                $form->get('start')->getData(),
-                $form->get('end')->getData()
-            );
+        $type = $form->get('type')->getData();
+        $start = $form->get('start')->getData();
+        $end = $form->get('end')->getData();
+        if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
+            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForProducer($start, $end);
             foreach ($credits as $credit) {
                 $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (bénéficiaire: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
-        } elseif (SynthesesType::INVOICE_BY_MEMBER == $form->get('type')->getData()) {
-            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForMember(
-                $form->get('start')->getData(),
-                $form->get('end')->getData()
-            );
+        } elseif (SynthesesType::INVOICE_BY_MEMBER == $type) {
+            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForMember($start, $end);
             foreach ($credits as $credit) {
                 $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (producteur: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
         }
-        $items = $this->entityManager->getRepository(Basket::class)->getSyntheses(
-            $form->get('start')->getData(),
-            $form->get('end')->getData(),
-            $form->get('type')->getData()
-        );
-        $columns = $this->entityManager->getRepository(Basket::class)->getColumns(
-            $form->get('start')->getData(),
-            $form->get('end')->getData(),
-            $form->get('type')->getData()
-        );
-
-        foreach ($columns as $key => $column) {
-            $columns[$key] = $column instanceof \DateTime ? $column->format('d/m') : $column;
+        $items = $this->entityManager->getRepository(Basket::class)->getSyntheses($start, $end, $type);
+        foreach ($items as &$item) {
+            if (isset($item['column']) && isset($item['value'])) {
+                $item[$item['column']] = $item['value'];
+            }
         }
-        $columns = array_fill_keys($columns, '');
+        $columns = $this->entityManager->getRepository(Basket::class)->getColumns($start, $end, $type);
         $tables = [];
         $parameters = [];
         foreach ($items as $item) {
             $table = $item['table'];
+            $tables[$table] = $tables[$table] ?? [];
+            $localTable = &$tables[$table];
+            $parameters[$table] = $parameters[$table] ?? [];
+            $localParameters = &$parameters[$table];
+            if (isset($item['tbody'])) {
+                $tbody = $item['tbody'];
+                $tables[$table][$tbody] = $tables[$table][$tbody] ?? [];
+                $localTable = &$tables[$table][$tbody];
+                $parameters[$table][$tbody] = $parameters[$table][$tbody] ?? [];
+                $localParameters = &$parameters[$table][$tbody];
+            }
             $line = $item['line'];
             $id = $item['id'];
-            $column = $item['column'] ?? null;
-            $column = $column instanceof \DateTime ? $column->format('d/m') : $column;
-            if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $form->get('type')->getData()) {
-                $tbody = $item['tbody'];
-                $tables[$table][$tbody][$line] = $tables[$table][$tbody][$line] ?? $columns;
-                $parameters[$table][$tbody][$line]['color'] = $item['color'];
-                $localTable = &$tables[$table][$tbody][$line];
-            } else {
-                $tables[$table][$line] = $tables[$table][$line] ?? $columns;
-                $parameters[$table][$line]['color'] = $item['color'];
-                $localTable = &$tables[$table][$line];
+            $localTable[$line] = $localTable[$line] ?? array_fill_keys($columns, '');
+            $localParameters[$line] = $localParameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
+            if (isset($item['credit_product'])) {
+                /*                $item['table'] = 'ANNE Nicolas';
+                                $item['line'] = 'petit panier';*/
+                $localParameters[$line]['credit'] = json_encode([
+                    'syntheses[credit][product]' => $item['credit_product'],
+                    'syntheses[credit][date]' => null,
+                    'syntheses[credit][member]' => $item['credit_member'] ?? null,
+                    'syntheses[credit][quantity]' => null,
+                ]);
+                $localParameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
             }
-            if (null != $column) {
-                $localTable[$column] = $item['value'];
-            } else {
-                foreach ($columns as $key => $value) {
-                    if (isset($item[$key])) {
-                        $localTable[$key] = $item[$key];
+            foreach ($columns as $column) {
+                if (isset($item[$column])) {
+                    $localTable[$line][$column] = $item[$column];
+                    if (isset($item['credit_product'])) {
+                        $localParameters[$line][$column]['credit'] = json_encode([
+                            'syntheses[credit][product]' => $item['credit_product'],
+                            'syntheses[credit][date]' => $item['credit_date'],
+                            'syntheses[credit][member]' => $item['credit_member'] ?? null,
+                            'syntheses[credit][quantity]' => $item['credit_quantity'] ?? null,
+                        ]);
+                        $localParameters[$line][$column]['credit_text'] = $item['credit_column_text'] ?? '';
                     }
                 }
             }
             if (isset($extra[$id])) {
-                $parameters[$table]['extra'] = $extra[$id];
+                $localParameters['extra'] = $extra[$id];
             }
             if (isset($item['broadcastList'])) {
-                $parameters[$table]['broadcastList'] = $item['broadcastList'];
+                $localParameters['broadcastList'] = $item['broadcastList'];
             }
             if (isset($item['email'])) {
-                $parameters[$table]['email'] = $item['email'];
+                $localParameters['email'] = $item['email'];
             }
         }
 
