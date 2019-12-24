@@ -52,7 +52,7 @@ class SynthesesType extends AbstractType
                 'attr' => ['class' => 'hidden credit'],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
-            ->add('submitCredit', SubmitType::class, ['label' => false, 'attr' => ['class' => 'hidden']])
+            ->add('submitCredit', SubmitType::class, ['label' => 'Générer', 'attr' => ['class' => 'btn-success btn-block hidden']])
         ;
         if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
             $builder
@@ -76,8 +76,7 @@ class SynthesesType extends AbstractType
                     'attr' => ['class' => 'hidden css'],
                 ])
                 ->add('pdf', SubmitType::class, ['label' => 'Imprimer', 'attr' => [
-                    'class' => 'btn-success btn-block form-popin',
-                    'data-button' => 'Imprimer',
+                    'class' => 'btn-success btn-block form-popin download-file',
                     'data-target' => '.css',
                 ]]);
         }

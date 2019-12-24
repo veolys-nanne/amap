@@ -278,8 +278,8 @@ class BasketController extends AbstractController
             if ($isCredit) {
                 $credit = $form->get('credit');
                 $creditManager->generateCredit(
-                    $credit->has('date') ? $credit->get('date')->getData() : $form->get('start')->getData(),
-                    $credit->has('date') ? clone $credit->get('date')->getData() : $form->get('end')->getData(),
+                    $credit->has('date') && $credit->get('date')->getData() != null ? $credit->get('date')->getData() : $form->get('start')->getData(),
+                    $credit->has('date') && $credit->get('date')->getData() != null  ? clone $credit->get('date')->getData() : $form->get('end')->getData(),
                     $credit->has('product') ? $credit->get('product')->getData() : null,
                     $credit->has('member') ? $credit->get('member')->getData() : null,
                     $credit->has('quantity') ? $credit->get('quantity')->getData() : null
