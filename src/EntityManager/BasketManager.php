@@ -217,8 +217,6 @@ class BasketManager
             $localTable[$line] = $localTable[$line] ?? array_fill_keys($columns, '');
             $localParameters[$line] = $localParameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
             if (isset($item['credit_product'])) {
-                /*                $item['table'] = 'ANNE Nicolas';
-                                $item['line'] = 'petit panier';*/
                 $localParameters[$line]['credit'] = json_encode([
                     'syntheses[credit][product]' => $item['credit_product'],
                     'syntheses[credit][date]' => null,

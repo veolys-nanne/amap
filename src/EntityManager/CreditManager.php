@@ -39,10 +39,14 @@ class CreditManager
         $amounts = $this->entityManager->getRepository(Basket::class)->findAmoutByIntervalAndProductAndUser($start, $end, $product, $member, $quantity);
         foreach ($amounts as $amount) {
             if ($amount['totalAmount'] > 0) {
+                $object = 'Pas de livraison pour le produit "'.$product->getName().'"';
+                $object .= null != $quantity ? ' (quantité: '.$quantity.')' : '';
+                $object .= $start != $end ? ' sur la période du '.$start->format('d/m/Y').' au '.$end->format('d/m/Y') : ' pour le '.$start->format('d/m/Y');
                 $credit = $this->createCredit();
                 $credit->setProducer($product->getProducer());
                 $credit->setMember($member ? $member : $this->entityManager->getRepository(User::class)->find($amount['member']));
                 $credit->setTotalAmount($amount['totalAmount']);
+                $credit->setObject($object);
                 $this->entityManager->persist($credit);
             }
         }

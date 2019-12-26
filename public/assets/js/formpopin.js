@@ -1,23 +1,17 @@
 (function( $ ){
-    var language = null;
     var methods = {
         init : function(params) {
             var $context = $(this);
             $(this).on('click', function(event) {
-                $context.addFormPopin('openModal', event, $(this), $(this).data('button') || 'Envoyer', $($(this).data('target')), $(this).data('values'), $(this).data('text') || '');
-                if ($(this).data('action')) {
-                    var $button = $($(this).data('action'));
-                    $button.on('click', function(event) {
-                        event.preventDefault();
-                    });
-                    $button.click();
+                if ($(this).parents('.modal').length == 0) {
+                    event.preventDefault();
+                    $context.addFormPopin('openModal', $(this).data('action') ? $($(this).data('action')) : $(this), $($(this).data('target')), $(this).data('values'), $(this).data('text') || '');
                 }
             });
 
             return this;
         },
-        openModal : function(event, $button, buttonText, $target, formValues, text) {
-            event.preventDefault();
+        openModal : function($button, $target, formValues, text) {
             var $context = $(this);
             var $modal = $('' +
                 '<div class="modal" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true">' +
@@ -27,15 +21,16 @@
                                 '<div class="modal-text">' + text + '</div>' +
                                 '<div class="modal-form"></div>' +
                             '</div>' +
-                            '<div class="modal-footer">' +
-                                '<button class="btn btn-success">' + buttonText + '</button>' +
-                            '</div>' +
+                            '<div class="modal-footer"></div>' +
                         '</div>' +
                     '</div>' +
                 '</div>'
             );
             var $container = $target.parent();
-            $target.detach().appendTo($('.modal-body .modal-form', $modal)).toggleClass('hidden');
+            $target.detachTemp().appendTo($('.modal-body .modal-form', $modal)).toggleClass('hidden');
+            $button
+                .data('hidden', $button.hasClass('hidden'))
+                .detachTemp().appendTo($('.modal-footer', $modal)).removeClass('hidden');
             if (formValues) {
                 for (var i in formValues) {
                     $('[name="' + i + '"]', $target)
@@ -44,18 +39,16 @@
                         .toggleClass('hidden', null == formValues[i]);
                 }
             }
-            $('body').append($modal);
+            $target.closest('form').append($modal);
             $modal.modal({show: true});
-            (function ($context, $container, $target, $button) {
-                $modal.on('hidden.bs.modal', function (e) {
-                    $(this).remove();
-                    $target.detach().appendTo($container).toggleClass('hidden');
-                });
-                $('button', $modal).on('click', function(event) {
-                    $modal.modal('hide');
-                    $($button.data('target')).parents('form').submit();
-                });
-            })($context, $container, $target, $button, buttonText);
+            $modal.on('hidden.bs.modal', function (e) {
+                $target.reattach().toggleClass('hidden');
+                $button.reattach().toggleClass('hidden', $button.data('hidden'));
+                $(this).remove();
+            });
+            $('.modal-footer button', $modal).on('click', function(event) {
+                $modal.modal('hide');
+            });
 
             return this;
         },

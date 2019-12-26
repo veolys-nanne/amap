@@ -1,4 +1,4 @@
-(function( $ ){
+(function( $ ) {
     var methods = {
         init : function(params) {
             $('textarea', $(this)).addTinymce();
@@ -81,51 +81,44 @@
             return this;
         },
         ajax : function() {
-            var url = $(this).attr('href') || $(this).data('url');
-            if ($(this).is('form')) {
-                url = $(this).attr('action') || window.location.href;
-            }
-            if (undefined == $._data($(this)[0], "events") && url != '#' && url) {
-                $(this).data('url', url);
+            if (!$(this).hasClass('download-file')) {
+                var url = $(this).attr('href') || $(this).data('url');
                 if ($(this).is('form')) {
+                    url = $(this).attr('action') || window.location.href;
                     var $form = $(this);
-                    $('[type="submit"]', $(this)).on('click', function(event) {
-                        $('[type="submit"]', $form).val(0);
-                        $(this).val(1);
+                    $(':submit', $form).bind('click keypress', function () {
+                        $form.data('submit', this.id);
                     });
                 }
-                $(this).on($(this).is('form') ? 'submit' : 'click', function(event) {
-                    event.preventDefault();
-                    var data = $(this).is('form') ? new FormData($(this)[0]) : null;
-                    $('[type="submit"]', $(this)).each(function() {
-                        if (true == $(this).val()) {
-                            data.append($(this)[0].name, $(this).val());
-                        }
-                    });
-                    $.ajax({
-                        url : $(this).data('url'),
-                        method: $(this).is('form') ? 'post' : 'get',
-                        data: data,
-                        dataType: 'text',
-                        processData: false,
-                        contentType: false,
-                        success: function(data) {
-                            try {
-                                eval('data = ' + data + ';')
-                                document.title = data.header;
-                                window.history.pushState({url: data.url, title: data.header}, data.header, data.url);
-                                $.refreshFromAjax(data);
-                            } catch (e) {
-                                var $link = $('<a>', {
-                                    'href':  window.URL.createObjectURL(new Blob([data])),
-                                    'download': 'test.pdf',
-                                }).appendTo('body');
-                                $link[0].click();
-                                $link.remove();
+                if (undefined == $._data($(this)[0], 'events') && url != '#' && url) {
+                    $(this).data('url', url);
+                    $(this).on($(this).is('form') ? 'submit' : 'click', function(event) {
+                        var $submit = $('#' + $(this).data("submit"));
+                        if ($submit.hasClass('download-file')) {
+                            return;
+                        } else {
+                            data = null;
+                            if ($(this).is('form')) {
+                                var data = new FormData($(this)[0]);
+                                data.append($submit.attr('name'), 1);
                             }
+                            event.preventDefault();
+                            $.ajax({
+                                url : $(this).data('url'),
+                                method: $(this).is('form') ? 'post' : 'get',
+                                data: data,
+                                dataType: 'json',
+                                processData: false,
+                                contentType: false,
+                                success: function(data) {
+                                    document.title = data.header;
+                                    window.history.pushState({url: data.url, title: data.header}, data.header, data.url);
+                                    $.refreshFromAjax(data);
+                                }
+                            });
                         }
                     });
-                });
+                }
             }
         },
     };

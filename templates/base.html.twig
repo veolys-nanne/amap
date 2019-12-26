@@ -10,7 +10,7 @@
     </title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
-    <link rel="stylesheet" href="{{ absolute_url(asset('assets/css/styles.css'~'?'~date().timestamp)) }}" />
+    <link rel="stylesheet" href="{{ absolute_url(asset('assets/css/styles.css')) }}" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.2.5/css/rowReorder.dataTables.min.css" />
@@ -29,16 +29,16 @@
     <script src="https://cdn.datatables.net/rowreorder/1.2.5/js/dataTables.rowReorder.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas-fixes@0.5.6/dist/html2canvas.min.js"></script>
-    <script src="{{ absolute_url(asset('assets/js/helper.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/datatable.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/jquery.collection.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/multiselect.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/confirm.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/mailextra.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/tinymce.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/formpopin.js'~'?'~date().timestamp)) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/initcommon.js'~'?'~date().timestamp)) }}"></script>
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    <script src="{{ absolute_url(asset('assets/js/helper.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/datatable.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/jquery_collection.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/multiselect.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/confirm.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/mailextra.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/tinymce.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/formpopin.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/initcommon.js')) }}"></script>
+    <link rel="icon" type="image/x-icon" href="{{ absolute_url(asset('favicon.ico')) }}" />
 </head>
 <body>
 {% block header %}
