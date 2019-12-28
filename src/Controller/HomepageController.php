@@ -12,28 +12,28 @@ class HomepageController extends AbstractController
      */
     public function index()
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            return $this->forward('App\Controller\SecurityController::login');
+        }
         $roles = $this->getUser()->getRoles();
-
         if (in_array('ROLE_ADMIN', $roles)) {
-            return $this->redirectToRoute('document_view', [
+            return $this->forward('App\Controller\DocumentController::documentViewAction', [
                 'role' => 'admin',
                 'name' => 'homepage',
             ]);
         } elseif (in_array('ROLE_REFERENT', $roles)) {
-            return $this->redirectToRoute('document_view', [
+            return $this->forward('App\Controller\DocumentController::documentViewAction', [
                 'role' => 'referent',
                 'name' => 'homepage',
             ]);
         } elseif (in_array('ROLE_PRODUCER', $roles)) {
-            return $this->redirectToRoute('document_view', [
+            return $this->forward('App\Controller\DocumentController::documentViewAction', [
                 'role' => 'producer',
                 'name' => 'homepage',
             ]);
         }
 
-        return $this->redirectToRoute('document_view', [
+        return $this->forward('App\Controller\DocumentController::documentViewAction', [
             'role' => 'member',
             'name' => 'homepage',
         ]);

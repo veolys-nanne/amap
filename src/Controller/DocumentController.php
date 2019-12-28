@@ -47,7 +47,7 @@ class DocumentController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le document a été créé.' : 'Le document a été mis à jour.');
 
-            return $this->redirectToRoute('document_index');
+            return $this->forward('App\Controller\DocumentController::documentListingAction');
         }
 
         return $this->render('document/form.html.twig', [
@@ -108,7 +108,7 @@ class DocumentController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'Le document a été supprimé.');
 
-        return $this->redirectToRoute('document_index');
+        return $this->forward('App\Controller\DocumentController::documentListingAction');
     }
 
     private function generateUniqueFileName(): string

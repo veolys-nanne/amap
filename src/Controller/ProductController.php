@@ -71,7 +71,7 @@ class ProductController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le produit a été créé.' : 'Le produit a été mis à jour.');
 
-            return $this->redirectToRoute('product_index', ['role' => $role]);
+            return $this->forward('App\Controller\ProductController::productListingAction', ['role' => $role]);
         }
 
         return $this->render('product/form.html.twig', [
@@ -101,7 +101,7 @@ class ProductController extends AbstractController
             $this->addFlash('success', $active ? 'Le produit a été activé.' : 'Le produit a été désactivé.');
         }
 
-        return $this->redirectToRoute('product_index', [
+        return $this->forward('App\Controller\ProductController::productListingAction', [
             'role' => $role,
         ]);
     }
@@ -165,10 +165,14 @@ class ProductController extends AbstractController
                 $messages[] = $message;
             }
         }
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('product_index', [
+        return $this->forward('App\Controller\ProductController::productListingAction', [
             'role' => 'producer',
-        ]));
+        ]);
     }
 
     /**
@@ -205,7 +209,7 @@ class ProductController extends AbstractController
             $this->addFlash('info', 'Ce changement d\'ordre n\'est pas valide.');
         }
 
-        return $this->redirectToRoute('product_index', [
+        return $this->forward('App\Controller\ProductController::productListingAction', [
             'role' => $role,
         ]);
 
@@ -224,6 +228,6 @@ class ProductController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'Le produit a été supprimé.');
 
-        return $this->redirectToRoute('product_index', ['role' => 'admin']);
+        return $this->forward('App\Controller\ProductController::productListingAction', ['role' => 'admin']);
     }
 }

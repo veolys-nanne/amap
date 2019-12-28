@@ -4,7 +4,6 @@ namespace App\Helper;
 
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,27 +56,26 @@ class MailHelper
         return $message;
     }
 
-    public function sendMessages(bool $isPreview, array $messages, RedirectResponse $redirectResponse): Response
+    public function getMessagesPreview(array $messages): Response
     {
-        if ($isPreview) {
-            $jsonResponse = [];
-            foreach ($messages as $message) {
-                $jsonResponse[] = [
-                    'from' => $message->getFrom(),
-                    'to' => $message->getTo(),
-                    'subject' => $message->getSubject(),
-                    'body' => $message->getBody(),
-                ];
-            }
-
-            return new JsonResponse($jsonResponse);
+        $jsonResponse = [];
+        foreach ($messages as $message) {
+            $jsonResponse[] = [
+                'from' => $message->getFrom(),
+                'to' => $message->getTo(),
+                'subject' => $message->getSubject(),
+                'body' => $message->getBody(),
+            ];
         }
 
+        return new JsonResponse($jsonResponse);
+    }
+
+    public function sendMessages(array $messages)
+    {
         foreach ($messages as $message) {
             $this->mailer->send($message);
         }
         $this->session->getFlashBag()->add('info', 'Envoie de mails réalisé.');
-
-        return $redirectResponse;
     }
 }

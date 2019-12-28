@@ -64,7 +64,7 @@ class CreditController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'L\'avoir a été créé.' : 'L\'avoir a été mis à jour.');
 
-            return $this->redirectToRoute('credit_index', ['role' => $role]);
+            return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => $role]);
         }
 
         return $this->render('credit/form.html.twig', [
@@ -89,7 +89,7 @@ class CreditController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', $active ? 'L\'avoir a été activé.' : 'L\'avoir a été désactivé.');
 
-        return $this->redirectToRoute('credit_index', [
+        return $this->forward('App\Controller\CreditController::creditListingAction', [
             'role' => $role,
         ]);
     }
@@ -153,10 +153,14 @@ class CreditController extends AbstractController
                 $messages[] = $message;
             }
         }
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('credit_index', [
+        return $this->forward('App\Controller\CreditController::creditListingAction', [
             'role' => 'producer',
-        ]));
+        ]);
     }
 
     /**
@@ -171,6 +175,6 @@ class CreditController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'L\'avoir a été supprimé.');
 
-        return $this->redirectToRoute('credit_index', ['role' => 'admin']);
+        return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => 'admin']);
     }
 }

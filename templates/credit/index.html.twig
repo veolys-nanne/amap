@@ -42,8 +42,9 @@
                         </td>
                     {% elseif is_granted('ROLE_PRODUCER') %}
                         <td>
-                            {% set texte = credit.isActive ? 'Demander la désactivation' : 'Demander l\'activation' %}
-                            <a href="{{ path('credit_ask_active', {role: 'producer', id: credit.id}) }}" class="btn btn-sm btn-success mail-extra">{{ texte }}</a>
+                            <form action="{{ path('credit_ask_active', {role: 'producer', id: credit.id}) }}" method="post">
+                                <button type="submit" class="btn btn-success mail-extra">{{ credit.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}</button>
+                            </form>
                         </td>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}

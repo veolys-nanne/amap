@@ -47,8 +47,9 @@
                         </td>
                     {% elseif is_granted('ROLE_PRODUCER') %}
                         <td>
-                            {% set texte = product.isActive ? 'Demander la désactivation' : 'Demander l\'activation' %}
-                            <a href="{{ path('product_ask_active', {role: 'producer', id: product.id}) }}" class="btn btn-sm btn-success mail-extra">{{ texte }}</a>
+                            <form action="{{ path('product_ask_active', {role: 'producer', id: product.id}) }}" method="post">
+                                <button type="submit" class="btn btn-success mail-extra">{{ product.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}</button>
+                            </form>
                         </td>
                     {% endif %}
                     <td class="move"></td>

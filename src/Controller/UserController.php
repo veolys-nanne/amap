@@ -141,13 +141,13 @@ class UserController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le compte a été créé.' : 'Le compte a été mis à jour.');
             if ($isAccount) {
-                return $this->redirectToRoute('document_view', [
+                return $this->forward('App\Controller\DocumentController::documentViewAction', [
                     'role' => $role,
                     'name' => 'homepage',
                 ]);
             }
 
-            return $this->redirectToRoute('user_index', [
+            return $this->forward('App\Controller\UserController::userListingAction', [
                 'role' => $role,
                 'type' => $type,
             ]);
@@ -210,7 +210,7 @@ class UserController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Le mot de passe a été mis à jour.');
 
-            return $this->redirectToRoute('user_profil', [
+            return $this->forward('App\Controller\UserController::userEditAction', [
                 'role' => $role,
             ]);
         }
@@ -243,7 +243,7 @@ class UserController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', $active ? 'Le compte a été activé.' : 'Le compte a été désactivé.');
 
-        return $this->redirectToRoute('user_index', [
+        return $this->forward('App\Controller\UserController::userListingAction', [
             'role' => $role,
             'type' => $type,
         ]);
@@ -272,7 +272,7 @@ class UserController extends AbstractController
             $this->addFlash('info', 'Ce changement d\'ordre n\'est pas valide.');
         }
 
-        return $this->redirectToRoute('user_index', [
+        return $this->forward('App\Controller\UserController::userListingAction', [
             'role' => 'admin',
             'type' => 'producer',
         ]);
@@ -290,7 +290,7 @@ class UserController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'L\'utilisateur a été supprimé.');
 
-        return $this->redirectToRoute('user_index', ['role' => 'admin', 'type' => $type]);
+        return $this->forward('App\Controller\UserController::userListingAction', ['role' => 'admin', 'type' => $type]);
     }
 
     /**

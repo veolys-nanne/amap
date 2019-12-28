@@ -21,62 +21,13 @@
                     },
                 });
             }
-            $('.toggle-producer', $(this)).on('click', function (event) {
-                event.preventDefault();
-                var $i = $('i', $(this)).toggleClass('fa-arrow-up fa-arrow-down');
-                $('tr[data-producer-id="' + $i.data('producer') + '"]').toggle();
-            });
+            $(this).addProductListing();
             $('a', $(this)).initCommon('ajax');
             $('form', $(this)).initCommon('ajax');
-            $(this, $(this)).initCommon('addTotals');
             $("input[type=file]", $(this)).change(function () {
                 $(this).next(".custom-file-label").attr('data-content', this.files[0].name);
                 $(this).next(".custom-file-label").text(this.files[0].name);
             });
-            if(null == window.history.state) {
-                window.history.replaceState({url: window.location.href}, document.title, window.location.href)
-                window.addEventListener("popstate", function (event) {
-                    if (null !== event.state) {
-                        $.ajax({
-                            url: event.state.url,
-                            method: 'get',
-                            dataType: 'json',
-                            processData: false,
-                            contentType: false,
-                            success: function (data) {
-                                document.title = event.state.title;
-                                $.refreshFromAjax(data);
-                            }
-                        });
-                    } else {
-                        window.location.href = window.location.href;
-                    }
-                });
-            }
-
-            return this;
-        },
-        addTotals : function() {
-            var $context = $(this)
-            $('.total-product-id', $(this)).each(function () {
-                $context.initCommon('addTotal', '[data-product-id="' + $(this).data('product-id') + '"]', $(this));
-            });
-            $('.total-producer-id', $(this)).each(function () {
-                $context.initCommon('addTotal', '[data-producer-id="' + $(this).data('producer-id') + '"]', $(this));
-            });
-            $(this).initCommon('addTotal', '[data-product-id]', $('.total', $(this)));
-
-            return this;
-        },
-        addTotal : function(selector, $target) {
-            var total = 0;
-            $('span' + selector, $(this)).each(function () {
-                total += $(this).data('price') * parseInt($(this).html());
-            });
-            $('input' + selector, $(this)).each(function () {
-                total += $(this).data('price') * parseInt($(this).val());
-            });
-            $target.html((Math.round(total * 100) / 100).toFixed(2));
 
             return this;
         },
@@ -100,7 +51,7 @@
                             data = null;
                             if ($(this).is('form')) {
                                 var data = new FormData($(this)[0]);
-                                data.append($submit.attr('name'), 1);
+                                data.append($submit.attr('name'), null);
                             }
                             event.preventDefault();
                             $.ajax({
