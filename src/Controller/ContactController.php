@@ -240,10 +240,14 @@ class ContactController extends AbstractController
                 );
             $messages[] = $message;
         }
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('document_view', [
+        return $this->forward('App\Controller\DocumentController::documentViewAction', [
             'role' => $role,
             'name' => 'homepage',
-        ]));
+        ]);
     }
 }

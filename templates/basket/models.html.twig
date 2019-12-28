@@ -33,10 +33,14 @@
     </table>
     <a href="{{ path('basket_model') }}" class="btn btn-success">Nouveau</a>
     {% if needMail %}
-        <a href="{{ path('basket_mails_info') }}" class="btn btn-success mail-extra">Envoyer un mail de mise à disposition des paniers</a>
+        <form action="{{ path('basket_mails_info') }}" method="post">
+            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de mise à disposition des paniers</button>
+        </form>
     {% endif %}
     {% if needMailUp %}
-        <a href="{{ path('basket_mails_up') }}" class="btn btn-success mail-extra">Envoyer un mail de relance pour la commande</a>
+        <form action="{{ path('basket_mails_up') }}" method="post">
+            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de relance pour la commande</button>
+        </form>
     {% endif %}
 {% endblock %}
 

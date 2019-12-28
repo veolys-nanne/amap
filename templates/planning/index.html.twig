@@ -30,11 +30,13 @@
                     <td>{{ constant('App\\Entity\\Planning::LABELS')[planning.state] }}</td>
                     <td>
                         {% if planning.nextState %}
-                            {% set class = 'btn btn-sm btn-success' %}
                             {% if planning.nextState == constant('App\\Entity\\Planning::STATE_OPEN') or planning.nextState == constant('App\\Entity\\Planning::STATE_ONLINE') %}
-                                {% set class = class~' mail-extra' %}
+                                <form action="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" method="post">
+                                    <button type="submit" class="btn btn-success mail-extra">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</button>
+                                </form>
+                            {% else %}
+                                <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="btn btn-sm btn-success">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
                             {% endif %}
-                            <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="{{ class }}">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
                         {% endif %}
                     </td>
                     <td>
@@ -48,7 +50,9 @@
     </table>
     <a href="{{ path('planning_form') }}" class="btn btn-success">Nouveau</a>
     {% if needMail %}
-        <a href="{{ path('planning_mails_up') }}" class="btn btn-success mail-extra">Envoyer un mail de relance pour les disponibilités</a>
+        <form action="{{ path('planning_mails_up') }}" method="post">
+            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de relance pour les disponibilités</button>
+        </form>
     {% endif %}
 {% endblock %}
 

@@ -76,11 +76,16 @@ class SecurityController extends AbstractController
                             'text/plain'
                         );
 
-                    return $mailHelper->sendMessages($request->request->get('preview'), [$message], $this->redirectToRoute('login'));
+                    if ($request->request->get('preview')) {
+                        return $mailHelper->getMessagesPreview([$message]);
+                    }
+                    $mailHelper->sendMessages([$message]);
+
+                    return $this->forward('App\Controller\SecurityController::login');
                 }
             }
 
-            return $this->redirectToRoute('login');
+            return $this->forward('App\Controller\SecurityController::login');
         }
 
         return $this->render('security/resetpassword.html.twig', [
@@ -109,7 +114,7 @@ class SecurityController extends AbstractController
                         $entityManager->flush();
                         $this->addFlash('success', 'Votre mot de passe a été mis à jour.');
 
-                        return $this->redirectToRoute('login');
+                        return $this->forward('App\Controller\SecurityController::login');
                     } else {
                         $error = true;
                     }

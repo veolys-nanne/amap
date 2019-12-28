@@ -106,7 +106,7 @@ class BasketController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Le panier a été mis à jour.');
 
-            return $this->redirectToRoute('basket_view', ['role' => $role]);
+            return $this->forward('App\Controller\BasketController::basketViewAction', ['role' => $role]);
         }
 
         return $this->render('basket/form.html.twig', [
@@ -170,7 +170,12 @@ class BasketController extends AbstractController
             }
         }
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('basket_models'));
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
+
+        return $this->forward('App\Controller\BasketController::modelListingAction');
     }
 
     /**
@@ -208,7 +213,7 @@ class BasketController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le modèle a été créé.' : 'Le modèle a été mis à jour.');
 
-            return $this->redirectToRoute('basket_models');
+            return $this->forward('App\Controller\BasketController::modelListingAction');
         }
 
         return $this->render('basket/model.html.twig', [
@@ -251,8 +256,12 @@ class BasketController extends AbstractController
                 );
             $messages[] = $message;
         }
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('basket_models'));
+        return $this->forward('App\Controller\BasketController::modelListingAction');
     }
 
     /**
@@ -272,21 +281,21 @@ class BasketController extends AbstractController
         $isEmail = $form->has('email') && $form->get('email')->isClicked();
         $isPdf = $form->has('pdf') && $form->get('pdf')->isClicked();
         $isCredit = $form->has('submitCredit') && $form->get('submitCredit')->isClicked();
-        $isPreview = $request->request->get('preview');
+        $isPreview = $request->request->has('preview') ? $request->request->get('preview') : false;
         if ($form->isSubmitted() && $form->isValid()) {
             list($tables, $parameters) = $basketManager->generateSyntheses($form);
             if ($isCredit) {
                 $credit = $form->get('credit');
                 $creditManager->generateCredit(
-                    $credit->has('date') && $credit->get('date')->getData() != null ? $credit->get('date')->getData() : $form->get('start')->getData(),
-                    $credit->has('date') && $credit->get('date')->getData() != null  ? clone $credit->get('date')->getData() : $form->get('end')->getData(),
+                    $credit->has('date') && null != $credit->get('date')->getData() ? $credit->get('date')->getData() : $form->get('start')->getData(),
+                    $credit->has('date') && null != $credit->get('date')->getData() ? clone $credit->get('date')->getData() : $form->get('end')->getData(),
                     $credit->has('product') ? $credit->get('product')->getData() : null,
                     $credit->has('member') ? $credit->get('member')->getData() : null,
                     $credit->has('quantity') ? $credit->get('quantity')->getData() : null
                 );
                 $entityManager->flush();
 
-                return $this->redirectToRoute('credit_index', ['role' => 'admin']);
+                return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => 'admin']);
             }
             if ($isEmail || $isPreview) {
                 $messages = [];
@@ -321,8 +330,10 @@ class BasketController extends AbstractController
                         $messages[] = $message;
                     }
                 }
-
-                return $mailHelper->sendMessages($isPreview, $messages, $this->redirectToRoute('basket_syntheses'));
+                if ($isPreview) {
+                    return $mailHelper->getMessagesPreview($messages);
+                }
+                $mailHelper->sendMessages($messages);
             }
         }
 
@@ -367,7 +378,7 @@ class BasketController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', $frozen ? 'Le modèle de panier a été fermé.' : 'Le modèle de panier a été réouvert.');
 
-        return $this->redirectToRoute('basket_models');
+        return $this->forward('App\Controller\BasketController::modelListingAction');
     }
 
     /**
@@ -382,6 +393,6 @@ class BasketController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'L\'entrée du modèle de panier a été supprimée.');
 
-        return $this->redirectToRoute('basket_models');
+        return $this->forward('App\Controller\BasketController::modelListingAction');
     }
 }

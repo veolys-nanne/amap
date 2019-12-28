@@ -56,10 +56,7 @@ class SynthesesType extends AbstractType
         ;
         if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
             $builder
-                ->add('email', SubmitType::class, ['label' => 'Envoyer', 'attr' => [
-                    'class' => 'btn-success btn-block mail-extra',
-                    'data-mail-title' => self::LABELS[$options['type']],
-                ]]);
+                ->add('email', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block mail-extra']]);
         }
         if (null !== $options['type']) {
             $builder

@@ -8,6 +8,6 @@ class ExceptionController extends AbstractController
 {
     public function showAction()
     {
-        return $this->redirectToRoute('login');
+        return $this->forward('App\Controller\SecurityController::login');
     }
 }

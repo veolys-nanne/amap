@@ -80,8 +80,12 @@ class PlanningController extends AbstractController
                 }
             }
         }
+        if ($request->request->get('preview')) {
+            return $mailHelper->getMessagesPreview($messages);
+        }
+        $mailHelper->sendMessages($messages);
 
-        return $mailHelper->sendMessages($request->request->get('preview'), $messages, $this->redirectToRoute('planning_index'));
+        return $this->forward('App\Controller\PlanningController::planningListingAction');
     }
 
     /**
@@ -117,7 +121,7 @@ class PlanningController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le planning de permanences a été créé.' : 'Le planning de permanences a été mis à jour.');
 
-            return $this->redirectToRoute('planning_index');
+            return $this->forward('App\Controller\PlanningController::planningListingAction');
         }
 
         return $this->render($isPlanningWithMember ? 'planning/formwithmember.html.twig' : 'planning/form.html.twig', [
@@ -135,7 +139,7 @@ class PlanningController extends AbstractController
     public function stateAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, string $state, Planning $planning)
     {
         $planning->setState($state);
-        $response = $planningManager->changeState($request->request->get('preview'), $this->redirectToRoute('planning_index'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
+        $response = $planningManager->changeState($request->request->get('preview'), $this->forward('App\Controller\PlanningController::planningListingAction'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
         if (!$request->request->get('preview')) {
             $entityManager->persist($planning);
             $entityManager->flush();
@@ -197,7 +201,7 @@ class PlanningController extends AbstractController
                 $entityManager->flush();
                 $this->addFlash('success', 'Les diponibilités ont été mise à jour.');
 
-                return $this->redirectToRoute('planning_form', ['id' => $planning->getId()]);
+                return $this->forward('App\Controller\PlanningController::planningEditAction', ['id' => $planning->getId()]);
             }
             $options['form'] = $form->createView();
         }
@@ -221,6 +225,6 @@ class PlanningController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'Le planning a été supprimé.');
 
-        return $this->redirectToRoute('planning_index');
+        return $this->forward('App\Controller\PlanningController::planningListingAction');
     }
 }
