@@ -18,6 +18,11 @@
     {% endset %}
     {% set json = json|merge({navbar: navbar|spaceless}) %}
 {% endif %}
+{% set modal %}
+    {% block modal %}
+    {% endblock %}
+{% endset %}
+{% set json = json|merge({modal: modal|spaceless}) %}
 {% set script %}
     <script type="application/javascript">
         $(document).ready(function() {

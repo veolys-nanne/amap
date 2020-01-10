@@ -68,8 +68,19 @@ footer#footer {
 }
 /*form*/
 form.form-horizontal .form-group {
-    margin-bottom: 0 !important;
     border-bottom: 1px #f8f9fa solid;
+}
+.form-group {
+    margin-bottom: 0 !important;
+}
+.form-group > :last-child {
+    margin-bottom: 1rem;
+}
+.form-popin {
+    display: none;
+}
+.sub-form .form-popin {
+    display: initial;
 }
 form.form-horizontal .form-check {
     display: inline-block;

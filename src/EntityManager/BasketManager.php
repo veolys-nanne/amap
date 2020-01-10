@@ -217,11 +217,11 @@ class BasketManager
             $localTable[$line] = $localTable[$line] ?? array_fill_keys($columns, '');
             $localParameters[$line] = $localParameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
             if (isset($item['credit_product'])) {
-                $localParameters[$line]['credit'] = json_encode([
-                    'syntheses[credit][product]' => $item['credit_product'],
-                    'syntheses[credit][date]' => null,
-                    'syntheses[credit][member]' => $item['credit_member'] ?? null,
-                    'syntheses[credit][quantity]' => null,
+                $localParameters[$line]['formValues'] = json_encode([
+                    'syntheses[product]' => $item['credit_product'],
+                    'syntheses[date]' => null,
+                    'syntheses[member]' => $item['credit_member'] ?? null,
+                    'syntheses[quantity]' => null,
                 ]);
                 $localParameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
             }
@@ -229,12 +229,13 @@ class BasketManager
                 if (isset($item[$column])) {
                     $localTable[$line][$column] = $item[$column];
                     if (isset($item['credit_product'])) {
-                        $localParameters[$line][$column]['credit'] = json_encode([
-                            'syntheses[credit][product]' => $item['credit_product'],
-                            'syntheses[credit][date]' => $item['credit_date'],
-                            'syntheses[credit][member]' => $item['credit_member'] ?? null,
-                            'syntheses[credit][quantity]' => $item['credit_quantity'] ?? null,
+                        $localParameters[$line][$column]['formValues'] = json_encode([
+                            'syntheses[product]' => $item['credit_product'],
+                            'syntheses[date]' => $item['credit_date'],
+                            'syntheses[member]' => $item['credit_member'] ?? null,
+                            'syntheses[quantity]' => $item['credit_quantity'] ?? null,
                         ]);
+                        $localParameters[$line][$column]['subForm'] = isset($item['credit_quantity']) ? '.quantity' : '';
                         $localParameters[$line][$column]['credit_text'] = $item['credit_column_text'] ?? '';
                     }
                 }

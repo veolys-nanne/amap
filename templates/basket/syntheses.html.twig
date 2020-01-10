@@ -17,6 +17,10 @@
     {% endfor %}
 {% endblock %}
 
+{% block modal %}
+    {% include 'emails/preview.html.twig' with {messages: messages} %}
+{% endblock %}
+
 {% block javascripts %}
     <script type="application/javascript">
         $(document).ready(function() {

@@ -4,6 +4,7 @@ $(function() {
             $('#container-header').html(data['header']);
             $('#container-flash').html(data['flash']);
             $('#container-body').html(data['body']);
+            $('#container-modal').html(data['modal']);
             if ('navbar' in data) {
                 $('#container-navbar').html(data['navbar']);
             }

@@ -2,6 +2,7 @@
     var methods = {
         init : function(params) {
             $(this).each(function() {
+                tinymce.remove('#' + $(this).attr('id'));
                 tinymce.init({
                     target: $(this).get(0),
                     height: 500,
@@ -27,55 +28,6 @@
             });
 
             return this;
-        },
-        preview: function(event) {
-            event.preventDefault();
-            var $form = $('form', $(this));
-            var data = $form.serializeArray();
-            data.push({name: "preview", value: true});
-            $.ajax({
-                url: $form.attr('action'),
-                type: 'post',
-                dataType: 'json',
-                data: $.param(data),
-                success: function(data) {
-                    var body = '';
-                    for (var i in data) {
-                        body += '' +
-                            '<div class="table">' +
-                            '    <div class="row">' +
-                            '        <div class="cell">De : </div>' +
-                            '       <div class="cell">' + Object.keys(data[i].from).join(', ') + '</div>' +
-                            '   </div>' +
-                            '   <div class="row">' +
-                            '        <div class="cell">À: </div>' +
-                            '       <div class="cell">' + Object.keys(data[i].to).join(', ') + '</div>' +
-                            '   </div>' +
-                            '   <div class="row">' +
-                            '        <div class="cell">Sujet: </div>' +
-                            '       <div class="cell">' + data[i].subject + '</div>' +
-                            '   </div>' +
-                            '</div>' +
-                            '<div class="body">' + data[i].body + '</div>';
-                    }
-                    var $modal = $('' +
-                        '<div class="modal" role="dialog" aria-labelledby="dataExtraLabel" aria-hidden="true">' +
-                            '<div class="modal-dialog modal-lg">' +
-                                '<div class="modal-content">' +
-                                    '<div class="modal-body">' +
-                                        body +
-                                    '</div>' +
-                                '</div>' +
-                            '</div>' +
-                        '</div>'
-                    );
-                    $('body').append($modal);
-                    $modal.on('hidden.bs.modal', function (e) {
-                        $(this).remove();
-                    });
-                    $modal.modal({show: true});
-                }
-            });
         },
     };
 

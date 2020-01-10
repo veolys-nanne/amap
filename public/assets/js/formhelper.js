@@ -2,23 +2,34 @@
     var methods = {
         init : function(params) {
             var $context = $(this);
-            $(this).on('click', function(event) {
+            $('.form-popin', $(this)).closest('.form-group').addClass('form-popin');
+            $('[data-form][data-form-values]', $(this)).on('click', function(event) {
+                var $form = $($(this).data('form'));
+                var formValues = $(this).data('formValues');
+                for (var i in formValues) {
+                    $('[name="' + i + '"]', $form).val(formValues[i]);
+                }
+            });
+            $('[data-sub-form]', $(this)).on('click', function(event) {
                 if ($(this).parents('.modal').length == 0) {
                     event.preventDefault();
-                    $context.addFormPopin('openModal', $(this).data('action') ? $($(this).data('action')) : $(this), $($(this).data('target')), $(this).data('values'), $(this).data('text') || '');
+                    $context.addFormHelper('openModal',
+                        $(this).data('button') ? $($(this).data('button')) : $(this),
+                        $(this).data('subForm') ? $($(this).data('subForm')).closest('.form-group') : null,
+                        $(this).data('form') ? $($(this).data('form')) : $($(this).data('subForm')).closest('form'),
+                        $(this).data('text') || '');
                 }
             });
 
             return this;
         },
-        openModal : function($button, $target, formValues, text) {
-            var $context = $(this);
+        openModal : function($button, $subForm, $form, text) {
             var $modal = $('' +
-                '<div class="modal" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true">' +
+                '<div class="modal sub-form" role="dialog" aria-hidden="true">' +
                     '<div class="modal-dialog modal-lg">' +
                         '<div class="modal-content">' +
                             '<div class="modal-body">' +
-                                '<div class="modal-text">' + text + '</div>' +
+                                '<div class="modal-text"><strong>' + text + '</strong></div>' +
                                 '<div class="modal-form"></div>' +
                             '</div>' +
                             '<div class="modal-footer"></div>' +
@@ -26,25 +37,22 @@
                     '</div>' +
                 '</div>'
             );
-            var $container = $target.parent();
-            $target.detachTemp().appendTo($('.modal-body .modal-form', $modal)).toggleClass('hidden');
-            $button
-                .data('hidden', $button.hasClass('hidden'))
-                .detachTemp().appendTo($('.modal-footer', $modal)).removeClass('hidden');
-            if (formValues) {
-                for (var i in formValues) {
-                    $('[name="' + i + '"]', $target)
-                        .val(formValues[i])
-                        .parents('.form-group')
-                        .toggleClass('hidden', null == formValues[i]);
-                }
+            if ($subForm) {
+                $subForm.detachTemp().appendTo($('.modal-form', $modal));
             }
-            $target.closest('form').append($modal);
+            $button.each(function() {
+                $(this).detachTemp().appendTo($('.modal-footer', $modal));
+            });
+            $form.append($modal);
             $modal.modal({show: true});
             $modal.on('hidden.bs.modal', function (e) {
-                $target.reattach().toggleClass('hidden');
-                $button.reattach().toggleClass('hidden', $button.data('hidden'));
-                $(this).remove();
+                if ($subForm) {
+                    $subForm.reattach();
+                }
+                $button.each(function() {
+                    $(this).reattach();
+                });
+                $modal.remove();
             });
             $('.modal-footer button', $modal).on('click', function(event) {
                 $modal.modal('hide');
@@ -54,7 +62,7 @@
         },
     };
 
-    $.fn.addFormPopin = function(methodOrOptions) {
+    $.fn.addFormHelper = function(methodOrOptions) {
         var currentArguments = arguments;
         var result = [];
         this.each(function() {

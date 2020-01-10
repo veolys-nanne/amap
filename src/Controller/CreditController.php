@@ -6,6 +6,7 @@ use App\Entity\Credit;
 use App\Form\CreditType;
 use App\Entity\User;
 use App\EntityManager\CreditManager;
+use App\Form\FormatEmailType;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

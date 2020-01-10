@@ -33,7 +33,7 @@
     <script src="{{ absolute_url(asset('assets/js/confirm.js')) }}"></script>
     <script src="{{ absolute_url(asset('assets/js/mailextra.js')) }}"></script>
     <script src="{{ absolute_url(asset('assets/js/tinymce.js')) }}"></script>
-    <script src="{{ absolute_url(asset('assets/js/formpopin.js')) }}"></script>
+    <script src="{{ absolute_url(asset('assets/js/formhelper.js')) }}"></script>
     <script src="{{ absolute_url(asset('assets/js/productlisting.js')) }}"></script>
     <script src="{{ absolute_url(asset('assets/js/initcommon.js')) }}"></script>
     <link rel="icon" type="image/x-icon" href="{{ absolute_url(asset('favicon.ico')) }}" />
@@ -75,6 +75,11 @@
     {% endif %}
 {% endblock %}
 </footer>
+
+<div id="container-modal">
+{% block modal %}
+{% endblock %}
+</div>
 
 <script type="application/javascript">
     $(document).ready(function() {

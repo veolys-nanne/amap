@@ -2,9 +2,15 @@
 
 namespace App\Form;
 
+use App\Entity\Product;
+use App\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -47,16 +53,41 @@ class SynthesesType extends AbstractType
                 'label' => 'Type',
                 'choices' => array_flip(self::LABELS),
             ])
-            ->add('credit', MassCreditType::class, [
+            ->add('product', EntityType::class, [
+                'class' => Product::class,
+                'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
+                    return $entityRepository->createQueryBuilder('product');
+                },
                 'label' => false,
-                'attr' => ['class' => 'hidden credit'],
+                'required' => false,
+                'attr' => ['class' => 'hidden'],
+            ])
+            ->add('member', EntityType::class, [
+                'class' => User::class,
+                'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
+                    return $entityRepository->createQueryBuilder('user');
+                },
+                'label' => false,
+                'required' => false,
+                'attr' => ['class' => 'hidden'],
+            ])
+            ->add('date', DateType::class, [
+                'widget' => 'single_text',
+                'label' => false,
+                'required' => false,
+                'attr' => ['class' => 'hidden'],
+            ])
+            ->add('quantity', IntegerType::class, [
+                'label' => 'Quantité',
+                'required' => false,
+                'attr' => ['class' => 'quantity form-popin'],
+                'label_attr' => ['class' => 'form-popin'],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
-            ->add('submitCredit', SubmitType::class, ['label' => 'Générer', 'attr' => ['class' => 'btn-success btn-block hidden']])
+            ->add('submitCredit', SubmitType::class, ['label' => 'Générer', 'attr' => ['class' => 'btn-success btn-block form-popin', 'data-sub-form' => '']])
         ;
         if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
-            $builder
-                ->add('email', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block mail-extra']]);
+            $builder->add('email', FormatEmailType::class, ['label' => false]);
         }
         if (null !== $options['type']) {
             $builder
@@ -70,11 +101,12 @@ class SynthesesType extends AbstractType
                         'en couleur avec sauts de page' => 'pdf-color-page-break',
                     ],
                     'expanded' => true,
-                    'attr' => ['class' => 'hidden css'],
+                    'attr' => ['class' => 'css form-popin'],
+                    'label_attr' => ['class' => 'form-popin'],
                 ])
                 ->add('pdf', SubmitType::class, ['label' => 'Imprimer', 'attr' => [
-                    'class' => 'btn-success btn-block form-popin download-file',
-                    'data-target' => '.css',
+                    'class' => 'btn-success btn-block download-file',
+                    'data-sub-form' => '.css',
                 ]]);
         }
     }

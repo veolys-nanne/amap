@@ -1,0 +1,32 @@
+{% if messages is defined and null != messages %}
+    <div id="main-modal" class="modal" role="dialog" aria-labelledby="dataExtraLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    {% for message in messages %}
+                        <div class="table">
+                            <div class="row">
+                                <div class="cell">De : </div>
+                                <div class="cell">{{ message.getFrom|keys|join(', ') }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">À: </div>
+                                <div class="cell">{{ message.getTo|keys|join(', ') }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">Sujet: </div>
+                                <div class="cell">{{ message.getSubject }}</div>
+                            </div>
+                        </div>
+                        <div class="body">{{ message.getBody|raw }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#main-modal').modal('show');
+        });
+    </script>
+{% endif %}
