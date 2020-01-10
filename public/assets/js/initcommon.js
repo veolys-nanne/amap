@@ -6,7 +6,7 @@
             $('a[data-confirm]', $(this)).addConfirm();
             $('.mail-extra', $(this)).addMailExtra();
             $('.preview', $(this)).addMailExtra({preview: true});
-            $('.form-popin', $(this)).addFormPopin();
+            $(this).addFormHelper();
             $('select[multiple="multiple"]:visible', $(this)).select2();
             if ($('.collection').length) {
                 $('.collection').collection({

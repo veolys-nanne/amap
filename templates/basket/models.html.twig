@@ -31,17 +31,19 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ path('basket_model') }}" class="btn btn-success">Nouveau</a>
-    {% if needMail %}
-        <form action="{{ path('basket_mails_info') }}" method="post">
-            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de mise à disposition des paniers</button>
-        </form>
+    <div class="form-group">
+        <a href="{{ path('basket_model') }}" class="btn btn-block btn-success">Nouveau</a>
+    </div>
+    {% if formMailInfo is defined %}
+        {{ form(formMailInfo) }}
     {% endif %}
-    {% if needMailUp %}
-        <form action="{{ path('basket_mails_up') }}" method="post">
-            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de relance pour la commande</button>
-        </form>
+    {% if formMailUp is defined %}
+        {{ form(formMailUp) }}
     {% endif %}
+{% endblock %}
+
+{% block modal %}
+    {% include 'emails/preview.html.twig' with {messages: messages} %}
 {% endblock %}
 
 {% block javascripts %}

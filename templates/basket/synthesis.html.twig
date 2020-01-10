@@ -3,15 +3,15 @@
         <tr style="background-color:{{ parameters[lineName].color }}">
             <th>
                 {{ lineName }}
-                {% if parameters[lineName].credit is defined %}
-                    <a href="#" class="no-print text-dark create-credit form-popin" data-action="#syntheses_submitCredit" data-target=".credit" data-values="{{ parameters[lineName].credit }}" data-text="{{ parameters[lineName].credit_text }}"><i class="fas fa-coins"></i></a>
+                {% if parameters[lineName].formValues is defined %}
+                    <a href="#" class="no-print text-dark create-credit" data-button="#syntheses_submitCredit" data-sub-form="" data-form="[name='syntheses']" data-form-values="{{ parameters[lineName].formValues }}" data-text="{{ parameters[lineName].credit_text }}"><i class="fas fa-coins"></i></a>
                 {% endif %}
             </th>
             {% for column, value in columns %}
                 <td>
                     {{ value }}
-                    {% if parameters[lineName][column].credit is defined %}
-                        <a href="#" class="no-print text-dark create-credit form-popin" data-action="#syntheses_submitCredit" data-target=".credit" data-values="{{ parameters[lineName][column].credit }}" data-text="{{ parameters[lineName][column].credit_text }}"><i class="fas fa-coins"></i></a>
+                    {% if parameters[lineName][column].formValues is defined %}
+                        <a href="#" class="no-print text-dark create-credit" data-button="#syntheses_submitCredit" data-sub-form="{{ parameters[lineName][column].subForm }}" data-form="[name='syntheses']" data-form-values="{{ parameters[lineName][column].formValues }}" data-text="{{ parameters[lineName][column].credit_text }}"><i class="fas fa-coins"></i></a>
                     {% endif %}
                 </td>
             {% endfor %}
