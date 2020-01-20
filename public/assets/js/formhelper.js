@@ -37,17 +37,21 @@
                     '</div>' +
                 '</div>'
             );
-            if ($subForm) {
-                $subForm.detachTemp().appendTo($('.modal-form', $modal));
-            }
+            $subForm.each(function() {
+                $(this).detachTemp().appendTo($('.modal-form', $modal));
+            });
             $button.each(function() {
                 $(this).detachTemp().appendTo($('.modal-footer', $modal));
             });
             $form.append($modal);
+            $('textarea', $modal).addTinymce();
+
             $modal.modal({show: true});
             $modal.on('hidden.bs.modal', function (e) {
                 if ($subForm) {
-                    $subForm.reattach();
+                    $subForm.each(function() {
+                        $(this).reattach();
+                    });
                 }
                 $button.each(function() {
                     $(this).reattach();

@@ -11,7 +11,7 @@
             } else {
                 $context.drawDataTable('callback', language, params);
             }
-            $('tr[data-url] td:not(:has(a))', $(this)).each(function (){
+            $('tr[data-url] td:not(:has(a)):not(:has(button))', $(this)).each(function (){
                 $(this).attr('data-url', $(this).parent().data('url'));
                 $(this).initCommon('ajax');
             });

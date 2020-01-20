@@ -22,23 +22,36 @@ class ProductController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function productListingAction(EntityManagerInterface $entityManager, string $role)
+    public function productListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role)
     {
         $roles = $this->getUser()->getRoles();
-
         $products = [];
+        $options = [
+            'role' => $role,
+            'title' => 'Avoirs',
+        ];
         if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
             $producers = $entityManager->getRepository(User::class)->findByRole('ROLE_PRODUCER', $this->getUser());
             $products = $entityManager->getRepository(Product::class)->findByProducers($producers);
         } elseif (in_array('ROLE_PRODUCER', $roles)) {
             $products = $entityManager->getRepository(Product::class)->findByProducers([$this->getUser()]);
+            foreach ($products as $product) {
+                $mailsParameters[$product->getId()] = [
+                    'list' => [$product->getProducer()->getParent()],
+                    'subject' => $product->isActive() ? 'Demande de désactivation de produit AMAP hommes de terre' : 'Demande d\'activation de produit AMAP hommes de terre',
+                    'template' => $product->isActive() ? 'emails/deactivateproduct' : 'emails/activateproduct',
+                    'mailOptions' => [
+                        'product' => $product,
+                        'role' => in_array('ROLE_ADMIN', $product->getProducer()->getParent()->getRoles()) ? 'admin' : 'referent',
+                    ],
+                ];
+            }
+            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            $options['mailsParameters'] = $mailsParameters;
         }
+        $options['products'] = $products;
 
-        return $this->render('product/index.html.twig', [
-            'role' => $role,
-            'products' => $products,
-            'title' => 'Produits',
-        ]);
+        return $this->render('product/index.html.twig', $options);
     }
 
     /**
@@ -103,75 +116,6 @@ class ProductController extends AbstractController
 
         return $this->forward('App\Controller\ProductController::productListingAction', [
             'role' => $role,
-        ]);
-    }
-
-    /**
-     * @Route(
-     *     "/producer/product/ask_active/{id}",
-     *     name="product_ask_active",
-     * )
-     */
-    public function askActiveAction(Request $request, Product $product, MailHelper $mailHelper)
-    {
-        $referent = $product->getProducer()->getParent();
-        $messages = [];
-        if ($product->IsActive()) {
-            $message = $mailHelper->getMailForList('Demande de désactivation de produit AMAP hommes de terre', [$referent]);
-            if (null !== $message) {
-                $message
-                    ->setBody(
-                        $this->renderView('emails/deactivateproduct.html.twig', [
-                            'message' => $message,
-                            'product' => $product,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/html'
-                    )
-                    ->addPart(
-                        $this->renderView('emails/deactivateproduct.txt.twig', [
-                            'message' => $message,
-                            'product' => $product,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/plain'
-                    );
-                $messages[] = $message;
-            }
-        } else {
-            $message = $mailHelper->getMailForList('Demande d\'activation de produit AMAP hommes de terre', [$referent]);
-            if (null !== $message) {
-                $message
-                    ->setBody(
-                        $this->renderView('emails/activateproduct.html.twig', [
-                            'message' => $message,
-                            'product' => $product,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/html'
-                    )
-                    ->addPart(
-                        $this->renderView('emails/activateproduct.txt.twig', [
-                            'message' => $message,
-                            'product' => $product,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/plain'
-                    );
-                $messages[] = $message;
-            }
-        }
-        if ($request->request->get('preview')) {
-            return $mailHelper->getMessagesPreview($messages);
-        }
-        $mailHelper->sendMessages($messages);
-
-        return $this->forward('App\Controller\ProductController::productListingAction', [
-            'role' => 'producer',
         ]);
     }
 

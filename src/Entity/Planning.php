@@ -32,6 +32,14 @@ class Planning
         self::STATE_CLOSE => self::STATE_ONLINE,
         self::STATE_ONLINE => false,
     ];
+    const MAIL_TEMPLATES = [
+        self::STATE_OPEN => 'emails/availabilities',
+        self::STATE_ONLINE => 'emails/planning',
+    ];
+    const MAIL_SUBJECTS = [
+        self::STATE_OPEN => 'Disponibilités pour le planning des permanences AMAP Hommes de terre',
+        self::STATE_ONLINE => 'Planning des permanences AMAP Hommes de terre',
+    ];
 
     /**
      * @ORM\Id()

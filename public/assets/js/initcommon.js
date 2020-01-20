@@ -1,11 +1,9 @@
 (function( $ ) {
     var methods = {
         init : function(params) {
-            $('textarea', $(this)).addTinymce();
+            $('textarea:not(.form-popin)', $(this)).addTinymce();
             $('input.date-picker', $(this)).datepicker($.datepicker.regional['fr']);
             $('a[data-confirm]', $(this)).addConfirm();
-            $('.mail-extra', $(this)).addMailExtra();
-            $('.preview', $(this)).addMailExtra({preview: true});
             $(this).addFormHelper();
             $('select[multiple="multiple"]:visible', $(this)).select2();
             if ($('.collection').length) {

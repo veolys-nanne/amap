@@ -1,21 +1,21 @@
-{% if messages is defined and null != messages %}
+{% if messages is defined and null != messages and not messages is empty %}
     <div id="main-modal" class="modal" role="dialog" aria-labelledby="dataExtraLabel">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-body">
                     {% for message in messages %}
-                        <div class="table">
-                            <div class="row">
-                                <div class="cell">De : </div>
-                                <div class="cell">{{ message.getFrom|keys|join(', ') }}</div>
+                        <div class="display-table">
+                            <div class="display-row">
+                                <div class="display-cell">De : </div>
+                                <div class="display-cell">{{ message.getFrom|keys|join(', ') }}</div>
                             </div>
-                            <div class="row">
-                                <div class="cell">À: </div>
-                                <div class="cell">{{ message.getTo|keys|join(', ') }}</div>
+                            <div class="display-row">
+                                <div class="display-cell">À: </div>
+                                <div class="display-cell">{{ message.getTo|keys|join(', ') }}</div>
                             </div>
-                            <div class="row">
-                                <div class="cell">Sujet: </div>
-                                <div class="cell">{{ message.getSubject }}</div>
+                            <div class="display-row">
+                                <div class="display-cell">Sujet: </div>
+                                <div class="display-cell">{{ message.getSubject }}</div>
                             </div>
                         </div>
                         <div class="body">{{ message.getBody|raw }}</div>

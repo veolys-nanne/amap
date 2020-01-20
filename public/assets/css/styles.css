@@ -182,18 +182,18 @@ ul.max-height li label {
     color: grey;
 }
 /*modal*/
-.modal .table {
+.modal .display-table {
     width: 100%;
     display: table;
     border-top: 1px solid;
     border-bottom: 1px solid;
     border-collapse: collapse;
 }
-.modal .row {
+.modal .display-row {
     width: 100%;
     display: table-row;
 }
-.modal .cell {
+.modal .display-cell {
     display: table-cell;
 }
 .modal .body {

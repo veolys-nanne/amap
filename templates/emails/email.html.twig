@@ -5,7 +5,6 @@
         <title>{{ message.subject }}</title>
     </head>
     <body>
-        <h1>{{ message.subject }}</h1>
         {% if app.user is defined and app.user.email is defined %}<h4>Mail de {{ app.user }}</h4>{% endif %}
         {% if extra is defined %}
             {{ extra|raw }}

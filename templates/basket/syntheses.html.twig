@@ -4,21 +4,36 @@
     {% set title = '' %}
     {% if isPdf is not defined or not isPdf %}
         {{ form(form) }}
+        {% if formMailExtraction %}
+            <button
+                    class="btn btn-block btn-success"
+                    data-button=".email-formMail"
+                    data-sub-form=".extra-formMail"
+                    data-form="[name='syntheses']"
+                    data-form-values="{&quot;syntheses[email][reference]&quot;:&quot;formMail&quot;}">
+                Envoyer par mail
+            </button>
+        {% endif %}
     {% endif %}
     <h4>{{ title }}</h4>
-    {% for tableName, table in tables %}
-        {% embed 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName], type: type} %}
-            {% block header '' %}
-            {% block footer '' %}
-        {% endembed %}
-        {% if not loop.last %}
-            <div class="new-page"></div>
-        {% endif %}
-    {% endfor %}
+    {% if tables is defined %}
+        {% for tableName, table in tables %}
+            {% embed 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName], type: type} %}
+                {% block header '' %}
+                {% block footer '' %}
+            {% endembed %}
+            {% if not loop.last %}
+                <div class="new-page"></div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% if formMail is defined %}
+        {{ form(formMail) }}
+    {% endif %}
 {% endblock %}
 
 {% block modal %}
-    {% include 'emails/preview.html.twig' with {messages: messages} %}
+    {% include 'emails/preview.html.twig' with {messages: messages|default([])} %}
 {% endblock %}
 
 {% block javascripts %}

@@ -5,24 +5,15 @@ namespace App\EntityManager;
 use App\Entity\AvailabilitySchedule;
 use App\Entity\AvailabilityScheduleElement;
 use App\Entity\Planning;
-use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Twig\Environment;
 
 class PlanningManager
 {
     protected $entityManager;
-    protected $mailHelper;
-    protected $twigEnvironment;
-    protected $session;
 
-    public function __construct(EntityManagerInterface $entityManager, MailHelper $mailHelper, Environment $twigEnvironment)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->mailHelper = $mailHelper;
-        $this->twigEnvironment = $twigEnvironment;
     }
 
     public function updatePlanning(Planning $planning, array $members, array $originalElements)
@@ -112,60 +103,5 @@ class PlanningManager
         foreach ($addElements as $element) {
             $this->entityManager->persist($element);
         }
-    }
-
-    public function changeState(bool $isPreview, RedirectResponse $redirectResponse, Planning $planning, string $extra): Response
-    {
-        $messages = [];
-        switch ($planning->getState()) {
-            case Planning::STATE_OPEN:
-                $message = $this->mailHelper->getMailForMembers('Disponibilités pour le planning des permanences AMAP Hommes de terre');
-                if (null !== $message) {
-                    $message
-                        ->setBody(
-                            $this->twigEnvironment->render('emails/availabilities.html.twig', [
-                                'message' => $message,
-                                'period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                                'extra' => $extra,
-                            ]),
-                            'text/html'
-                        )
-                        ->addPart(
-                            $this->twigEnvironment->render('emails/availabilities.txt.twig', [
-                                'message' => $message,
-                                'period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                                'extra' => $extra,
-                            ]),
-                            'text/plain'
-                        );
-                    $messages[] = $message;
-                }
-                break;
-            case Planning::STATE_ONLINE:
-                $message = $this->mailHelper->getMailForMembers('Planning des permanences AMAP Hommes de terre');
-                if (null !== $message) {
-                    $message
-                        ->setBody(
-                            $this->twigEnvironment->render('emails/planning.html.twig', [
-                                'message' => $message,
-                                'period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                                'extra' => $extra,
-                            ]),
-                            'text/html'
-                        )
-                        ->addPart(
-                            $this->twigEnvironment->render('emails/planning.txt.twig', [
-                                'message' => $message,
-                                'period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                                'extra' => $extra,
-                            ]),
-                            'text/plain'
-                        );
-                    $messages[] = $message;
-                }
-                break;
-        }
-
-        return $this->mailHelper->sendMessages($isPreview, $messages, $redirectResponse);
     }
 }

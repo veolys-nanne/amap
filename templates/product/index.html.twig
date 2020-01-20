@@ -47,9 +47,14 @@
                         </td>
                     {% elseif is_granted('ROLE_PRODUCER') %}
                         <td>
-                            <form action="{{ path('product_ask_active', {role: 'producer', id: product.id}) }}" method="post">
-                                <button type="submit" class="btn btn-success mail-extra">{{ product.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}</button>
-                            </form>
+                            <a href="#"
+                               class="btn-sm btn-success"
+                               data-button=".email-formMail"
+                               data-sub-form=".extra-formMail"
+                               data-form="[name='formMail']"
+                               data-form-values="{&quot;formMail[email][reference]&quot;:{{ product.id}}}">
+                               {{ product.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}
+                            </a>
                         </td>
                     {% endif %}
                     <td class="move"></td>
@@ -64,7 +69,14 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ path('product_form', {role: role}) }}" class="btn btn-success">Nouveau</a>
+    <a href="{{ path('product_form', {role: role}) }}" class="btn btn-block btn-success">Nouveau</a>
+    {% if formMail is defined %}
+        {{ form(formMail) }}
+    {% endif %}
+{% endblock %}
+
+{% block modal %}
+    {% include 'emails/preview.html.twig' with {messages: messages|default([])} %}
 {% endblock %}
 
 {% block javascripts %}

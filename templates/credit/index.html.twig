@@ -42,9 +42,14 @@
                         </td>
                     {% elseif is_granted('ROLE_PRODUCER') %}
                         <td>
-                            <form action="{{ path('credit_ask_active', {role: 'producer', id: credit.id}) }}" method="post">
-                                <button type="submit" class="btn btn-success mail-extra">{{ credit.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}</button>
-                            </form>
+                            <a href="#"
+                               class="btn-sm btn-success"
+                               data-button=".email-formMail"
+                               data-sub-form=".extra-formMail"
+                               data-form="[name='formMail']"
+                               data-form-values="{&quot;formMail[email][reference]&quot;:{{ credit.id}}}">
+                                {{ credit.isActive ? 'Demander la désactivation' : 'Demander l\'activation' }}
+                            </a>
                         </td>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
@@ -59,8 +64,15 @@
         </tbody>
     </table>
     {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_REFERENT') %}
-        <a href="{{ path('credit_form', {role: role}) }}" class="btn btn-success">Nouveau</a>
+        <a href="{{ path('credit_form', {role: role}) }}" class="btn btn-block btn-success">Nouveau</a>
     {% endif %}
+    {% if formMail is defined %}
+        {{ form(formMail) }}
+    {% endif %}
+{% endblock %}
+
+{% block modal %}
+    {% include 'emails/preview.html.twig' with {messages: messages|default([])} %}
 {% endblock %}
 
 {% block javascripts %}

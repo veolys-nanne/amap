@@ -38,7 +38,7 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($request, $entityManager, $mailHelper, $role, $form);
+            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -65,14 +65,14 @@ class ContactController extends AbstractController
     public function contactEditProductAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, User $user = null, Product $product = null)
     {
         $form = $this->createForm(ContactType::class, [
-            'object' => 'Question à propos du produit "'.$product->getName().'"',
+            'subject' => 'Question à propos du produit "'.$product->getName().'"',
         ], [
             'user' => $user,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($request, $entityManager, $mailHelper, $role, $form);
+            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -98,8 +98,8 @@ class ContactController extends AbstractController
     public function contactEditProductPriceAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null, Product $product = null)
     {
         $form = $this->createForm(ContactType::class, [
-            'object' => 'Demande de modification du prix du produit "'.$product->getName().'"',
-            'body' => 'Merci de modifier le prix de <a href="'.$this->generateUrl('product_form', [
+            'subject' => 'Demande de modification du prix du produit "'.$product->getName().'"',
+            'extra' => 'Merci de modifier le prix de <a href="'.$this->generateUrl('product_form', [
                     'role' => 'referent',
                     'id' => $product->getId(),
                 ]).'">'.$product->getName().'</a>.<br />Nouveau prix:',
@@ -109,7 +109,7 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return  $this->sendMessage($request, $entityManager, $mailHelper, 'producer', $form);
+            return  $this->sendMessage($entityManager, $mailHelper, 'producer', $form);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -136,14 +136,14 @@ class ContactController extends AbstractController
     public function contactEditPlanningElementAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, User $user = null, PlanningElement $planningElement = null)
     {
         $form = $this->createForm(ContactType::class, [
-            'object' => 'Question à propos de la permanence du '.$planningElement->getDate()->format('d/m/Y'),
+            'subject' => 'Question à propos de la permanence du '.$planningElement->getDate()->format('d/m/Y'),
         ], [
             'user' => $user,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($request, $entityManager, $mailHelper, $role, $form);
+            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -169,8 +169,8 @@ class ContactController extends AbstractController
     public function contactEditCreditAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null, Credit $credit = null)
     {
         $form = $this->createForm(ContactType::class, [
-            'object' => 'Demande de modification du montant d\'un avoir (identifiant:'.$credit->getId().')',
-            'body' => 'Merci de modifier le montant de cet <a href="'.$this->generateUrl('credit_form', [
+            'subject' => 'Demande de modification du montant d\'un avoir (identifiant:'.$credit->getId().')',
+            'extra' => 'Merci de modifier le montant de cet <a href="'.$this->generateUrl('credit_form', [
                     'role' => 'referent',
                     'id' => $credit->getId(),
                 ]).'">avoir</a>.<br />Nouveau montant:',
@@ -180,7 +180,7 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return  $this->sendMessage($request, $entityManager, $mailHelper, 'producer', $form);
+            return  $this->sendMessage($entityManager, $mailHelper, 'producer', $form);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -189,14 +189,10 @@ class ContactController extends AbstractController
         ]);
     }
 
-    protected function sendMessage(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, FormInterface $form): Response
+    protected function sendMessage(EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, FormInterface $form): Response
     {
-        $to = $form->get('to')->getData();
-        $object = $form->get('object')->getData();
-        $body = $form->get('body')->getData();
         $broadcastList = [];
-        $messages = [];
-        foreach ($to as $receiver) {
+        foreach ($form->get('to')->getData() as $receiver) {
             switch ($receiver) {
                 case ContactType::ADMIN:
                     $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_ADMIN'));
@@ -221,29 +217,16 @@ class ContactController extends AbstractController
                     break;
             }
         }
-        $message = $mailHelper->getMailForList($object, $broadcastList);
-        if (null !== $message) {
-            $message
-                ->setBody(
-                    $this->renderView('emails/contact.html.twig', [
-                        'message' => $message,
-                        'body' => $body,
-                    ]),
-                    'text/html'
-                )
-                ->addPart(
-                    $this->renderView('emails/contact.txt.twig', [
-                        'message' => $message,
-                        'body' => $body,
-                    ]),
-                    'text/plain'
-                );
-            $messages[] = $message;
+
+        $message = $mailHelper->adminMailerForm($form, $broadcastList, $form->get('subject')->getData(), 'emails/email');
+
+        if ($form->has('email') && $form->get('email')->get('preview')->isClicked()) {
+            return $this->render('contact/form.html.twig', [
+                'messages' => [$message],
+                'form' => $form->createView(),
+                'title' => 'Contact',
+            ]);
         }
-        if ($request->request->get('preview')) {
-            return $mailHelper->getMessagesPreview($messages);
-        }
-        $mailHelper->sendMessages($messages);
 
         return $this->forward('App\Controller\DocumentController::documentViewAction', [
             'role' => $role,

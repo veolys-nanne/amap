@@ -3,11 +3,16 @@
 namespace App\Helper;
 
 use App\Entity\User;
+use App\Form\FormatEmailType;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
 class MailHelper
 {
@@ -16,14 +21,24 @@ class MailHelper
     protected $session;
     protected $mailer;
     protected $router;
+    protected $formFactory;
 
-    public function __construct(EntityManagerInterface $entityManager, string $adminEmail, SessionInterface $session, \Swift_Mailer $mailer, UrlGeneratorInterface $router)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        string $adminEmail,
+        SessionInterface $session,
+        \Swift_Mailer $mailer,
+        UrlGeneratorInterface $router,
+        FormFactoryInterface $formFactory,
+        Environment $twigEnvironment
+    ) {
         $this->entityManager = $entityManager;
         $this->adminEmail = $adminEmail;
         $this->session = $session;
         $this->mailer = $mailer;
         $this->router = $router;
+        $this->formFactory = $formFactory;
+        $this->twigEnvironment = $twigEnvironment;
     }
 
     public function getMailForMembers(string $subject): ?\Swift_Message
@@ -77,5 +92,79 @@ class MailHelper
             $this->mailer->send($message);
         }
         $this->session->getFlashBag()->add('info', 'Envoie de mails réalisé.');
+    }
+
+    public function createMailForm(Request $request, array $mailsParameters): array
+    {
+        $results = [];
+        $builder = $this->formFactory->createNamedBuilder('formMail');
+        $form = $builder->add('email', FormatEmailType::class, ['label' => false])->getForm();
+        $results['formMail'] = $form->createView();
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $results = array_merge($results, $this->handleMailForm($mailsParameters, $form));
+        }
+
+        return $results;
+    }
+
+    public function handleMailForm(array $mailsParameters, Form $form): array
+    {
+        $results = [];
+        $isEmail = $form->has('email') && $form->get('email')->get('email')->isClicked();
+        $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
+        if ($isEmail || $isPreview) {
+            $index = $form->get('email')->get('reference')->getData();
+            if (is_numeric($index)) {
+                $mailsParameter = $mailsParameters[$index];
+                if ($message = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? [], $mailsParameter['template'] ?? [], $mailsParameter['mailOptions'] ?? [])) {
+                    $results['messages'] = [$message];
+                }
+            } else {
+                foreach ($mailsParameters[$index] as $mailsParameter) {
+                    if ($message = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? [], $mailsParameter['template'] ?? [], $mailsParameter['mailOptions'] ?? [])) {
+                        $results['messages'][] = $message;
+                    }
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    public function adminMailerForm(Form $form, array $list, string $subject, string $template, array $mailOptions = []): ?\Swift_Message
+    {
+        $isPreview = false;
+        $message = null;
+        if (count($list) > 0) {
+            $mailOptions['extra'] = $form->has('email') ? $form->get('email')->get('extra')->getData() : null;
+            $isEmail = $form->has('email') && $form->get('email')->get('email')->isClicked();
+            $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
+            if ($isEmail || $isPreview) {
+                $message = $this->getMailForList($subject, $list);
+                $mailOptions['message'] = $message;
+                if (null !== $message) {
+                    $message
+                        ->setBody(
+                            $this->twigEnvironment->render($template.'.html.twig', $mailOptions),
+                            'text/html'
+                        )
+                        ->addPart(
+                            $this->twigEnvironment->render($template.'.txt.twig', $mailOptions),
+                            'text/plain'
+                        );
+                    if (!$isPreview) {
+                        $this->mailer->send($message);
+                        $this->session->getFlashBag()->add('info', 'Envoie de mails réalisé.');
+                    }
+                }
+            }
+        }
+
+        if ($isPreview && null !== $message) {
+            return $message;
+        }
+
+        return null;
     }
 }
