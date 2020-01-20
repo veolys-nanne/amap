@@ -29,14 +29,17 @@
                     {% endif %}
                     <td>{{ constant('App\\Entity\\Planning::LABELS')[planning.state] }}</td>
                     <td>
-                        {% if planning.nextState %}
-                            {% if planning.nextState == constant('App\\Entity\\Planning::STATE_OPEN') or planning.nextState == constant('App\\Entity\\Planning::STATE_ONLINE') %}
-                                <form action="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" method="post">
-                                    <button type="submit" class="btn btn-success mail-extra">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</button>
-                                </form>
-                            {% else %}
-                                <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="btn btn-sm btn-success">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
-                            {% endif %}
+                        {% if constant('App\\Entity\\Planning::MAIL_TEMPLATES')[planning.nextState] is defined %}
+                            <button
+                               class="btn btn-sm btn-success"
+                               data-button=".email-formMail"
+                               data-sub-form=".extra-formMail"
+                               data-form="[name='formMail']"
+                               data-form-values="{&quot;formMail[email][reference]&quot;:{{ planning.id}}}">
+                                {{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}
+                            </button>
+                        {% else %}
+                            <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="btn btn-sm btn-success">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
                         {% endif %}
                     </td>
                     <td>
@@ -48,12 +51,26 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ path('planning_form') }}" class="btn btn-success">Nouveau</a>
-    {% if needMail %}
-        <form action="{{ path('planning_mails_up') }}" method="post">
-            <button type="submit" class="btn btn-success mail-extra">Envoyer un mail de relance pour les disponibilités</button>
-        </form>
+    <div class="form-group">
+        <a href="{{ path('planning_form') }}" class="btn btn-block btn-success">Nouveau</a>
+    </div>
+    {% if formMailUp %}
+        <button
+           class="btn btn-block btn-success"
+           data-button=".email-formMail"
+           data-sub-form=".extra-formMail"
+           data-form="[name='formMail']"
+           data-form-values="{&quot;formMail[email][reference]&quot;:&quot;formMailUp&quot;}">
+            Envoyer un mail de relance pour les disponibilités
+        </button>
     {% endif %}
+    {% if formMail is defined %}
+        {{ form(formMail) }}
+    {% endif %}
+{% endblock %}
+
+{% block modal %}
+    {% include 'emails/preview.html.twig' with {messages: messages|default([])} %}
 {% endblock %}
 
 {% block javascripts %}

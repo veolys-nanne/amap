@@ -10,9 +10,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SynthesesType extends AbstractType
@@ -86,36 +87,37 @@ class SynthesesType extends AbstractType
             ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
             ->add('submitCredit', SubmitType::class, ['label' => 'Générer', 'attr' => ['class' => 'btn-success btn-block form-popin', 'data-sub-form' => '']])
         ;
-        if (null !== $options['type'] && (self::INVOICE_BY_MEMBER == $options['type'] || self::INVOICE_BY_PRODUCER == $options['type'] || self::INVOICE_BY_PRODUCER_BY_MEMBER == $options['type'])) {
-            $builder->add('email', FormatEmailType::class, ['label' => false]);
-        }
-        if (null !== $options['type']) {
-            $builder
-                ->add('css', ChoiceType::class, [
-                    'label' => false,
-                    'empty_data' => 'pdf-black-inline',
-                    'choices' => [
-                        'en noir et blanc sans saut de page' => 'pdf-black-inline',
-                        'en noir et blanc avec sauts de page' => 'pdf-black-page-break',
-                        'en couleur sans saut de page' => 'pdf-color-inline',
-                        'en couleur avec sauts de page' => 'pdf-color-page-break',
-                    ],
-                    'expanded' => true,
-                    'attr' => ['class' => 'css form-popin'],
-                    'label_attr' => ['class' => 'form-popin'],
-                ])
-                ->add('pdf', SubmitType::class, ['label' => 'Imprimer', 'attr' => [
-                    'class' => 'btn-success btn-block download-file',
-                    'data-sub-form' => '.css',
-                ]]);
-        }
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+            $builder = $event->getForm();
+            $type = $event->getData()['type'] ?? null;
+            if (null !== $type) {
+                if (self::INVOICE_BY_MEMBER == $type || self::INVOICE_BY_PRODUCER == $type || self::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
+                    $builder->add('email', FormatEmailType::class, ['label' => false]);
+                }
+                $builder
+                    ->add('css', ChoiceType::class, [
+                        'label' => false,
+                        'empty_data' => 'pdf-black-inline',
+                        'choices' => [
+                            'en noir et blanc sans saut de page' => 'pdf-black-inline',
+                            'en noir et blanc avec sauts de page' => 'pdf-black-page-break',
+                            'en couleur sans saut de page' => 'pdf-color-inline',
+                            'en couleur avec sauts de page' => 'pdf-color-page-break',
+                        ],
+                        'expanded' => true,
+                        'attr' => ['class' => 'css form-popin'],
+                        'label_attr' => ['class' => 'form-popin'],
+                    ])
+                    ->add('pdf', SubmitType::class, ['label' => 'Imprimer', 'attr' => [
+                        'class' => 'btn-success btn-block download-file',
+                        'data-sub-form' => '.css',
+                    ]]);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired([
-            'type',
-        ]);
         $resolver->setDefault('allow_extra_fields', true);
     }
 }

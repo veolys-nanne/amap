@@ -34,16 +34,33 @@
     <div class="form-group">
         <a href="{{ path('basket_model') }}" class="btn btn-block btn-success">Nouveau</a>
     </div>
-    {% if formMailInfo is defined %}
-        {{ form(formMailInfo) }}
+    {% if formMailUp %}
+        <button
+                class="btn btn-block btn-success"
+                data-button=".email-formMail"
+                data-sub-form=".extra-formMail"
+                data-form="[name='formMail']"
+                data-form-values="{&quot;formMail[email][reference]&quot;:0}">
+            Envoyer un mail de relance pour la commande
+        </button>
     {% endif %}
-    {% if formMailUp is defined %}
-        {{ form(formMailUp) }}
+    {% if formMailInfo %}
+        <button
+                class="btn btn-block btn-success"
+                data-button=".email-formMail"
+                data-sub-form=".extra-formMail"
+                data-form="[name='formMail']"
+                data-form-values="{&quot;formMail[email][reference]&quot;:1}">
+            Envoyer un mail de mise à disposition des paniers
+        </button>
+    {% endif %}
+    {% if formMail is defined %}
+        {{ form(formMail) }}
     {% endif %}
 {% endblock %}
 
 {% block modal %}
-    {% include 'emails/preview.html.twig' with {messages: messages} %}
+    {% include 'emails/preview.html.twig' with {messages: messages|default([])} %}
 {% endblock %}
 
 {% block javascripts %}

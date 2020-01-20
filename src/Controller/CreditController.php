@@ -6,7 +6,6 @@ use App\Entity\Credit;
 use App\Form\CreditType;
 use App\Entity\User;
 use App\EntityManager\CreditManager;
-use App\Form\FormatEmailType;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,22 +21,35 @@ class CreditController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function creditListingAction(EntityManagerInterface $entityManager, string $role)
+    public function creditListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role)
     {
         $roles = $this->getUser()->getRoles();
         $credits = [];
+        $options = [
+            'role' => $role,
+            'title' => 'Avoirs',
+        ];
         if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
             $producers = $entityManager->getRepository(User::class)->findByRole('ROLE_PRODUCER', $this->getUser());
             $credits = $entityManager->getRepository(Credit::class)->findByProducers($producers);
         } elseif (in_array('ROLE_PRODUCER', $roles)) {
             $credits = $entityManager->getRepository(Credit::class)->findByProducers([$this->getUser()]);
+            foreach ($credits as $credit) {
+                $mailsParameters[$credit->getId()] = [
+                    'list' => [$credit->getProducer()->getParent()],
+                    'subject' => $credit->isActive() ? 'Demande de désactivation d\'avoir AMAP hommes de terre' : 'Demande d\'activation d\'avoir AMAP hommes de terre',
+                    'template' => $credit->isActive() ? 'emails/deactivatecredit' : 'emails/activatecredit',
+                    'mailOptions' => [
+                        'credit' => $credit,
+                        'role' => in_array('ROLE_ADMIN', $credit->getProducer()->getParent()->getRoles()) ? 'admin' : 'referent',
+                    ],
+                ];
+            }
+            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
         }
+        $options['credits'] = $credits;
 
-        return $this->render('credit/index.html.twig', [
-            'role' => $role,
-            'credits' => $credits,
-            'title' => 'Avoirs',
-        ]);
+        return $this->render('credit/index.html.twig', $options);
     }
 
     /**
@@ -92,75 +104,6 @@ class CreditController extends AbstractController
 
         return $this->forward('App\Controller\CreditController::creditListingAction', [
             'role' => $role,
-        ]);
-    }
-
-    /**
-     * @Route(
-     *     "/producer/credit/ask_active/{id}",
-     *     name="credit_ask_active",
-     * )
-     */
-    public function askActiveAction(Request $request, Credit $credit, MailHelper $mailHelper)
-    {
-        $referent = $credit->getProducer()->getParent();
-        $messages = [];
-        if ($credit->IsActive()) {
-            $message = $mailHelper->getMailForList('Demande de désactivation d\'avoir AMAP hommes de terre', [$referent]);
-            if (null !== $message) {
-                $message
-                    ->setBody(
-                        $this->renderView('emails/deactivatecredit.html.twig', [
-                            'message' => $message,
-                            'credit' => $credit,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/html'
-                    )
-                    ->addPart(
-                        $this->renderView('emails/deactivatecredit.txt.twig', [
-                            'message' => $message,
-                            'credit' => $credit,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/plain'
-                    );
-                $messages[] = $message;
-            }
-        } else {
-            $message = $mailHelper->getMailForList('Demande d\'activation d\'avoir AMAP hommes de terre', [$referent]);
-            if (null !== $message) {
-                $message
-                    ->setBody(
-                        $this->renderView('emails/activatecredit.html.twig', [
-                            'message' => $message,
-                            'credit' => $credit,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/html'
-                    )
-                    ->addPart(
-                        $this->renderView('emails/activatecredit.txt.twig', [
-                            'message' => $message,
-                            'credit' => $credit,
-                            'role' => in_array('ROLE_ADMIN', $referent->getRoles()) ? 'admin' : 'referent',
-                            'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                        ]),
-                        'text/plain'
-                    );
-                $messages[] = $message;
-            }
-        }
-        if ($request->request->get('preview')) {
-            return $mailHelper->getMessagesPreview($messages);
-        }
-        $mailHelper->sendMessages($messages);
-
-        return $this->forward('App\Controller\CreditController::creditListingAction', [
-            'role' => 'producer',
         ]);
     }
 

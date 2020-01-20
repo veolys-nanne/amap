@@ -8,7 +8,6 @@ use App\EntityManager\CreditManager;
 use App\EntityManager\ProductManager;
 use App\Form\BillFilterType;
 use App\Form\CommandType;
-use App\Form\FormatEmailType;
 use App\Form\ModelType;
 use App\Form\SynthesesType;
 use App\EntityManager\BasketManager;
@@ -135,82 +134,28 @@ class BasketController extends AbstractController
             'baskets' => $baskets,
             'title' => 'Modèles de panier',
         ];
+        $mailsParameters = [];
+        $options['formMailUp'] = false;
         if ($getOpenModels && count($list) > 0) {
-            $builder = $this->get('form.factory')
-                ->createNamedBuilder('formMailUp');
-            $formMailUp = $builder
-                ->add('email', FormatEmailType::class, ['label' => false, 'submitLabel' => 'Envoyer un mail de relance pour la commande', 'builder' => $builder])
-                ->getForm();
-            $formMailUp->handleRequest($request);
-            $isEmail = $formMailUp->has('email') && $formMailUp->get('email')->get('email')->isClicked();
-            $isPreview = $formMailUp->has('email') && $formMailUp->get('email')->get('preview')->isClicked();
-            if ($isEmail || $isPreview) {
-                $messages = [];
-                if (count($list) > 0) {
-                    $message = $mailHelper->getMailForList('Relance commande AMAP hommes de terre', $list);
-                    if (null !== $message) {
-                        $message
-                            ->setBody(
-                                $this->renderView('emails/upcommande.html.twig', [
-                                    'message' => $message,
-                                    'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                                ]),
-                                'text/html'
-                            )
-                            ->addPart(
-                                $this->renderView('emails/upcommande.txt.twig', [
-                                    'message' => $message,
-                                ]),
-                                'text/plain'
-                            );
-                        $messages[] = $message;
-                    }
-                }
-                if (!$isPreview) {
-                    $mailHelper->sendMessages($messages);
-                }
-            }
-            $options['formMailUp'] = $formMailUp->createView();
-            $options['messages'] = $isPreview ? $messages : null;
+            $options['formMailUp'] = true;
+            $mailsParameters[0] = [
+                'list' => $list,
+                'subject' => 'Relance commande AMAP hommes de terre',
+                'template' => 'emails/upcommande',
+            ];
         }
+        $options['formMailInfo'] = false;
         if ($getOpenModels) {
-            $builder = $this->get('form.factory')
-                ->createNamedBuilder('formMailInfo');
-            $formMailInfo = $builder
-                ->add('email', FormatEmailType::class, ['label' => false, 'submitLabel' => 'Envoyer un mail de mise à disposition des paniers', 'builder' => $builder])
-                ->getForm();
-            $formMailInfo->handleRequest($request);
-            $isEmail = $formMailInfo->has('email') && $formMailInfo->get('email')->get('email')->isClicked();
-            $isPreview = $formMailInfo->has('email') && $formMailInfo->get('email')->get('preview')->isClicked();
-            if ($isEmail || $isPreview) {
-                $messages = [];
-                $message = $mailHelper->getMailForMembers('Commande AMAP Hommes de terre');
-                if (null !== $message) {
-                    $message
-                        ->setBody(
-                            $this->renderView('emails/infocommande.html.twig', [
-                                'message' => $message,
-                                'baskets' => $openModels,
-                                'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                            ]),
-                            'text/html'
-                        )
-                        ->addPart(
-                            $this->renderView('emails/infocommande.txt.twig', [
-                                'message' => $message,
-                                'baskets' => $openModels,
-                                'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                            ]),
-                            'text/plain'
-                        );
-                    $messages[] = $message;
-                }
-                if (!$isPreview) {
-                    $mailHelper->sendMessages($messages);
-                }
-            }
-            $options['formMailInfo'] = $formMailInfo->createView();
-            $options['messages'] = $isPreview ? $messages : null;
+            $options['formMailInfo'] = true;
+            $mailsParameters[1] = [
+                'list' => $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'),
+                'subject' => 'Commande AMAP Hommes de terre',
+                'template' => 'emails/infocommande',
+                'mailOptions' => ['baskets' => $openModels],
+            ];
+        }
+        if (!empty($mailsParameters)) {
+            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
         }
 
         return $this->render('basket/models.html.twig', $options);
@@ -271,19 +216,20 @@ class BasketController extends AbstractController
      */
     public function synthesesAction(Request $request, MailHelper $mailHelper, BasketManager $basketManager, CreditManager $creditManager, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
     {
-        $type = $request->request->has('syntheses') ? $request->request->get('syntheses')['type'] : null;
-        $form = $this->createForm(SynthesesType::class, null, [
-            'type' => $type,
-        ]);
+        $form = $this->createForm(SynthesesType::class);
         $form->handleRequest($request);
         $type = $form->has('type') ? $form->get('type')->getData() : '';
+        $isPdf = false;
+        $options = [
+            'title' => 'Extraction',
+            'form' => $form->createView(),
+            'type' => $type,
+        ];
+        $options['formMailExtraction'] = false;
         if ($form->isSubmitted() && $form->isValid()) {
-            $isEmail = $form->has('email') && $form->get('email')->get('email')->isClicked();
             $isPdf = $form->has('pdf') && $form->get('pdf')->isClicked();
-            $isCredit = $form->has('submitCredit') && $form->get('submitCredit')->isClicked();
-            $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
-            list($tables, $parameters) = $basketManager->generateSyntheses($form);
-            if ($isCredit) {
+            $options['isPdf'] = $isPdf;
+            if ($form->has('submitCredit') && $form->get('submitCredit')->isClicked()) {
                 $creditManager->generateCredit(
                     $form->has('date') && null != $form->get('date')->getData() ? $form->get('date')->getData() : $form->get('start')->getData(),
                     $form->has('date') && null != $form->get('date')->getData() ? clone $form->get('date')->getData() : $form->get('end')->getData(),
@@ -295,54 +241,34 @@ class BasketController extends AbstractController
 
                 return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => 'admin']);
             }
-            if ($isEmail || $isPreview) {
-                $messages = [];
-                $subject = 'AMAP Hommes de terre '.SynthesesType::LABELS[$type];
+
+            list($tables, $parameters) = $basketManager->generateSyntheses($form);
+            $options['tables'] = $tables;
+            $options['parameters'] = $parameters;
+            $mailsParameters = [];
+            if (SynthesesType::INVOICE_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type || SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
+                $options['formMailExtraction'] = true;
                 foreach ($tables as $tableName => $table) {
-                    $message = $mailHelper->getMailForList($subject, [$parameters[$tableName]]);
-                    if (null !== $message) {
-                        $message
-                            ->setBody(
-                                $this->renderView('basket/synthesis.html.twig', [
-                                    'message' => $message,
-                                    'extra' => $form->get('email')->get('extra')->getData(),
-                                    'tableName' => $tableName,
-                                    'table' => $table,
-                                    'parameters' => $parameters[$tableName],
-                                    'form' => $form->createView(),
-                                    'type' => $type,
-                                ]),
-                                'text/html'
-                            )
-                            ->addPart(
-                                $this->renderView('basket/synthesis.txt.twig', [
-                                    'message' => $message,
-                                    'extra' => $form->get('email')->get('extra')->getData(),
-                                    'tableName' => $tableName,
-                                    'table' => $table,
-                                    'parameters' => $parameters[$tableName],
-                                    'form' => $form->createView(),
-                                ]),
-                                'text/plain'
-                            );
-                        $messages[] = $message;
-                    }
-                }
-                if (!$isPreview) {
-                    $mailHelper->sendMessages($messages);
+                    $mailsParameters['formMail'][$tableName] = [
+                        'list' => [$parameters[$tableName]],
+                        'subject' => 'AMAP Hommes de terre '.SynthesesType::LABELS[$type],
+                        'template' => 'basket/synthesis',
+                        'mailOptions' => [
+                            'tableName' => $tableName,
+                            'table' => $table,
+                            'parameters' => $parameters[$tableName],
+                            'form' => $form->createView(),
+                            'type' => $type,
+                        ],
+                    ];
                 }
             }
+            if (!empty($mailsParameters)) {
+                $options = array_merge($options, $mailHelper->handleMailForm($mailsParameters, $form));
+            }
         }
-
-        $html = $this->renderView('basket/syntheses.html.twig', [
-            'title' => 'Extraction',
-            'tables' => $tables ?? [],
-            'parameters' => $parameters ?? [],
-            'form' => $form->createView(),
-            'type' => $type,
-            'isPdf' => $isPdf,
-            'messages' => $isPreview ? $messages : null,
-        ]);
+        $options['isPdf'] = $isPdf;
+        $html = $this->renderView('basket/syntheses.html.twig', $options);
         if ($isPdf) {
             $css = $form->has('css') ? $form->get('css')->getData() : 'pdf-color-page-break';
             $filename = null !== $type ? SynthesesType::FILES[$type] : 'extraction';

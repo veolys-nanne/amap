@@ -29,16 +29,31 @@ class AjaxSubscriber implements EventSubscriberInterface
     public function onKernelController(FilterControllerEvent $event)
     {
         $request = $event->getRequest();
-        $controller = $request->attributes->get('_controller');
-        $routeName = array_key_first(array_filter($this->router->getRouteCollection()->all(), function ($route) use ($controller) {
-            return $route->getDefault('_controller') == $controller;
-        }));
+
+        $url = '';
+        $routeName = '';
+        if ($request->attributes->has('_route')) {
+            $routeName = $request->attributes->get('_route');
+            if ($request->attributes->has('_route_params')) {
+                $url = $this->router->generate($routeName, $request->attributes->get('_route_params'));
+            }
+        }
+        if (empty($url)) {
+            if (empty($routeName)) {
+                $controller = $request->attributes->get('_controller');
+                $routeName = array_key_first(array_filter($this->router->getRouteCollection()->all(), function ($route) use ($controller) {
+                    return $route->getDefault('_controller') == $controller;
+                }));
+            }
+            $url = $this->router->generate($routeName, $event->getRequest()->attributes->all());
+        }
+
         if (HttpKernelInterface::MASTER_REQUEST == $event->getRequestType()) {
             $roles = $this->security->getUser() ? $this->security->getUser()->getRoles() : [];
             $this->twig->addGlobal('needNavbar', $this->session->get('roles') !== $roles);
             $this->session->set('roles', $roles);
         }
-        $this->twig->addGlobal('url', preg_replace('/\?.*/', '', $this->router->generate($routeName, $event->getRequest()->attributes->all())));
+        $this->twig->addGlobal('url', preg_replace('/\?.*/', '', $url));
         $this->twig->addGlobal('base', 'base.html.twig');
         if ($event->getRequest()->isXmlHttpRequest()) {
             $this->twig->addGlobal('base', 'ajax.html.twig');

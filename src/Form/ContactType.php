@@ -6,10 +6,8 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Security;
 
@@ -72,7 +70,7 @@ class ContactType extends AbstractType
         }
 
         $builder
-            ->add('object', TextType::class, [
+            ->add('subject', TextType::class, [
                 'label' => 'Objet',
             ])
             ->add('to', ChoiceType::class, [
@@ -81,11 +79,7 @@ class ContactType extends AbstractType
                 'data' => [$this->to],
                 'multiple' => true,
             ])
-            ->add('body', TextareaType::class, [
-                'label' => 'Corps',
-            ])
-            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
-            ->add('preview', SubmitType::class, ['label' => 'Prévisualiser', 'attr' => ['class' => 'btn-info btn-block preview']]);
+            ->add('email', FormatContactType::class, ['label' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

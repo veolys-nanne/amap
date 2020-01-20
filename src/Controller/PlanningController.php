@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\AvailabilitySchedule;
 use App\Entity\AvailabilityScheduleElement;
 use App\Entity\Planning;
+use App\Entity\User;
 use App\Form\AvailabilityScheduleElementsType;
 use App\Form\PlanningType;
 use App\Form\PlanningWithMemberType;
@@ -26,66 +27,55 @@ class PlanningController extends AbstractController
      *     name="planning_index",
      * )
      */
-    public function planningListingAction(EntityManagerInterface $entityManager)
+    public function planningListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper)
     {
         $plannings = $entityManager->getRepository(Planning::class)->findByDeleted(false);
-
-        return $this->render('planning/index.html.twig', [
+        $options = [
             'plannings' => $plannings,
             'title' => 'Plannings de permancence',
-            'needMail' => count($entityManager->getRepository(AvailabilitySchedule::class)->findMemberByEmptyAvailability()) > 0,
-        ]);
-    }
-
-    /**
-     * @Route(
-     *     "/admin/planning/mailsup",
-     *     name="planning_mails_up",
-     * )
-     */
-    public function mailUpAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper)
-    {
-        $list = $entityManager->getRepository(AvailabilitySchedule::class)->findMemberByEmptyAvailability();
-        $messages = [];
-        if (count($list) > 0) {
-            $plannings = array_map(function (int $id) use ($entityManager) {
-                return $entityManager->getRepository(Planning::class)->find($id);
-            }, array_keys(array_column($list, null, 'planning')));
+        ];
+        $mailsParameters = [];
+        foreach ($plannings as $planning) {
+            $state = $planning->getNextState();
+            if (isset(Planning::MAIL_TEMPLATES[$state])) {
+                $mailsParameters[$planning->getId()] = [
+                    'list' => $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'),
+                    'subject' => Planning::MAIL_SUBJECTS[$state],
+                    'template' => Planning::MAIL_TEMPLATES[$state],
+                    'mailOptions' => ['period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
+                    'callback' => function () use ($state, $planning) {
+                        return $this->redirect($this->generateUrl('planning_state', ['state' => $state, 'id' => $planning->getId()]));
+                    },
+                ];
+            }
+        }
+        $options['formMailUp'] = false;
+        if (count($list = $entityManager->getRepository(AvailabilitySchedule::class)->findMemberByEmptyAvailability()) > 0) {
+            $options['formMailUp'] = true;
             foreach ($plannings as $planning) {
-                $message = $mailHelper->getMailForList(
-                    'Relance Disponibilité AMAP hommes de terre',
-                    array_filter($list, function ($item) use ($planning) {
+                $mailsParameters['formMailUp'][$planning->getId()] = [
+                    'list' => array_filter($list, function ($item) use ($planning) {
                         return $item['planning'] == $planning->getId();
-                    })
-                );
-                if (null !== $message) {
-                    $message
-                        ->setBody(
-                            $this->renderView('emails/upplanning.html.twig', [
-                                'message' => $message,
-                                'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                                'period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                            ]),
-                            'text/html'
-                        )
-                        ->addPart(
-                            $this->renderView('emails/upplanning.txt.twig', [
-                                'message' => $message,
-                                'extra' => $request->request->has('extra') ? $request->request->get('extra') : '',
-                                'period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0],
-                            ]),
-                            'text/plain'
-                        );
-                    $messages[] = $message;
+                    }),
+                    'subject' => 'Relance Disponibilité AMAP hommes de terre',
+                    'template' => 'emails/upplanning',
+                    'mailOptions' => ['period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
+                ];
+            }
+        }
+        if (!empty($mailsParameters)) {
+            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            if ($request->request->has('formMail')) {
+                $email = $request->request->get('formMail')['email'];
+                $isEmail = isset($email['email']);
+                $reference = $email['reference'];
+                if ($isEmail && isset($mailsParameters[$reference]['callback'])) {
+                    return $mailsParameters[$reference]['callback']();
                 }
             }
         }
-        if ($request->request->get('preview')) {
-            return $mailHelper->getMessagesPreview($messages);
-        }
-        $mailHelper->sendMessages($messages);
 
-        return $this->forward('App\Controller\PlanningController::planningListingAction');
+        return $this->render('planning/index.html.twig', $options);
     }
 
     /**
@@ -139,14 +129,13 @@ class PlanningController extends AbstractController
     public function stateAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, string $state, Planning $planning)
     {
         $planning->setState($state);
-        $response = $planningManager->changeState($request->request->get('preview'), $this->forward('App\Controller\PlanningController::planningListingAction'), $planning, $request->request->has('extra') ? $request->request->get('extra') : '');
         if (!$request->request->get('preview')) {
             $entityManager->persist($planning);
             $entityManager->flush();
             $this->addFlash('success', 'Le planning de permanences a été passé dans l\'état "'.Planning::LABELS[$state].'".');
         }
 
-        return $response;
+        return $this->forward('App\Controller\PlanningController::planningListingAction');
     }
 
     /**

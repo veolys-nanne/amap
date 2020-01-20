@@ -1,7 +1,5 @@
 {% extends base %}
 
-{% form_theme form 'form/fields.html.twig' %}
-
 {% block body %}
     {% if user.id is not empty and (app.user.id == user.id or is_granted('ROLE_ADMIN')) %}
         {% if isAccount %}
