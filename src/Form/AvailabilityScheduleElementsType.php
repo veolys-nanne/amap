@@ -28,8 +28,9 @@ class AvailabilityScheduleElementsType extends AbstractType
                     ],
                 ]);
         });
-        $builder->add('form');
-        $builder->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
+        $builder
+            ->add('form')
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

@@ -7,6 +7,7 @@ use App\Entity\PlanningElement;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Form\ContactType;
+use App\Form\PreviewEmailsType;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -189,6 +190,25 @@ class ContactController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route(
+     *     "/preview",
+     *     name="preview"
+     * )
+     */
+    public function previewAction(Request $request, MailHelper $mailHelper)
+    {
+        if ($request->request->has('preview_emails')) {
+            $messages = $request->request->get('preview_emails')['messages'] ?? [];
+            foreach ($messages as &$message) {
+                $message = $mailHelper->createMessageFromArray($message);
+            }
+        }
+        $mailHelper->sendMessages($messages);
+
+        return $this->redirect(filter_var($request->headers->get('referer'), FILTER_SANITIZE_URL));
+    }
+
     protected function sendMessage(EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, FormInterface $form): Response
     {
         $broadcastList = [];
@@ -217,12 +237,15 @@ class ContactController extends AbstractController
                     break;
             }
         }
-
         $message = $mailHelper->adminMailerForm($form, $broadcastList, $form->get('subject')->getData(), 'emails/email');
-
         if ($form->has('email') && $form->get('email')->get('preview')->isClicked()) {
+            $formPreview = $this->createForm(PreviewEmailsType::class, ['messages' => [$message]], [
+                'action' => $this->generateUrl('preview'),
+            ]);
+
             return $this->render('contact/form.html.twig', [
                 'messages' => [$message],
+                'formPreview' => $formPreview,
                 'form' => $form->createView(),
                 'title' => 'Contact',
             ]);

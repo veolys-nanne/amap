@@ -4,19 +4,18 @@ namespace App\Helper;
 
 use App\Entity\User;
 use App\Form\FormatEmailType;
+use App\Form\PreviewEmailsType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 class MailHelper
 {
-    protected $entityManager;
     protected $adminEmail = '';
     protected $session;
     protected $mailer;
@@ -24,7 +23,6 @@ class MailHelper
     protected $formFactory;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
         string $adminEmail,
         SessionInterface $session,
         \Swift_Mailer $mailer,
@@ -32,7 +30,6 @@ class MailHelper
         FormFactoryInterface $formFactory,
         Environment $twigEnvironment
     ) {
-        $this->entityManager = $entityManager;
         $this->adminEmail = $adminEmail;
         $this->session = $session;
         $this->mailer = $mailer;
@@ -41,9 +38,23 @@ class MailHelper
         $this->twigEnvironment = $twigEnvironment;
     }
 
-    public function getMailForMembers(string $subject): ?\Swift_Message
+    public function createMessageFromArray(array $parameters): ?\Swift_Message
     {
-        return $this->getMailForList($subject, $this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'));
+        foreach ($parameters['to'] as &$to) {
+            $to = ['email' => $to];
+        }
+        $message = $this
+            ->getMailForList($parameters['subject'], $parameters['to'])
+            ->setBody(
+                $parameters['body'] ?? '',
+                'text/html'
+            )
+            ->addPart(
+                $parameters['part'] ?? '',
+                'text/plain'
+            );
+
+        return $message;
     }
 
     public function getMailForList(string $subject, array $list): ?\Swift_Message
@@ -51,7 +62,7 @@ class MailHelper
         $message = null;
         $broadcastList = [$this->adminEmail];
         array_walk($list, function ($data) use (&$broadcastList) {
-            $broadcastList = $data instanceof User ? array_merge($broadcastList, [$data->getEmail()], $data->getBroadcastList()) : array_merge($broadcastList, [$data['email']], $data['broadcastList']);
+            $broadcastList = $data instanceof User ? array_merge($broadcastList, [$data->getEmail()], $data->getBroadcastList()) : array_merge($broadcastList, [$data['email'] ?? []], $data['broadcastList'] ?? []);
         });
         $broadcastList = array_unique(array_filter($broadcastList));
         if (!empty($broadcastList)) {
@@ -127,6 +138,12 @@ class MailHelper
                     }
                 }
             }
+        }
+
+        if (isset($results['messages'])) {
+            $results['formPreview'] = $this->formFactory->create(PreviewEmailsType::class, ['messages' => $results['messages']], [
+                'action' => $this->router->generate('preview'),
+            ]);
         }
 
         return $results;
