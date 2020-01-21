@@ -2,6 +2,9 @@
     <div id="main-modal" class="modal" role="dialog" aria-labelledby="dataExtraLabel">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
+                <div class="modal-header">
+                    {{ form(formPreview.createView) }}
+                </div>
                 <div class="modal-body">
                     {% for message in messages %}
                         <div class="display-table">
@@ -20,6 +23,9 @@
                         </div>
                         <div class="body">{{ message.getBody|raw }}</div>
                     {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    {{ form(formPreview.createView) }}
                 </div>
             </div>
         </div>
