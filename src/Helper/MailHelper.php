@@ -3,10 +3,13 @@
 namespace App\Helper;
 
 use App\Entity\User;
+use App\Form\ContactType;
 use App\Form\FormatEmailType;
 use App\Form\PreviewEmailsType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -95,6 +98,51 @@ class MailHelper
         }
 
         return new JsonResponse($jsonResponse);
+    }
+
+    public function sendMessage(EntityManagerInterface $entityManager, string $role, FormInterface $form, User $user): ?string
+    {
+        $broadcastList = [];
+        foreach ($form->get('to')->getData() as $receiver) {
+            switch ($receiver) {
+                case ContactType::ADMIN:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_ADMIN'));
+                    break;
+                case ContactType::ALL:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByActive(1));
+                    break;
+                case ContactType::ALL_MEMBER:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'));
+                    break;
+                case ContactType::ALL_PRODUCER:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_PRODUCER'));
+                    break;
+                case ContactType::ALL_REFERENT:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_REFERENT'));
+                    break;
+                case ContactType::MY_PRODUCERS:
+                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_PRODUCER', $user));
+                    break;
+                default:
+                    $broadcastList = array_merge($broadcastList, [$entityManager->getRepository(User::class)->find(explode('_', $receiver)[1])]);
+                    break;
+            }
+        }
+        $message = $this->adminMailerForm($form, $broadcastList, $form->get('subject')->getData(), 'emails/email');
+        if ($form->has('email') && $form->get('email')->get('preview')->isClicked()) {
+            $formPreview = $this->formFactory->create(PreviewEmailsType::class, ['messages' => [$message]], [
+                'action' => $this->router->generate('preview'),
+            ]);
+
+            return $this->twigEnvironment->render('contact/form.html.twig', [
+                'messages' => [$message],
+                'formPreview' => $formPreview,
+                'form' => $form->createView(),
+                'title' => 'Contact',
+            ]);
+        }
+
+        return null;
     }
 
     public function sendMessages(array $messages)
