@@ -7,11 +7,9 @@ use App\Entity\PlanningElement;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Form\ContactType;
-use App\Form\PreviewEmailsType;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,7 +37,11 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
+            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
+                $this->forward('App\Controller\DocumentController::documentViewAction', [
+                    'role' => $role,
+                    'name' => 'homepage',
+                ]);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -73,7 +75,11 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
+            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
+                $this->forward('App\Controller\DocumentController::documentViewAction', [
+                    'role' => $role,
+                    'name' => 'homepage',
+                ]);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -110,7 +116,11 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return  $this->sendMessage($entityManager, $mailHelper, 'producer', $form);
+            return new Response($mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser())) ??
+                $this->forward('App\Controller\DocumentController::documentViewAction', [
+                    'role' => 'producer',
+                    'name' => 'homepage',
+                ]);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -144,7 +154,11 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->sendMessage($entityManager, $mailHelper, $role, $form);
+            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
+                $this->forward('App\Controller\DocumentController::documentViewAction', [
+                    'role' => $role,
+                    'name' => 'homepage',
+                ]);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -181,7 +195,11 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return  $this->sendMessage($entityManager, $mailHelper, 'producer', $form);
+            return new Response($mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser())) ??
+                $this->forward('App\Controller\DocumentController::documentViewAction', [
+                    'role' => 'producer',
+                    'name' => 'homepage',
+                ]);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -207,53 +225,5 @@ class ContactController extends AbstractController
         $mailHelper->sendMessages($messages);
 
         return $this->redirect(filter_var($request->headers->get('referer'), FILTER_SANITIZE_URL));
-    }
-
-    protected function sendMessage(EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, FormInterface $form): Response
-    {
-        $broadcastList = [];
-        foreach ($form->get('to')->getData() as $receiver) {
-            switch ($receiver) {
-                case ContactType::ADMIN:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_ADMIN'));
-                    break;
-                case ContactType::ALL:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByActive(1));
-                    break;
-                case ContactType::ALL_MEMBER:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'));
-                    break;
-                case ContactType::ALL_PRODUCER:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_PRODUCER'));
-                    break;
-                case ContactType::ALL_REFERENT:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_REFERENT'));
-                    break;
-                case ContactType::MY_PRODUCERS:
-                    $broadcastList = array_merge($broadcastList, $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_PRODUCER', $this->getUser()));
-                    break;
-                default:
-                    $broadcastList = array_merge($broadcastList, [$entityManager->getRepository(User::class)->find(explode('_', $receiver)[1])]);
-                    break;
-            }
-        }
-        $message = $mailHelper->adminMailerForm($form, $broadcastList, $form->get('subject')->getData(), 'emails/email');
-        if ($form->has('email') && $form->get('email')->get('preview')->isClicked()) {
-            $formPreview = $this->createForm(PreviewEmailsType::class, ['messages' => [$message]], [
-                'action' => $this->generateUrl('preview'),
-            ]);
-
-            return $this->render('contact/form.html.twig', [
-                'messages' => [$message],
-                'formPreview' => $formPreview,
-                'form' => $form->createView(),
-                'title' => 'Contact',
-            ]);
-        }
-
-        return $this->forward('App\Controller\DocumentController::documentViewAction', [
-            'role' => $role,
-            'name' => 'homepage',
-        ]);
     }
 }
