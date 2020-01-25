@@ -4,9 +4,9 @@ namespace App\EntityManager;
 
 use App\Entity\Basket;
 use App\Entity\Credit;
-use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class CreditManager
@@ -34,8 +34,13 @@ class CreditManager
         return $credit;
     }
 
-    public function generateCredit(\DateTime $start, \DateTime $end, Product $product, User $member = null, int $quantity = null)
+    public function generateCredit(FormInterface $form)
     {
+        $start = $form->has('date') && null != $form->get('date')->getData() ? $form->get('date')->getData() : $form->get('start')->getData();
+        $end = $form->has('date') && null != $form->get('date')->getData() ? clone $form->get('date')->getData() : $form->get('end')->getData();
+        $product = $form->has('product') ? $form->get('product')->getData() : null;
+        $member = $form->has('member') ? $form->get('member')->getData() : null;
+        $quantity = $form->has('quantity') ? $form->get('quantity')->getData() : nul;
         $amounts = $this->entityManager->getRepository(Basket::class)->findAmoutByIntervalAndProductAndUser($start, $end, $product, $member, $quantity);
         foreach ($amounts as $amount) {
             if ($amount['totalAmount'] > 0) {

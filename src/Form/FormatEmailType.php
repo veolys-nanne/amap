@@ -22,6 +22,7 @@ class FormatEmailType extends AbstractType
             ->add('reference', TextType::class, [
                 'label' => false,
                 'attr' => ['class' => 'hidden extra-formMail'],
+                'required' => false,
             ])
             ->add('preview', SubmitType::class, ['label' => 'Prévisualiser', 'attr' => [
                 'class' => 'btn-info btn-block form-popin email-formMail',

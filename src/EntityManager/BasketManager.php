@@ -7,6 +7,7 @@ use App\Entity\Credit;
 use App\Entity\CreditBasketAmount;
 use App\Entity\Product;
 use App\Entity\ProductQuantity;
+use App\Entity\User;
 use App\Form\SynthesesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
@@ -16,11 +17,16 @@ class BasketManager
 {
     protected $entityManager;
     protected $tokenStorage;
+    protected $userManager;
 
-    public function __construct(EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        UserManager $userManager
+    ) {
         $this->entityManager = $entityManager;
         $this->tokenStorage = $tokenStorage;
+        $this->userManager = $userManager;
     }
 
     public function changeBasket(Basket $basket)
@@ -171,26 +177,29 @@ class BasketManager
         return $basket;
     }
 
-    public function generateSyntheses(FormInterface $form): array
+    public function generateSyntheses(FormInterface $form, User $user): array
     {
+        $roles = $user->getRoles();
+        $producers = $this->userManager->getProducers($user);
         $extra = [];
         $type = $form->get('type')->getData();
         $start = $form->get('start')->getData();
         $end = $form->get('end')->getData();
+        $needCreditGeneration = (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) && (SynthesesType::PRODUCT_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type);
         if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
-            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForProducer($start, $end);
+            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForProducer($start, $end, $producers);
             foreach ($credits as $credit) {
                 $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (bénéficiaire: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
         } elseif (SynthesesType::INVOICE_BY_MEMBER == $type) {
-            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForMember($start, $end);
+            $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForMember($start, $end, $producers);
             foreach ($credits as $credit) {
                 $extra[$credit['id']]['Avoirs'] = $extra[$credit['id']]['Avoirs'] ?? [];
                 $extra[$credit['id']]['Avoirs'][] = $credit['value'].' (producteur: '.$credit['name'].', objet: '.$credit['object'].', montant initial: '.$credit['totalAmount'].', montant restant: '.$credit['currentAmount'].')';
             }
         }
-        $items = $this->entityManager->getRepository(Basket::class)->getSyntheses($start, $end, $type);
+        $items = $this->entityManager->getRepository(Basket::class)->getSyntheses($start, $end, $type, $producers);
         foreach ($items as &$item) {
             if (isset($item['column']) && isset($item['value'])) {
                 $item[$item['column']] = $item['value'];
@@ -216,24 +225,24 @@ class BasketManager
             $id = $item['id'];
             $localTable[$line] = $localTable[$line] ?? array_fill_keys($columns, '');
             $localParameters[$line] = $localParameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
-            if (isset($item['credit_product'])) {
+            if ($needCreditGeneration) {
                 $localParameters[$line]['formValues'] = json_encode([
-                    'syntheses[product]' => $item['credit_product'],
-                    'syntheses[date]' => null,
-                    'syntheses[member]' => $item['credit_member'] ?? null,
-                    'syntheses[quantity]' => null,
+                    'generate_credit[product]' => $item['credit_product'],
+                    'generate_credit[date]' => null,
+                    'generate_credit[member]' => $item['credit_member'] ?? null,
+                    'generate_credit[quantity]' => null,
                 ]);
                 $localParameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
             }
             foreach ($columns as $column) {
                 if (isset($item[$column])) {
                     $localTable[$line][$column] = $item[$column];
-                    if (isset($item['credit_product'])) {
+                    if ($needCreditGeneration) {
                         $localParameters[$line][$column]['formValues'] = json_encode([
-                            'syntheses[product]' => $item['credit_product'],
-                            'syntheses[date]' => $item['credit_date'],
-                            'syntheses[member]' => $item['credit_member'] ?? null,
-                            'syntheses[quantity]' => $item['credit_quantity'] ?? null,
+                            'generate_credit[product]' => $item['credit_product'],
+                            'generate_credit[date]' => $item['credit_date'],
+                            'generate_credit[member]' => $item['credit_member'] ?? null,
+                            'generate_credit[quantity]' => $item['credit_quantity'] ?? null,
                         ]);
                         $localParameters[$line][$column]['subForm'] = isset($item['credit_quantity']) ? '.quantity' : '';
                         $localParameters[$line][$column]['credit_text'] = $item['credit_column_text'] ?? '';

@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\EntityManager\UserManager;
 use App\Form\ProductType;
-use App\Entity\User;
 use App\EntityManager\ProductManager;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,19 +22,16 @@ class ProductController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function productListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role)
+    public function productListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, UserManager $userManager, string $role)
     {
         $roles = $this->getUser()->getRoles();
-        $products = [];
+        $products = $entityManager->getRepository(Product::class)->findByProducers($userManager->getProducers($this->getUser()));
         $options = [
             'role' => $role,
             'title' => 'Avoirs',
+            'products' => $products,
         ];
-        if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
-            $producers = $entityManager->getRepository(User::class)->findByRole('ROLE_PRODUCER', $this->getUser());
-            $products = $entityManager->getRepository(Product::class)->findByProducers($producers);
-        } elseif (in_array('ROLE_PRODUCER', $roles)) {
-            $products = $entityManager->getRepository(Product::class)->findByProducers([$this->getUser()]);
+        if (!in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_REFERENT', $roles)) {
             foreach ($products as $product) {
                 $mailsParameters[$product->getId()] = [
                     'list' => [$product->getProducer()->getParent()],
@@ -46,10 +43,10 @@ class ProductController extends AbstractController
                     ],
                 ];
             }
-            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
-            $options['mailsParameters'] = $mailsParameters;
+            if (!empty($mailsParameters)) {
+                $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            }
         }
-        $options['products'] = $products;
 
         return $this->render('product/index.html.twig', $options);
     }

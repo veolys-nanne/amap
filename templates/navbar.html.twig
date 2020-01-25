@@ -39,7 +39,7 @@
                         Administration
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
-                        <a class="dropdown-item" href="{{ path('basket_syntheses') }}">Extraction</a>
+                        <a class="dropdown-item" href="{{ path('basket_syntheses', {role: 'admin'}) }}">Extraction</a>
                         <a class="dropdown-item" href="{{ path('planning_index') }}">Permanences</a>
                         <a class="dropdown-item" href="{{ path('document_index') }}">Documents</a>
                     </div>
@@ -54,12 +54,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('credit_index', {role: 'referent'}) }}">Avoirs</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('basket_syntheses', {role: 'referent'}) }}">Extraction</a>
+                </li>
             {% elseif is_granted('ROLE_PRODUCER') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('product_index', {role: 'producer'}) }}">Produits</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('credit_index', {role: 'producer'}) }}">Avoirs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('basket_syntheses', {role: 'producer'}) }}">Extraction</a>
                 </li>
             {% endif %}
             {% if is_granted('ROLE_MEMBER') %}

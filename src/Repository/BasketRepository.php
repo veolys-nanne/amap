@@ -60,7 +60,8 @@ class BasketRepository extends ServiceEntityRepository
 
     public function findCreditByDateForProducer(
         \DateTime $start,
-        \DateTime $end
+        \DateTime $end,
+        array $producers
     ): array {
         return $this->createQueryBuilder('b')
             ->join('b.creditBasketAmountCollection', 'cbac')
@@ -76,9 +77,11 @@ class BasketRepository extends ServiceEntityRepository
             ->where('b.date BETWEEN :start AND :end')
             ->andWhere('b.parent IS NOT NULL')
             ->andWhere('b.deleted = 0')
+            ->andWhere('c.producer IN (:producers)')
             ->setParameters([
                 'start' => $start->setTime(0, 0, 0),
                 'end' => $end->setTime(23, 59, 59),
+                'producers' => $producers,
             ])
             ->orderBy('c.date', 'asc')
             ->groupBy('c.id')
@@ -89,7 +92,8 @@ class BasketRepository extends ServiceEntityRepository
 
     public function findCreditByDateForMember(
         \DateTime $start,
-        \DateTime $end
+        \DateTime $end,
+        array $producers
     ): array {
         return $this->createQueryBuilder('b')
             ->join('b.creditBasketAmountCollection', 'cbac')
@@ -105,9 +109,11 @@ class BasketRepository extends ServiceEntityRepository
             ->where('b.date BETWEEN :start AND :end')
             ->andWhere('b.parent IS NOT NULL')
             ->andWhere('b.deleted = 0')
+            ->andWhere('c.producer IN (:producers)')
             ->setParameters([
                 'start' => $start->setTime(0, 0, 0),
                 'end' => $end->setTime(23, 59, 59),
+                'producers' => $producers,
             ])
             ->orderBy('c.date', 'asc')
             ->groupBy('c.id')
@@ -173,7 +179,8 @@ class BasketRepository extends ServiceEntityRepository
     public function getSyntheses(
         \DateTime $start,
         \DateTime $end,
-        int $type
+        int $type,
+        array $producers
     ): array {
         $needExtra = false;
         $start->setTime(0, 0, 0);
@@ -187,9 +194,11 @@ class BasketRepository extends ServiceEntityRepository
             ->where('b.date BETWEEN :start AND :end')
             ->andWhere('b.parent IS NOT NULL')
             ->andWhere('b.deleted = 0')
+            ->andWhere('p.producer IN (:producers)')
             ->setParameters([
                 'start' => $start,
                 'end' => $end,
+                'producers' => $producers,
             ]);
         switch ($type) {
             case SynthesesType::INVOICE_BY_MEMBER:
@@ -287,9 +296,11 @@ class BasketRepository extends ServiceEntityRepository
                 ->where('b.date BETWEEN :start AND :end')
                 ->andWhere('b.parent IS NOT NULL')
                 ->andWhere('b.deleted = 0')
+                ->andWhere('c.producer IN (:producers)')
                 ->setParameters([
                     'start' => $start->setTime(0, 0, 0),
                     'end' => $end->setTime(23, 59, 59),
+                    'producers' => $producers,
                 ])
                 ->addGroupBy('producer.id')
                 ->addGroupBy('user.id')

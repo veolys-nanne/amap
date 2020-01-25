@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Credit;
+use App\EntityManager\UserManager;
 use App\Form\CreditType;
-use App\Entity\User;
 use App\EntityManager\CreditManager;
 use App\Helper\MailHelper;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,19 +21,18 @@ class CreditController extends AbstractController
      *     requirements={"role"="admin|referent|producer"}
      * )
      */
-    public function creditListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role)
+    public function creditListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, UserManager $userManager, string $role)
     {
         $roles = $this->getUser()->getRoles();
-        $credits = [];
+        $credits = $entityManager->getRepository(Credit::class)->findByProducers($userManager->getProducers($this->getUser()));
         $options = [
             'role' => $role,
             'title' => 'Avoirs',
+            'credits' => $credits,
         ];
-        if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
-            $producers = $entityManager->getRepository(User::class)->findByRole('ROLE_PRODUCER', $this->getUser());
-            $credits = $entityManager->getRepository(Credit::class)->findByProducers($producers);
-        } elseif (in_array('ROLE_PRODUCER', $roles)) {
-            $credits = $entityManager->getRepository(Credit::class)->findByProducers([$this->getUser()]);
+
+        if (!in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_REFERENT', $roles)) {
+            $mailsParameters = [];
             foreach ($credits as $credit) {
                 $mailsParameters[$credit->getId()] = [
                     'list' => [$credit->getProducer()->getParent()],
@@ -45,9 +44,10 @@ class CreditController extends AbstractController
                     ],
                 ];
             }
-            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            if (!empty($mailsParameters)) {
+                $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            }
         }
-        $options['credits'] = $credits;
 
         return $this->render('credit/index.html.twig', $options);
     }
