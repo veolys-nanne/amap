@@ -2,14 +2,9 @@
 
 namespace App\Form;
 
-use App\Entity\Product;
-use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
@@ -27,6 +22,11 @@ class SynthesesType extends AbstractType
         self::PRODUCT_BY_MEMBER => 'Paniers des consom\'acteurs/trices',
         self::INVOICE_BY_PRODUCER => 'Pointage permanence et commande des producteurs/trices',
         self::INVOICE_BY_PRODUCER_BY_MEMBER => 'Pointage paiement des consom\'acteurs/trices',
+    ];
+    const LABELS_LIGHT = [
+        self::INVOICE_BY_MEMBER => 'Facture des consom\'acteurs/trices',
+        self::PRODUCT_BY_MEMBER => 'Paniers des consom\'acteurs/trices',
+        self::INVOICE_BY_PRODUCER => 'Pointage permanence et commande des producteurs/trices',
     ];
     const FILES = [
         self::INVOICE_BY_MEMBER => 'facture_des_consomacteurs_trices',
@@ -49,43 +49,19 @@ class SynthesesType extends AbstractType
                 'widget' => 'single_text',
                 'format' => 'dd/MM/yyyy',
                 'attr' => ['autocomplete' => 'off', 'class' => 'date-picker'],
-            ])
-            ->add('type', ChoiceType::class, [
+            ]);
+        if ($options['light']) {
+            $builder->add('type', ChoiceType::class, [
+                'label' => 'Type',
+                'choices' => array_flip(self::LABELS_LIGHT),
+            ]);
+        } else {
+            $builder->add('type', ChoiceType::class, [
                 'label' => 'Type',
                 'choices' => array_flip(self::LABELS),
-            ])
-            ->add('product', EntityType::class, [
-                'class' => Product::class,
-                'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
-                    return $entityRepository->createQueryBuilder('product');
-                },
-                'label' => false,
-                'required' => false,
-                'attr' => ['class' => 'hidden'],
-            ])
-            ->add('member', EntityType::class, [
-                'class' => User::class,
-                'query_builder' => function (ServiceEntityRepository $entityRepository) use ($options) {
-                    return $entityRepository->createQueryBuilder('user');
-                },
-                'label' => false,
-                'required' => false,
-                'attr' => ['class' => 'hidden'],
-            ])
-            ->add('date', DateType::class, [
-                'widget' => 'single_text',
-                'label' => false,
-                'required' => false,
-                'attr' => ['class' => 'hidden'],
-            ])
-            ->add('quantity', IntegerType::class, [
-                'label' => 'Quantité',
-                'required' => false,
-                'attr' => ['class' => 'quantity form-popin'],
-                'label_attr' => ['class' => 'form-popin'],
-            ])
-            ->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
-            ->add('submitCredit', SubmitType::class, ['label' => 'Générer', 'attr' => ['class' => 'btn-success btn-block form-popin', 'data-sub-form' => '']])
+            ]);
+        }
+        $builder->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
         ;
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
             $builder = $event->getForm();
@@ -119,5 +95,8 @@ class SynthesesType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('allow_extra_fields', true);
+        $resolver->setDefaults([
+            'light' => false,
+        ]);
     }
 }

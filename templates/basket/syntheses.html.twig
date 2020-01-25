@@ -4,7 +4,7 @@
     {% set title = '' %}
     {% if isPdf is not defined or not isPdf %}
         {{ form(form) }}
-        {% if formMailExtraction %}
+        {% if formMail is defined %}
             <button
                     class="btn btn-block btn-success"
                     data-button=".email-formMail"
@@ -13,6 +13,9 @@
                     data-form-values="{&quot;syntheses[email][reference]&quot;:&quot;formMail&quot;}">
                 Envoyer par mail
             </button>
+        {% endif %}
+        {% if formCredit is defined %}
+            {{ form(formCredit) }}
         {% endif %}
     {% endif %}
     <h4>{{ title }}</h4>

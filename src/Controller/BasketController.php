@@ -8,6 +8,7 @@ use App\EntityManager\CreditManager;
 use App\EntityManager\ProductManager;
 use App\Form\BillFilterType;
 use App\Form\CommandType;
+use App\Form\GenerateCreditType;
 use App\Form\ModelType;
 use App\Form\SynthesesType;
 use App\EntityManager\BasketManager;
@@ -210,44 +211,64 @@ class BasketController extends AbstractController
 
     /**
      * @Route(
-     *     "/admin/syntheses/basket",
-     *     name="basket_syntheses",
+     *     "/admin/basket/frozen/{id}",
+     *     name="basket_frozen",
      * )
      */
-    public function synthesesAction(Request $request, MailHelper $mailHelper, BasketManager $basketManager, CreditManager $creditManager, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
+    public function frozenAction(EntityManagerInterface $entityManager, BasketManager $basketManager, Basket $basket)
     {
-        $form = $this->createForm(SynthesesType::class);
-        $form->handleRequest($request);
-        $type = $form->has('type') ? $form->get('type')->getData() : '';
-        $isPdf = false;
+        $frozen = !$basket->isFrozen();
+        $basket->setFrozen($frozen);
+        $basketManager->changeBasket($basket);
+        $entityManager->flush();
+        $this->addFlash('success', $frozen ? 'Le modèle de panier a été fermé.' : 'Le modèle de panier a été réouvert.');
+
+        return $this->forward('App\Controller\BasketController::modelListingAction');
+    }
+
+    /**
+     * @Route(
+     *     "/{role}/syntheses/basket",
+     *     name="basket_syntheses",
+     *     requirements={"role"="admin|referent|producer"},
+     * )
+     */
+    public function synthesesAction(Request $request, string $role, MailHelper $mailHelper, BasketManager $basketManager, CreditManager $creditManager, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
+    {
+        $roles = $this->getUser()->getRoles();
         $options = [
             'title' => 'Extraction',
-            'form' => $form->createView(),
-            'type' => $type,
+            'isPdf' => false,
         ];
-        $options['formMailExtraction'] = false;
-        if ($form->isSubmitted() && $form->isValid()) {
-            $isPdf = $form->has('pdf') && $form->get('pdf')->isClicked();
-            $options['isPdf'] = $isPdf;
-            if ($form->has('submitCredit') && $form->get('submitCredit')->isClicked()) {
-                $creditManager->generateCredit(
-                    $form->has('date') && null != $form->get('date')->getData() ? $form->get('date')->getData() : $form->get('start')->getData(),
-                    $form->has('date') && null != $form->get('date')->getData() ? clone $form->get('date')->getData() : $form->get('end')->getData(),
-                    $form->has('product') ? $form->get('product')->getData() : null,
-                    $form->has('member') ? $form->get('member')->getData() : null,
-                    $form->has('quantity') ? $form->get('quantity')->getData() : null
-                );
+        $options[''] = false;
+        $form = $this->createForm(SynthesesType::class, null, [
+            'light' => !in_array('ROLE_ADMIN', $roles),
+        ]);
+        $form->handleRequest($request);
+        $options['form'] = $form->createView();
+        $type = $form->has('type') ? $form->get('type')->getData() : '';
+        $options['type'] = $type;
+        if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
+            $formCredit = $this->createForm(GenerateCreditType::class, [
+                'start' => $form->get('start')->getData(),
+                'end' => $form->get('end')->getData(),
+            ]);
+            $formCredit->handleRequest($request);
+            if ($formCredit->isSubmitted() && $formCredit->isValid()) {
+                $creditManager->generateCredit($formCredit);
                 $entityManager->flush();
 
-                return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => 'admin']);
+                return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => $role]);
             }
-
-            list($tables, $parameters) = $basketManager->generateSyntheses($form);
+            $options['formCredit'] = $formCredit->createView();
+        }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $options['isPdf'] = $form->has('pdf') && $form->get('pdf')->isClicked();
+            list($tables, $parameters) = $basketManager->generateSyntheses($form, $this->getUser());
             $options['tables'] = $tables;
             $options['parameters'] = $parameters;
             $mailsParameters = [];
-            if (SynthesesType::INVOICE_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type || SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
-                $options['formMailExtraction'] = true;
+            if (in_array('ROLE_ADMIN', $roles) && (SynthesesType::INVOICE_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type || SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type)) {
                 foreach ($tables as $tableName => $table) {
                     $mailsParameters['formMail'][$tableName] = [
                         'list' => [$parameters[$tableName]],
@@ -267,9 +288,8 @@ class BasketController extends AbstractController
                 $options = array_merge($options, $mailHelper->handleMailForm($mailsParameters, $form));
             }
         }
-        $options['isPdf'] = $isPdf;
         $html = $this->renderView('basket/syntheses.html.twig', $options);
-        if ($isPdf) {
+        if ($options['isPdf']) {
             $css = $form->has('css') ? $form->get('css')->getData() : 'pdf-color-page-break';
             $filename = null !== $type ? SynthesesType::FILES[$type] : 'extraction';
             if ($form->has('start') && $form->get('start')->getData()) {
@@ -286,23 +306,6 @@ class BasketController extends AbstractController
         }
 
         return new Response($html);
-    }
-
-    /**
-     * @Route(
-     *     "/admin/basket/frozen/{id}",
-     *     name="basket_frozen",
-     * )
-     */
-    public function frozenAction(EntityManagerInterface $entityManager, BasketManager $basketManager, Basket $basket)
-    {
-        $frozen = !$basket->isFrozen();
-        $basket->setFrozen($frozen);
-        $basketManager->changeBasket($basket);
-        $entityManager->flush();
-        $this->addFlash('success', $frozen ? 'Le modèle de panier a été fermé.' : 'Le modèle de panier a été réouvert.');
-
-        return $this->forward('App\Controller\BasketController::modelListingAction');
     }
 
     /**

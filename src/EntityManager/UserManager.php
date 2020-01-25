@@ -52,4 +52,21 @@ class UserManager
             }
         }
     }
+
+    public function getProducers(User $user)
+    {
+        $roles = $user->getRoles();
+        $producers = [];
+        if (in_array('ROLE_ADMIN', $roles)) {
+            $producers = $this->entityManager->getRepository(User::class)->findByRole('ROLE_PRODUCER');
+        }
+        if (in_array('ROLE_REFERENT', $roles)) {
+            $producers = array_merge($producers, $user->getChildren()->toArray());
+        }
+        if (in_array('ROLE_PRODUCER', $roles)) {
+            $producers = array_merge($producers, [$user]);
+        }
+
+        return array_unique($producers);
+    }
 }

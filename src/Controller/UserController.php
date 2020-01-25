@@ -119,7 +119,6 @@ class UserController extends AbstractController
             $user->addRole('ROLE_'.strtoupper($type));
         }
         $form = $this->createForm(UserType::class, $user, [
-            'action' => $this->generateUrl($request->attributes->get('_route'), $request->attributes->get('_route_params')),
             'role' => $role,
             'type' => $type,
             'isAccount' => $isAccount,
@@ -210,9 +209,17 @@ class UserController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Le mot de passe a été mis à jour.');
 
-            return $this->forward('App\Controller\UserController::userEditAction', [
-                'role' => $role,
-            ]);
+            $options = ['role' => $role];
+            if (!$isAccount) {
+                $roles = $user->getRoles();
+                $options['id'] = $user->getId();
+                $options['type'] = in_array('ROLE_ADMIN', $roles) ? 'admin' : (
+                    in_array('ROLE_REFERENT', $roles) ? 'referent' : (
+                        in_array('ROLE_PRODUCER', $roles) ? 'producer' : 'member'
+                ));
+            }
+
+            return $this->forward('App\Controller\UserController::userEditAction', $options);
         }
 
         $title = 'Mise à jour du mot de passe';

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\Traits\SoftDeletableTrait;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -119,9 +121,14 @@ class User implements UserInterface
     private $new = true;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="children")
      */
     private $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="parent")
+     */
+    private $children;
 
     /**
      * @ORM\Column(type="array")
@@ -137,6 +144,11 @@ class User implements UserInterface
      * @ORM\Column(type="array", nullable=true)
      */
     private $deleveries = [];
+
+    public function __construct()
+    {
+        $this->children = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -241,6 +253,11 @@ class User implements UserInterface
     public function getParent(): ?User
     {
         return $this->parent;
+    }
+
+    public function getChildren(): ?Collection
+    {
+        return $this->children;
     }
 
     public function getRoles(): array
@@ -377,6 +394,16 @@ class User implements UserInterface
     public function setParent(User $user): self
     {
         $this->parent = $user;
+
+        return $this;
+    }
+
+    public function addChildren(User $user): self
+    {
+        if (!$this->children->contains($user)) {
+            $this->children->add($user);
+            $user->setParent($this);
+        }
 
         return $this;
     }
