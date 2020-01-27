@@ -35,13 +35,13 @@ class ContactController extends AbstractController
             'user' => $user,
         ]);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
-                $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => $role,
-                    'name' => 'homepage',
-                ]);
+            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            if (null == $return) {
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+            }
+
+            return new Response($return);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -75,11 +75,12 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
-                $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => $role,
-                    'name' => 'homepage',
-                ]);
+            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            if (null == $return) {
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+            }
+
+            return new Response($return);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -116,11 +117,12 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return new Response($mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser())) ??
-                $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => 'producer',
-                    'name' => 'homepage',
-                ]);
+            $return = $mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser());
+            if (null == $return) {
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => 'producer', 'name' => 'homepage']);
+            }
+
+            return new Response($return);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -154,11 +156,12 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return new Response($mailHelper->sendMessage($entityManager, $role, $form, $this->getUser())) ??
-                $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => $role,
-                    'name' => 'homepage',
-                ]);
+            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            if (null == $return) {
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+            }
+
+            return new Response($return);
         }
 
         return $this->render('contact/form.html.twig', [
@@ -195,11 +198,12 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return new Response($mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser())) ??
-                $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => 'producer',
-                    'name' => 'homepage',
-                ]);
+            $return = $mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser());
+            if (null == $return) {
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => 'producer', 'name' => 'homepage']);
+            }
+
+            return new Response($return);
         }
 
         return $this->render('contact/form.html.twig', [

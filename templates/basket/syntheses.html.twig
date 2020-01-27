@@ -4,7 +4,7 @@
     {% set title = '' %}
     {% if isPdf is not defined or not isPdf %}
         {{ form(form) }}
-        {% if formMail is defined %}
+        {% if form.email is defined %}
             <button
                     class="btn btn-block btn-success"
                     data-button=".email-formMail"

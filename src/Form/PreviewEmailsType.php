@@ -15,7 +15,7 @@ class PreviewEmailsType extends AbstractType
 
         foreach ($builder->getData()['messages']  as $message) {
             $data[] = [
-                'to' => array_keys($message->getTo()),
+                'to' => array_keys($message->getBcc()),
                 'subject' => $message->getSubject(),
                 'body' => $message->getBody(),
                 'part' => $message->getChildren()[0]->getBody(),

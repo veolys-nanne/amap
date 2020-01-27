@@ -1,0 +1,7 @@
+{% extends base %}
+
+{% block body %}
+    <h3>{{ maillog.subject }}</h3>
+    <i>{{ maillog.sentAt|date('d/m/Y') }}</i>
+    {{ maillog.content|raw }}
+{% endblock %}

@@ -57,7 +57,6 @@ class SecurityController extends AbstractController
                 $user->setResetPassword($token);
                 $entityManager->persist($user);
                 $entityManager->flush();
-
                 $message = $mailHelper->getMailForList('Réinitialisation mot de passe AMAP hommes de terre', [$user]);
                 if (null !== $message) {
                     $message
@@ -75,10 +74,6 @@ class SecurityController extends AbstractController
                             ]),
                             'text/plain'
                         );
-
-                    if ($request->request->get('preview')) {
-                        return $mailHelper->getMessagesPreview([$message]);
-                    }
                     $mailHelper->sendMessages([$message]);
 
                     return $this->forward('App\Controller\SecurityController::login');

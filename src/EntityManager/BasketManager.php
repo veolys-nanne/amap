@@ -185,7 +185,7 @@ class BasketManager
         $type = $form->get('type')->getData();
         $start = $form->get('start')->getData();
         $end = $form->get('end')->getData();
-        $needCreditGeneration = (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) && (SynthesesType::PRODUCT_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type);
+        $needCreditGeneration = in_array('ROLE_ADMIN', $roles) && (SynthesesType::PRODUCT_BY_MEMBER == $type || SynthesesType::INVOICE_BY_PRODUCER == $type);
         if (SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
             $credits = $this->entityManager->getRepository(Basket::class)->findCreditByDateForProducer($start, $end, $producers);
             foreach ($credits as $credit) {
@@ -250,13 +250,13 @@ class BasketManager
                 }
             }
             if (isset($extra[$id])) {
-                $localParameters['extra'] = $extra[$id];
+                $parameters[$table]['extra'] = $extra[$id];
             }
             if (isset($item['broadcastList'])) {
-                $localParameters['broadcastList'] = $item['broadcastList'];
+                $parameters[$table]['broadcastList'] = $item['broadcastList'];
             }
             if (isset($item['email'])) {
-                $localParameters['email'] = $item['email'];
+                $parameters[$table]['email'] = $item['email'];
             }
         }
 

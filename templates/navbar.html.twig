@@ -32,6 +32,7 @@
                         <a class="dropdown-item" href="{{ path('product_index', {role: 'admin'}) }}">Produits</a>
                         <a class="dropdown-item" href="{{ path('basket_models') }}">Modèles</a>
                         <a class="dropdown-item" href="{{ path('credit_index', {role: 'admin'}) }}">Avoirs</a>
+                        <a class="dropdown-item" href="{{ path('basket_syntheses', {role: 'admin'}) }}">Extraction</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -39,7 +40,6 @@
                         Administration
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
-                        <a class="dropdown-item" href="{{ path('basket_syntheses', {role: 'admin'}) }}">Extraction</a>
                         <a class="dropdown-item" href="{{ path('planning_index') }}">Permanences</a>
                         <a class="dropdown-item" href="{{ path('document_index') }}">Documents</a>
                     </div>
@@ -48,24 +48,26 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('user_index', {role: 'referent', type: 'producer'}) }}">Producteurs/trices</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('product_index', {role: 'referent'}) }}">Produits</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('credit_index', {role: 'referent'}) }}">Avoirs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('basket_syntheses', {role: 'referent'}) }}">Extraction</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBasket" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Panier
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownBasket">
+                        <a class="dropdown-item" href="{{ path('product_index', {role: 'referent'}) }}">Produits</a>
+                        <a class="dropdown-item" href="{{ path('credit_index', {role: 'referent'}) }}">Avoirs</a>
+                        <a class="dropdown-item" href="{{ path('basket_syntheses', {role: 'referent'}) }}">Extraction</a>
+                    </div>
                 </li>
             {% elseif is_granted('ROLE_PRODUCER') %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('product_index', {role: 'producer'}) }}">Produits</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('credit_index', {role: 'producer'}) }}">Avoirs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('basket_syntheses', {role: 'producer'}) }}">Extraction</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBasket" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Panier
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownBasket">
+                        <a class="dropdown-item" href="{{ path('product_index', {role: 'producer'}) }}">Produits</a>
+                        <a class="dropdown-item" href="{{ path('credit_index', {role: 'producer'}) }}">Avoirs</a>
+                        <a class="dropdown-item" href="{{ path('basket_syntheses', {role: 'producer'}) }}">Extraction</a>
+                    </div>
                 </li>
             {% endif %}
             {% if is_granted('ROLE_MEMBER') %}
@@ -86,10 +88,13 @@
                 <a class="nav-link" href="{{ path('user_profil', {role: role}) }}" title="Mon profil"><i class="fas fa-user"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}" title="Envoyer un mail"><i class="far fa-envelope"></i></a>
+                <a class="nav-link" href="{{ path('maillog_index', {role: role}) }}" title="Envoyer un mail"><i class="fas fa-mail-bulk"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('user_view', {role: role}) }}" title="fiche-contact des utilisateurs"><i class="fas fa-users"></i></a>
+                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}" title="Voir mes mails"><i class="far fa-envelope"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('user_view', {role: role}) }}" title="fiche contact des utilisateurs"><i class="fas fa-users"></i></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ path('logout') }}" title="Se déconnecter"><i class="fas fa-sign-out-alt"></i></a>

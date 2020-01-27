@@ -68,7 +68,7 @@ class SynthesesType extends AbstractType
             $type = $event->getData()['type'] ?? null;
             if (null !== $type) {
                 if (self::INVOICE_BY_MEMBER == $type || self::INVOICE_BY_PRODUCER == $type || self::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
-                    $builder->add('email', FormatEmailType::class, ['label' => false]);
+                    $builder->add('email', FormatEmailType::class, ['label' => false, 'attr' => ['class' => 'form-popin']]);
                 }
                 $builder
                     ->add('css', ChoiceType::class, [

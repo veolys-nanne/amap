@@ -248,7 +248,7 @@ class BasketController extends AbstractController
         $options['form'] = $form->createView();
         $type = $form->has('type') ? $form->get('type')->getData() : '';
         $options['type'] = $type;
-        if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_REFERENT', $roles)) {
+        if (in_array('ROLE_ADMIN', $roles)) {
             $formCredit = $this->createForm(GenerateCreditType::class, [
                 'start' => $form->get('start')->getData(),
                 'end' => $form->get('end')->getData(),
