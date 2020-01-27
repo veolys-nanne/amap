@@ -15,8 +15,7 @@ class FormatEmailType extends AbstractType
         $builder
             ->add('extra', TextareaType::class, [
                 'label' => 'Texte Complémentaire',
-                'attr' => ['class' => 'form-popin extra-formMail'],
-                'label_attr' => ['class' => 'form-popin'],
+                'attr' => ['class' => 'extra-formMail'],
                 'required' => false,
             ])
             ->add('reference', TextType::class, [
@@ -25,12 +24,12 @@ class FormatEmailType extends AbstractType
                 'required' => false,
             ])
             ->add('preview', SubmitType::class, ['label' => 'Prévisualiser', 'attr' => [
-                'class' => 'btn-info btn-block form-popin email-formMail',
+                'class' => 'btn-info btn-block email-formMail',
             ]])
             ->add('email', SubmitType::class, [
                 'label' => 'Envoyer',
                 'attr' => [
-                    'class' => 'btn-success btn-block form-popin email-formMail',
+                    'class' => 'btn-success btn-block email-formMail',
                     'data-sub-form' => '.extra-formMail',
                     'data-button' => '.email-formMail',
                 ],

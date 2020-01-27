@@ -4,7 +4,6 @@ namespace App\Helper;
 
 use App\Entity\User;
 use App\Form\ContactType;
-use App\Form\FormatEmailType;
 use App\Form\PreviewEmailsType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -142,7 +141,7 @@ class MailHelper
     {
         $results = [];
         $builder = $this->formFactory->createNamedBuilder('formMail');
-        $form = $builder->add('email', FormatEmailType::class, ['label' => false])->getForm();
+        $form = $builder->add('email', ['label' => false, 'attr' => ['class' => 'form-popin']])->getForm();
         $results['formMail'] = $form->createView();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

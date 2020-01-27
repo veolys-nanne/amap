@@ -63,11 +63,11 @@ class SynthesesType extends AbstractType
         }
         $builder->add('submit', SubmitType::class, ['label' => 'Extraire', 'attr' => ['class' => 'btn-success btn-block']])
         ;
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
             $builder = $event->getForm();
             $type = $event->getData()['type'] ?? null;
             if (null !== $type) {
-                if (self::INVOICE_BY_MEMBER == $type || self::INVOICE_BY_PRODUCER == $type || self::INVOICE_BY_PRODUCER_BY_MEMBER == $type) {
+                if (!$options['light'] && (self::INVOICE_BY_MEMBER == $type || self::INVOICE_BY_PRODUCER == $type || self::INVOICE_BY_PRODUCER_BY_MEMBER == $type)) {
                     $builder->add('email', FormatEmailType::class, ['label' => false, 'attr' => ['class' => 'form-popin']]);
                 }
                 $builder
