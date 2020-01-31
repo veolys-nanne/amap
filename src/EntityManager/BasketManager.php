@@ -200,9 +200,9 @@ class BasketManager
             }
         }
         $items = $this->entityManager->getRepository(Basket::class)->getSyntheses($start, $end, $type, $producers);
-        foreach ($items as &$item) {
+        foreach ($items as $key => $item) {
             if (isset($item['column']) && isset($item['value'])) {
-                $item[$item['column']] = $item['value'];
+                $items[$key][$item['column']] = $item['value'];
             }
         }
         $columns = $this->entityManager->getRepository(Basket::class)->getColumns($start, $end, $type);
@@ -211,44 +211,20 @@ class BasketManager
         foreach ($items as $item) {
             $table = $item['table'];
             $tables[$table] = $tables[$table] ?? [];
-            $localTable = &$tables[$table];
             $parameters[$table] = $parameters[$table] ?? [];
-            $localParameters = &$parameters[$table];
             if (isset($item['tbody'])) {
                 $tbody = $item['tbody'];
                 $tables[$table][$tbody] = $tables[$table][$tbody] ?? [];
-                $localTable = &$tables[$table][$tbody];
                 $parameters[$table][$tbody] = $parameters[$table][$tbody] ?? [];
-                $localParameters = &$parameters[$table][$tbody];
+                list($tables[$table][$tbody], $parameters[$table][$tbody]) = $this->setValues(
+                    $item, $tables[$table][$tbody], $parameters[$table][$tbody], $columns, $item['line'], $needCreditGeneration
+                );
+            } else {
+                list($tables[$table], $parameters[$table]) = $this->setValues(
+                    $item, $tables[$table], $parameters[$table], $columns, $item['line'], $needCreditGeneration
+                );
             }
-            $line = $item['line'];
             $id = $item['id'];
-            $localTable[$line] = $localTable[$line] ?? array_fill_keys($columns, '');
-            $localParameters[$line] = $localParameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
-            if ($needCreditGeneration) {
-                $localParameters[$line]['formValues'] = json_encode([
-                    'generate_credit[product]' => $item['credit_product'],
-                    'generate_credit[date]' => null,
-                    'generate_credit[member]' => $item['credit_member'] ?? null,
-                    'generate_credit[quantity]' => null,
-                ]);
-                $localParameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
-            }
-            foreach ($columns as $column) {
-                if (isset($item[$column])) {
-                    $localTable[$line][$column] = $item[$column];
-                    if ($needCreditGeneration) {
-                        $localParameters[$line][$column]['formValues'] = json_encode([
-                            'generate_credit[product]' => $item['credit_product'],
-                            'generate_credit[date]' => $item['credit_date'],
-                            'generate_credit[member]' => $item['credit_member'] ?? null,
-                            'generate_credit[quantity]' => $item['credit_quantity'] ?? null,
-                        ]);
-                        $localParameters[$line][$column]['subForm'] = isset($item['credit_quantity']) ? '.quantity' : '';
-                        $localParameters[$line][$column]['credit_text'] = $item['credit_column_text'] ?? '';
-                    }
-                }
-            }
             if (isset($extra[$id])) {
                 $parameters[$table]['extra'] = $extra[$id];
             }
@@ -270,5 +246,45 @@ class BasketManager
         foreach ($baskets as $subBasket) {
             $subBasket->setDeleted(true);
         }
+    }
+
+    protected function setValues(array $item, array $table, array $parameters, array $columns, string $line, bool $needCreditGeneration): array
+    {
+        $table[$line] = $table[$line] ?? array_fill_keys($columns, '');
+        $parameters[$line] = $parameters[$line] ?? ['color' => $item['color'] ?? 'transparent'];
+        if ($needCreditGeneration) {
+            $parameters[$line]['formValues'] = json_encode([
+                'generate_credit[product]' => $item['credit_product'],
+                'generate_credit[date]' => null,
+                'generate_credit[member]' => $item['credit_member'] ?? null,
+                'generate_credit[quantity]' => null,
+            ]);
+            $parameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
+        }
+        foreach ($item as $key => $value) {
+            if (preg_match('/^data_(.*)/', $key, $matches)) {
+                $parameters[$line]['data'][preg_replace('/_/', '-', $matches[1])] = $value;
+            }
+        }
+        if (isset($item['data'])) {
+            $parameters[$line]['data'] = $item['data'];
+        }
+        foreach ($columns as $column) {
+            if (isset($item[$column])) {
+                $table[$line][$column] = $item[$column];
+                if ($needCreditGeneration) {
+                    $parameters[$line][$column]['formValues'] = json_encode([
+                        'generate_credit[product]' => $item['credit_product'],
+                        'generate_credit[date]' => $item['credit_date'],
+                        'generate_credit[member]' => $item['credit_member'] ?? null,
+                        'generate_credit[quantity]' => $item['credit_quantity'] ?? null,
+                    ]);
+                    $parameters[$line][$column]['subForm'] = isset($item['credit_quantity']) ? '.quantity' : '';
+                    $parameters[$line][$column]['credit_text'] = $item['credit_column_text'] ?? '';
+                }
+            }
+        }
+
+        return [$table, $parameters];
     }
 }

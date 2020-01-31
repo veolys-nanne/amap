@@ -1,7 +1,13 @@
 {% macro tbody(lines, parameters, type) %}
     {% for lineName, columns in lines %}
         <tr style="background-color:{{ parameters[lineName].color }}">
-            <th>
+            <th
+            {% if parameters[lineName].data is defined %}
+                {% for key, value in parameters[lineName].data %}
+                    data-{{ key }}="{{ value }}"
+                {% endfor  %}
+            {% endif %}
+            >
                 {{ lineName }}
                 {% if parameters[lineName].formValues is defined %}
                     <a href="#" class="no-print text-dark create-credit" data-button="#generate_credit_submit" data-sub-form="" data-form="[name='generate_credit']" data-form-values="{{ parameters[lineName].formValues }}" data-text="{{ parameters[lineName].credit_text }}"><i class="fas fa-coins"></i></a>
@@ -9,7 +15,7 @@
             </th>
             {% for column, value in columns %}
                 <td>
-                    {{ value }}
+                    {{ value|raw }}
                     {% if parameters[lineName][column].formValues is defined %}
                         <a href="#" class="no-print text-dark create-credit" data-button="#generate_credit_submit" data-sub-form="{{ parameters[lineName][column].subForm }}" data-form="[name='generate_credit']" data-form-values="{{ parameters[lineName][column].formValues }}" data-text="{{ parameters[lineName][column].credit_text }}"><i class="fas fa-coins"></i></a>
                     {% endif %}
@@ -38,36 +44,38 @@
         du {{ form.start.vars.value }} au {{ form.end.vars.value }}
     </h4>
 {% endif %}
-<table class="table table-striped table-hover">
-    <thead>
-    <tr>
-        <th>{{ tableName }}</th>
+<div class="type-{{ form.type.vars.value }}">
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th>{{ tableName }}</th>
+            {% if table|first|first is iterable %}
+                {% for name, column in table|first|first %}
+                    <th>{{ name }}</th>
+                {% endfor %}
+            {% else %}
+                {% for name, column in table|first %}
+                    <th>{{ name }}</th>
+                {% endfor %}
+            {% endif %}
+        </tr>
+        </thead>
         {% if table|first|first is iterable %}
-            {% for name, column in table|first|first %}
-                <th>{{ name }}</th>
+            {% for tbody, lines in table %}
+                <tbody>
+                    <tr style="background-color:{{ parameters[tbody][lines|keys|first].color }}">
+                        <th colspan="{{ 1 + lines|first|length }}">{{ tbody }}</th>
+                    </tr>
+                    {{ _self.tbody(lines, parameters[tbody], type) }}
+                </tbody>
             {% endfor %}
         {% else %}
-            {% for name, column in table|first %}
-                <th>{{ name }}</th>
-            {% endfor %}
-        {% endif %}
-    </tr>
-    </thead>
-    {% if table|first|first is iterable %}
-        {% for tbody, lines in table %}
             <tbody>
-                <tr style="background-color:{{ parameters[tbody][lines|keys|first].color }}">
-                    <th colspan="{{ 1 + lines|first|length }}">{{ tbody }}</th>
-                </tr>
-                {{ _self.tbody(lines, parameters[tbody], type) }}
+                {{ _self.tbody(table, parameters, type) }}
             </tbody>
-        {% endfor %}
-    {% else %}
-        <tbody>
-            {{ _self.tbody(table, parameters, type) }}
-        </tbody>
-    {% endif %}
-</table>
+        {% endif %}
+    </table>
+</div>
 {% if parameters.extra is defined %}
     {% for label, extra in parameters.extra %}
         <div class="informations">

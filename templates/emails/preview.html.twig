@@ -3,7 +3,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    {{ form(formPreview.createView) }}
+                    {{ form(formPreview.createView, {attr: {class : "full-width"}}) }}
                 </div>
                 <div class="modal-body">
                     {% for message in messages %}
@@ -14,7 +14,7 @@
                             </div>
                             <div class="display-row">
                                 <div class="display-cell">À: </div>
-                                <div class="display-cell">{{ message.getTo|keys|join(', ') }}</div>
+                                <div class="display-cell">{{ message.getBcc|keys|join(', ') }}</div>
                             </div>
                             <div class="display-row">
                                 <div class="display-cell">Sujet: </div>
@@ -25,7 +25,7 @@
                     {% endfor %}
                 </div>
                 <div class="modal-footer">
-                    {{ form(formPreview.createView) }}
+                    {{ form(formPreview.createView, {attr: {class : "full-width"}}) }}
                 </div>
             </div>
         </div>
