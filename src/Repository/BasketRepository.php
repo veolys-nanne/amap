@@ -272,6 +272,8 @@ class BasketRepository extends ServiceEntityRepository
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as line')
                     ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\')) as tbody')
                     ->addSelect('SUM(coalesce(pqc.price, p.price) * coalesce(pqc.quantity, 0)) as Total')
+                    ->addSelect('user.email as data_email')
+                    ->addSelect('coalesce(user.broadcastList, \'a:0:{}\') as data_broadcast_list')
                     ->orderBy('producer.order', 'asc')
                     ->addOrderBy('producer.lastname', 'asc')
                     ->addOrderBy('user.lastname', 'asc')

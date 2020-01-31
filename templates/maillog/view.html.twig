@@ -3,5 +3,15 @@
 {% block body %}
     <h3>{{ maillog.subject }}</h3>
     <i>{{ maillog.sentAt|date('d/m/Y') }}</i>
-    {{ maillog.content|raw }}
+    <div class="mail-log" data-id="{{ maillog.id }}" data-url="{{ path('maillog_update', {role: role}) }}">
+        {{ maillog.content|raw }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('.mail-log .type-{{ constant('App\\Form\\SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER') }}').addMailForm();
+        });
+    </script>
 {% endblock %}

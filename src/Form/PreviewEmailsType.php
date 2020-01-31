@@ -28,6 +28,6 @@ class PreviewEmailsType extends AbstractType
                 'entry_options' => ['label' => false],
                 'data' => $data,
             ])
-            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn btn-success']]);
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
     }
 }
