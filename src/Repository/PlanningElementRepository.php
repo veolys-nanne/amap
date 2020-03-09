@@ -19,6 +19,7 @@ class PlanningElementRepository extends ServiceEntityRepository
             ->innerJoin('pe.planning', 'p')
             ->innerJoin('pe.members', 'u')
             ->select('pe.date as date')
+            ->addSelect('pe.id as id')
             ->addSelect('u.email as email')
             ->addSelect('u.broadcastList as broadcastList')
             ->where('p.deleted = 0')

@@ -56,7 +56,7 @@ class PlanningType extends AbstractType
                     $members->add($availabilitySchedule->getMember());
                 }
             } else {
-                $members = $this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER');
+                $members = $this->entityManager->getRepository(User::class)->findOnlyMemberActive('ROLE_MEMBER');
             }
             $builder
                 ->add('members', EntityType::class, [

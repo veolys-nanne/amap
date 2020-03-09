@@ -37,9 +37,11 @@
                     '</div>' +
                 '</div>'
             );
-            $subForm.each(function() {
-                $(this).detachTemp().appendTo($('.modal-form', $modal));
-            });
+            if ($subForm) {
+                $subForm.each(function () {
+                    $(this).detachTemp().appendTo($('.modal-form', $modal));
+                });
+            }
             $button.each(function() {
                 $(this).detachTemp().appendTo($('.modal-footer', $modal));
             });

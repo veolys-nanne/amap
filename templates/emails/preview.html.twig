@@ -2,8 +2,9 @@
     <div id="main-modal" class="modal" role="dialog" aria-labelledby="dataExtraLabel">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
+                <div class="hidden">{{ form(formPreview) }}</div>
                 <div class="modal-header">
-                    {{ form(formPreview.createView, {attr: {class : "full-width"}}) }}
+                    <button type="button" class="btn-success btn-block btn preview">Envoyer</button>
                 </div>
                 <div class="modal-body">
                     {% for message in messages %}
@@ -25,7 +26,7 @@
                     {% endfor %}
                 </div>
                 <div class="modal-footer">
-                    {{ form(formPreview.createView, {attr: {class : "full-width"}}) }}
+                    <button type="button" class="btn-success btn-block btn preview">Envoyer</button>
                 </div>
             </div>
         </div>
@@ -33,6 +34,9 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $('#main-modal').modal('show');
+            $('.preview').on('click', function () {
+                $('form[name="preview_emails"]').submit();
+            });
         });
     </script>
 {% endif %}

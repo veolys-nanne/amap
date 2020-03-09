@@ -223,7 +223,7 @@ class BasketRepository extends ServiceEntityRepository
                     ->addSelect('DATE_FORMAT(b.date, \'%Y-%m-%d\') as credit_date')
                     ->addSelect('user.id as credit_member')
                     ->addSelect('SUM(coalesce(pqc.quantity, 0)) as credit_quantity')
-                    ->addSelect('CONCAT(\'Créer un avoir à "\', user.lastname, \' \', coalesce(user.firstname, \'\'), \'" pour tous les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
+                    ->addSelect('CONCAT(\'Créer un avoir à "\', user.lastname, \' \', coalesce(user.firstname, \'\'), \'" pour les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
                     ->addSelect('CONCAT(\'Créer un avoir à "\', user.lastname, \' \', coalesce(user.firstname, \'\'), \'" pour les "\', p.name, \'" à la date \', DATE_FORMAT(b.date, \'%d/%m\')) as credit_column_text')
                     ->addSelect('DATE_FORMAT(b.date, \'%d/%m\') as column')
                     ->addSelect('CONCAT(user.lastname, \' \', coalesce(user.firstname, \'\')) as table')
@@ -244,7 +244,7 @@ class BasketRepository extends ServiceEntityRepository
                 $queryBuilder
                     ->addSelect('p.id as credit_product')
                     ->addSelect('DATE_FORMAT(b.date, \'%Y-%m-%d\') as credit_date')
-                    ->addSelect('CONCAT(\'Créer un avoir à tous les consom\'\'acteurs/trices pour tous les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
+                    ->addSelect('CONCAT(\'Créer un avoir à tous les consom\'\'acteurs/trices pour les "\', p.name, \'" sur la période du '.$start->format('d/m').' au '.$end->format('d/m').'\') as credit_line_text')
                     ->addSelect('CONCAT(\'Créer un avoir à tous les consom\'\'acteurs/trices pour les "\', p.name, \'" à la date \', DATE_FORMAT(b.date, \'%d/%m\')) as credit_column_text')
                     ->addSelect('DATE_FORMAT(b.date, \'%d/%m\') as column')
                     ->addSelect('CONCAT(producer.lastname, \' \', coalesce(producer.firstname, \'\')) as table')
