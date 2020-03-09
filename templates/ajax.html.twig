@@ -1,28 +1,36 @@
 {% set json = {} %}
-{% set header %}
-    {{ title|default('') }}
-{% endset %}
-{% set json = json|merge({header: header|spaceless}) %}
-{% set flash %}
-    {% include 'flash.html.twig' %}
-{% endset %}
-{% set json = json|merge({flash: flash|spaceless}) %}
-{% set body %}
-    {% block body %}
-    {% endblock %}
-{% endset %}
-{% set json = json|merge({body: body|spaceless}) %}
-{% if needNavbar|default(false) %}
-    {% set navbar %}
-        {% include 'navbar.html.twig' %}
-    {% endset %}
-    {% set json = json|merge({navbar: navbar|spaceless}) %}
-{% endif %}
 {% set modal %}
     {% block modal %}
     {% endblock %}
 {% endset %}
+{% set header = '' %}
+{% set flash = '' %}
+{% set body = '' %}
+
+{% if '' == modal.jsonSerialize|trim %}
+    {% set header %}
+        {{ title|default('') }}
+    {% endset %}
+    {% set flash %}
+        {% include 'flash.html.twig' %}
+    {% endset %}
+    {% set body %}
+        {% block body %}
+        {% endblock %}
+    {% endset %}
+    {% if needNavbar|default(false) %}
+        {% set navbar %}
+            {% include 'navbar.html.twig' %}
+        {% endset %}
+        {% set json = json|merge({navbar: navbar|spaceless}) %}
+    {% endif %}
+{% endif %}
+
+{% set json = json|merge({header: header|spaceless}) %}
+{% set json = json|merge({flash: flash|spaceless}) %}
+{% set json = json|merge({body: body|spaceless}) %}
 {% set json = json|merge({modal: modal|spaceless}) %}
+
 {% set script %}
     <script type="application/javascript">
         $(document).ready(function() {

@@ -58,6 +58,17 @@ class UserRepository extends ServiceEntityRepository
         return $queryBuilder;
     }
 
+    public function findOnlyMemberActive()
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles = \'a:1:{i:0;s:11:"ROLE_MEMBER";}\'')
+            ->andWhere('u.deleted = 0')
+            ->andWhere('u.active = 1')
+            ->orderBy('u.lastname', 'asc')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getQueryBuilderForFindByRole(string $role, User $parent = null): QueryBuilder
     {
         $queryBuilder = $this->createQueryBuilder('u');

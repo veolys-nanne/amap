@@ -214,11 +214,11 @@ class ContactController extends AbstractController
 
     /**
      * @Route(
-     *     "/preview",
-     *     name="preview"
+     *     "/preview/{url}",
+     *     name="preview",
      * )
      */
-    public function previewAction(Request $request, MailHelper $mailHelper)
+    public function previewAction(Request $request, MailHelper $mailHelper, string $url = null)
     {
         if ($request->request->has('preview_emails')) {
             $messages = $request->request->get('preview_emails')['messages'] ?? [];
@@ -228,6 +228,6 @@ class ContactController extends AbstractController
         }
         $mailHelper->sendMessages($messages);
 
-        return $this->redirect(filter_var($request->headers->get('referer'), FILTER_SANITIZE_URL));
+        return (null !== $url) ? $this->redirect(urldecode($url)) : $this->redirect(filter_var($request->headers->get('referer'), FILTER_SANITIZE_URL));
     }
 }

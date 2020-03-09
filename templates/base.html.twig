@@ -84,10 +84,10 @@
 
 <script type="application/javascript">
     $(document).ready(function() {
+        $.ajaxSetup({ cache: false });
         $('body').initCommon();
         window.history.replaceState({url: window.location.href}, document.title, window.location.href)
         window.addEventListener("popstate", function (event) {
-            console.log(event.state);
             if (null !== event.state) {
                 $.ajax({
                     url: event.state.url,

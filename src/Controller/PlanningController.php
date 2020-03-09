@@ -43,9 +43,7 @@ class PlanningController extends AbstractController
                     'subject' => Planning::MAIL_SUBJECTS[$state],
                     'template' => Planning::MAIL_TEMPLATES[$state],
                     'mailOptions' => ['period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
-                    'callback' => function () use ($state, $planning) {
-                        return $this->redirect($this->generateUrl('planning_state', ['state' => $state, 'id' => $planning->getId()]));
-                    },
+                    'callback' => urlencode($this->generateUrl('planning_state', ['state' => $state, 'id' => $planning->getId()])),
                 ];
             }
         }
@@ -63,16 +61,9 @@ class PlanningController extends AbstractController
                 ];
             }
         }
+
         if (!empty($mailsParameters)) {
             $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
-            if ($request->request->has('formMail')) {
-                $email = $request->request->get('formMail')['email'];
-                $isEmail = isset($email['email']);
-                $reference = $email['reference'];
-                if ($isEmail && isset($mailsParameters[$reference]['callback'])) {
-                    return $mailsParameters[$reference]['callback']();
-                }
-            }
         }
 
         return $this->render('planning/index.html.twig', $options);

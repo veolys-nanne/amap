@@ -6,7 +6,7 @@
 parameters:
     locale: 'fr'
     media_directory: '%kernel.project_dir%/public/uploads'
-    admin_email: 'amaphommesdeterre@yahoo.fr'
+    admin_email: 'amaphommesdeterre@etre-enchante.org'
 
 services:
     # default configuration for services in *this* file

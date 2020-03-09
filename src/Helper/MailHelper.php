@@ -4,6 +4,7 @@ namespace App\Helper;
 
 use App\Entity\User;
 use App\Form\ContactType;
+use App\Form\FormatEmailType;
 use App\Form\PreviewEmailsType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
@@ -119,7 +120,7 @@ class MailHelper
 
             return $this->twigEnvironment->render('contact/form.html.twig', [
                 'messages' => [$message],
-                'formPreview' => $formPreview,
+                'formPreview' => $formPreview->createView(),
                 'form' => $form->createView(),
                 'title' => 'Contact',
             ]);
@@ -141,7 +142,7 @@ class MailHelper
     {
         $results = [];
         $builder = $this->formFactory->createNamedBuilder('formMail');
-        $form = $builder->add('email', ['label' => false, 'attr' => ['class' => 'form-popin']])->getForm();
+        $form = $builder->add('email', FormatEmailType::class, ['label' => false, 'attr' => ['class' => 'form-popin']])->getForm();
         $results['formMail'] = $form->createView();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -166,16 +167,16 @@ class MailHelper
                     $results['messages'][] = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? []);
                 }
             }
-        }
+            if ($isPreview) {
+                if (isset($results['messages'])) {
+                    $url = $this->router->generate('preview', ['url' => $mailsParameters[$index]['callback'] ?? '']);
+                    $results['formPreview'] = $this->formFactory->create(PreviewEmailsType::class, ['messages' => $results['messages']], [
+                        'action' => $url,
+                    ])->createView();
+                }
 
-        if ($isPreview) {
-            if (isset($results['messages'])) {
-                $results['formPreview'] = $this->formFactory->create(PreviewEmailsType::class, ['messages' => $results['messages']], [
-                    'action' => $this->router->generate('preview'),
-                ]);
+                return $results;
             }
-
-            return $results;
         }
 
         if ($isEmail) {

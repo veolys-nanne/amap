@@ -30,6 +30,7 @@
             return this;
         },
         ajax : function() {
+            $.ajaxSetup({ cache: false });
             if (!$(this).hasClass('download-file')) {
                 var url = $(this).attr('href') || $(this).data('url');
                 if ($(this).is('form')) {

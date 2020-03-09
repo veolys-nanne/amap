@@ -29,7 +29,6 @@ class AjaxSubscriber implements EventSubscriberInterface
     public function onKernelController(FilterControllerEvent $event)
     {
         $request = $event->getRequest();
-
         $url = '';
         $routeName = '';
         if ($request->attributes->has('_route')) {
@@ -47,7 +46,6 @@ class AjaxSubscriber implements EventSubscriberInterface
             }
             $url = $this->router->generate($routeName, $event->getRequest()->attributes->all());
         }
-
         if (HttpKernelInterface::MASTER_REQUEST == $event->getRequestType()) {
             $roles = $this->security->getUser() ? $this->security->getUser()->getRoles() : [];
             $this->twig->addGlobal('needNavbar', $this->session->get('roles') !== $roles);
