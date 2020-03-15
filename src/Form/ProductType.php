@@ -40,27 +40,28 @@ class ProductType extends AbstractType
                 ])
                 ->add('active', CheckboxType::class, ['label' => 'Actif']);
         }
-        $builder->add('name', TextType::class, ['label' => 'Dénomination']);
+        $builder
+            ->add('name', TextType::class, ['label' => 'Dénomination'])
+            ->add('stock', TextType::class, ['label' => 'Stock disponible par livraison', 'required' => false]);
         if (in_array('ROLE_PRODUCER', $options['user']->getRoles())) {
             $builder->add('portfolio', PortfolioType::class, ['label' => false, 'required' => false]);
         }
         $builder->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
-            $mailOptions = [];
             $product = $event->getData();
             $builder = $event->getForm();
-            $allowed = !$product->getId() || !$product->isActive() || in_array('ROLE_ADMIN', $options['user']->getRoles()) || in_array('ROLE_REFERENT', $options['user']->getRoles());
-            if (!$allowed && !in_array('ROLE_ADMIN', $options['user']->getRoles()) && !in_array('ROLE_REFERENT', $options['user']->getRoles())) {
-                $mailOptions = ['mail' => true];
-            }
+            $frozen = $product->getId() && $product->isActive() && !in_array('ROLE_ADMIN', $options['user']->getRoles()) && !in_array('ROLE_REFERENT', $options['user']->getRoles());
             $active = false;
-            if ($product->getId() && $allowed) {
+            if ($frozen) {
                 $active = $this->entityManager->getRepository(Basket::class)->isProductInActiveBasket($product);
             }
             $builder->add('price', NumberType::class, [
                 'label' => 'Prix',
-                'attr' => array_merge(['min' => 0], $mailOptions),
-                'disabled' => !$allowed,
+                'attr' => [
+                    'min' => 0,
+                    'frozen' => $frozen,
+                ],
+                'disabled' => $frozen,
                 'label_attr' => [
                     'class' => $active ? 'fas fa-exclamation-triangle text-danger' : '',
                     'title' => $active ? 'Ce produit est présent dans une commande en cours' : '',

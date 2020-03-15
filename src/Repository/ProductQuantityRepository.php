@@ -38,4 +38,21 @@ class ProductQuantityRepository extends ServiceEntityRepository
         $statement->bindValue('basket', $basket->getId());
         $statement->execute();
     }
+
+    public function findSumByModelAndProduct(ProductQuantity $productQuantity)
+    {
+        return $this->createQueryBuilder('pq')
+            ->join('pq.basket', 'b')
+            ->select('SUM(pq.quantity)')
+            ->where('b.parent = :parent')
+            ->andWhere('pq.product = :product')
+            ->andWhere('pq.basket <> :basket')
+            ->setParameters([
+                'parent' => $productQuantity->getBasket()->getParent(),
+                'product' => $productQuantity->getProduct(),
+                'basket' => $productQuantity->getBasket(),
+            ])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

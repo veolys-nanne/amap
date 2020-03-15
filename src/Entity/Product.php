@@ -35,6 +35,11 @@ class Product
     private $order;
 
     /**
+     * @ORM\Column(name="product_stock", type="integer", nullable=true)
+     */
+    private $stock;
+
+    /**
      * @ORM\Column(type="decimal", precision=10, scale=2)
      * @Assert\GreaterThanOrEqual(0)
      * @Assert\NotBlank()
@@ -67,6 +72,11 @@ class Product
         return $this->order;
     }
 
+    public function getStock(): ?int
+    {
+        return $this->stock;
+    }
+
     public function getPrice(): ?float
     {
         return $this->price;
@@ -92,6 +102,13 @@ class Product
     public function setOrder(int $order): self
     {
         $this->order = $order;
+
+        return $this;
+    }
+
+    public function setStock(int $stock = null): self
+    {
+        $this->stock = $stock;
 
         return $this;
     }
