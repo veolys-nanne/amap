@@ -11,10 +11,6 @@
             } else {
                 $context.drawDataTable('callback', language, params);
             }
-            $('tr[data-url] td:not(:has(a)):not(:has(button))', $(this)).each(function (){
-                $(this).attr('data-url', $(this).parent().data('url'));
-                $(this).initCommon('ajax');
-            });
 
             return this;
         },
@@ -44,6 +40,13 @@
                 }
             }
             params.options['retrieve'] = true;
+            params.options['drawCallback'] = function( settings ) {
+                $('tr[data-url] td:not(:has(a)):not(:has(button))', $(this)).each(function (){
+                    $(this).attr('data-url', $(this).parent().data('url'));
+                    $(this).initCommon('ajax');
+                });
+            };
+
             var table = $context.DataTable(params.options);
             if (params.options.rowReorder) {
                 table.on('row-reorder', function (e, details, changes) {

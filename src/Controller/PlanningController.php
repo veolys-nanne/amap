@@ -14,8 +14,12 @@ use App\Helper\MailHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
+use Knp\Snappy\Pdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
@@ -135,7 +139,7 @@ class PlanningController extends AbstractController
      *     name="planning_availability",
      * )
      */
-    public function availabilityAction(Request $request, EntityManagerInterface $entityManager)
+    public function availabilityAction(Request $request, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
     {
         $options = ['title' => 'Permanences'];
         $availabilityScheduleElements = $entityManager->getRepository(AvailabilityScheduleElement::class)->findByMemberAndByState($this->getUser(), Planning::STATE_OPEN);
@@ -151,12 +155,22 @@ class PlanningController extends AbstractController
             }
             $options['form'] = $form->createView();
         }
-        $plannings = $entityManager->getRepository(Planning::class)->findByOnline();
+
+        $options['isPdf'] = $request->query->has('pdf') && $request->query->get('pdf');
+        $plannings = $options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
         if (!empty($plannings)) {
             $options['plannings'] = $plannings;
         }
 
-        return $this->render('planning/availability.html.twig', $options);
+        $html = $this->renderView('planning/availability.html.twig', $options);
+        if ($options['isPdf']) {
+            return new PdfResponse(
+                $knpSnappy->getOutputFromHtml($html, ['user-style-sheet' => $parameterBag->get('kernel.project_dir').'/public/assets/css/pdf-color-page-break.css']),
+                'planning.pdf'
+            );
+        }
+
+        return new Response($html);
     }
 
     /**

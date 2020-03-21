@@ -2,11 +2,14 @@
 
 {% block body %}
     {{ form_start(form) }}
+        {% if form.producer is defined %}
+            {{ form_row(form.producer) }}
+        {% endif %}
         {{ form_row(form.name) }}
         {% if form.active is defined %}
             {{ form_row(form.active) }}
         {% endif %}
-        {% if form.price.vars.attr.mail is defined %}
+        {% if form.price.vars.attr.frozen %}
             {% set product = form.vars.value %}
             <div class="form-group">
                 {{ form_label(form.price) }}
