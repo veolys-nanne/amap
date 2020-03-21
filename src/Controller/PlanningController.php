@@ -157,7 +157,7 @@ class PlanningController extends AbstractController
         }
 
         $options['isPdf'] = $request->query->has('pdf') && $request->query->get('pdf');
-        $plannings = $options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
+        $plannings = !$options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
         if (!empty($plannings)) {
             $options['plannings'] = $plannings;
         }
