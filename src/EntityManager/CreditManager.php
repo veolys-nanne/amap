@@ -51,6 +51,7 @@ class CreditManager
                 $credit->setProducer($product->getProducer());
                 $credit->setMember($member ? $member : $this->entityManager->getRepository(User::class)->find($amount['member']));
                 $credit->setTotalAmount($amount['totalAmount']);
+                $credit->setCurrentAmount($amount['totalAmount']);
                 $credit->setObject($object);
                 $this->entityManager->persist($credit);
             }

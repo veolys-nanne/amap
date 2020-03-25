@@ -5,3 +5,4 @@ twig:
     form_themes:
         - 'bootstrap_4_layout.html.twig'
         - 'form/fields.html.twig'
+    exception_controller: App\Controller\ExceptionController::showAction
