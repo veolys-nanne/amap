@@ -53,6 +53,8 @@ DirectoryIndex index.php
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
+        RewriteRule ^apple-touch-icon-(precomposed|[0-9]{2,4}x[0-9]{2,4})?\.png apple-touch-icon.png [L]
+
     # Rewrite all other queries to the front controller.
     RewriteRule ^ %{ENV:BASE}/index.php [L]
 </IfModule>
