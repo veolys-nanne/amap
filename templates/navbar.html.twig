@@ -19,6 +19,7 @@
                         Utilisateurs
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownUser">
+                        <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'admin'}) }}">Administrateurs/trices</a>
                         <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'referent'}) }}">Référents/es</a>
                         <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'producer'}) }}">Producteurs/trices</a>
                         <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'member'}) }}">Consom'acteurs/trices</a>
