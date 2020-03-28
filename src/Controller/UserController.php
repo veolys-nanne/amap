@@ -237,7 +237,7 @@ class UserController extends AbstractController
      *     name="user_active",
      *     requirements={
      *      "role"="admin|referent",
-     *      "type"="referent|producer|member"
+     *      "type"="admin|referent|producer|member"
      *     },
      * )
      */
