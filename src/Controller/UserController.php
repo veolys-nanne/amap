@@ -55,14 +55,11 @@ class UserController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/user/view",
+     *     "/logged/user/view",
      *     name="user_view",
-     *     requirements={
-     *      "role"="admin|referent|producer|member",
-     *     }
      * )
      */
-    public function userViewAction(Request $request, EntityManagerInterface $entityManager, string $role, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
+    public function userViewAction(Request $request, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
     {
         $members = $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER');
         $referents = $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_REFERENT');
@@ -71,7 +68,6 @@ class UserController extends AbstractController
 
         $isPdf = $request->query->get('pdf');
         $html = $this->renderView('user/view.html.twig', [
-            'role' => $role,
             'members' => $members,
             'referents' => $referents,
             'producers' => $producers,
@@ -93,23 +89,20 @@ class UserController extends AbstractController
      *     "/{role}/user/form/{type}/{id}",
      *     name="user_form",
      *     requirements={
-     *      "role"="admin|referent|producer|member",
+     *      "role"="admin|referent",
      *      "type"="admin|referent|producer|member",
      *     "id"="\d+"
      *     },
      *     defaults={"id"=0}
      * )
      * @Route(
-     *     "/{role}/user/profil",
+     *     "/logged/user/profil",
      *     name="user_profil",
-     *     requirements={
-     *      "role"="admin|referent|producer|member",
-     *     },
      * )
      */
-    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role, string $type = null, User $user = null, RouterInterface $router)
+    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role = null, string $type = null, User $user = null, RouterInterface $router)
     {
-        $isAccount = null == $type;
+        $isAccount = null == $role;
         $user = $isAccount ? $this->getUser() : $user;
         $isNew = $user ? false : true;
         $user = $user ?? new User();
@@ -122,6 +115,7 @@ class UserController extends AbstractController
             'role' => $role,
             'type' => $type,
             'isAccount' => $isAccount,
+            'isProducer' => in_array('ROLE_PRODUCER', $user->getRoles()),
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -140,10 +134,7 @@ class UserController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le compte a été créé.' : 'Le compte a été mis à jour.');
             if ($isAccount) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', [
-                    'role' => $role,
-                    'name' => 'homepage',
-                ]);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return $this->forward('App\Controller\UserController::userListingAction', [
@@ -151,7 +142,6 @@ class UserController extends AbstractController
                 'type' => $type,
             ]);
         }
-
         $title = $isNew ? 'Inscription ' : 'Mise à jour ';
         if ('referent' == $type) {
             $title .= 'référent/e';
@@ -178,19 +168,16 @@ class UserController extends AbstractController
      *     "/{role}/user/password/{id}",
      *     name="user_password",
      *     requirements={
-     *      "role"="admin|referent|producer|member",
-     *     "id"="\d+"
+     *      "role"="admin|referent",
+     *      "id"="\d+"
      *     },
      * )
      * @Route(
-     *     "/{role}/user/profil/password",
+     *     "/logged/user/profil/password",
      *     name="user_profil_password",
-     *     requirements={
-     *      "role"="admin|referent|producer|member",
-     *     },
      * )
      */
-    public function userPasswordAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role, User $user = null)
+    public function userPasswordAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role = null, User $user = null)
     {
         $isAccount = null == $user;
         $user = $isAccount ? $this->getUser() : $user;
@@ -208,20 +195,17 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
             $this->addFlash('success', 'Le mot de passe a été mis à jour.');
-
-            $options = ['role' => $role];
             if (!$isAccount) {
-                $roles = $user->getRoles();
                 $options['id'] = $user->getId();
-                $options['type'] = in_array('ROLE_ADMIN', $roles) ? 'admin' : (
-                    in_array('ROLE_REFERENT', $roles) ? 'referent' : (
-                        in_array('ROLE_PRODUCER', $roles) ? 'producer' : 'member'
+                $options['type'] = in_array('ROLE_ADMIN', $user->getRoles()) ? 'admin' : (
+                    in_array('ROLE_REFERENT', $user->getRoles()) ? 'referent' : (
+                        in_array('ROLE_PRODUCER', $user->getRoles()) ? 'producer' : 'member'
                 ));
+                $options['role'] = $role;
             }
 
             return $this->forward('App\Controller\UserController::userEditAction', $options);
         }
-
         $title = 'Mise à jour du mot de passe';
 
         return $this->render('user/password.html.twig', [

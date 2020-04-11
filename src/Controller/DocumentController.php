@@ -79,16 +79,22 @@ class DocumentController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/document/{name}",
+     *     "/logged/document/{name}",
      *     name="document_view",
-     *     requirements={
-     *      "role"="admin|referent|producer|member",
-     *     }
      * )
      */
-    public function documentViewAction(EntityManagerInterface $entityManager, string $role, string $name)
+    public function documentViewAction(EntityManagerInterface $entityManager, string $name)
     {
-        $document = $entityManager->getRepository(Document::class)->findByNameAndRole($name, 'ROLE_'.strtoupper($role));
+        $roles = $this->getUser()->getRoles();
+        $role = 'ROLE_MEMBER';
+        if (in_array('ROLE_ADMIN', $roles)) {
+            $role = 'ROLE_ADMIN';
+        } elseif (in_array('ROLE_REFERENT', $roles)) {
+            $role = 'ROLE_REFERENT';
+        } elseif (in_array('ROLE_PRODUCER', $roles)) {
+            $role = 'ROLE_PRODUCER';
+        }
+        $document = $entityManager->getRepository(Document::class)->findByNameAndRole($name, $role);
 
         return $this->render('document/view.html.twig', [
             'document' => $document,

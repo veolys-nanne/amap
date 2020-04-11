@@ -7,7 +7,7 @@
     {% elseif is_granted('ROLE_PRODUCER') %}
         {% set role = 'producer' %}
     {% endif %}
-    <a class="navbar-brand" href="{{ path('document_view', {role: role, name: 'homepage'}) }}" title="Accueil"><i class="fa fa-home text-secondary"></i></a>
+    <a class="navbar-brand" href="{{ path('document_view', {name: 'homepage'}) }}" title="Accueil"><i class="fa fa-home text-secondary"></i></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -16,7 +16,7 @@
             {% if is_granted('ROLE_ADMIN') %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Utilisateurs
+                        Utilisateurs/trices
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownUser">
                         <a class="dropdown-item" href="{{ path('user_index', {role: 'admin', type: 'admin'}) }}">Administrateurs/trices</a>
@@ -73,29 +73,29 @@
             {% endif %}
             {% if is_granted('ROLE_MEMBER') %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('basket_form', {role: role}) }}">Mon panier</a>
+                    <a class="nav-link" href="{{ path('basket_form') }}">Mon panier</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('basket_view', {role: role}) }}">Mes commandes</a>
+                    <a class="nav-link" href="{{ path('basket_view') }}">Mes commandes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('planning_availability') }}">Permanences</a>
                 </li>
             {% endif %}
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('document_view', {role: role, name: 'rules'}) }}">Règlement</a>
+                <a class="nav-link" href="{{ path('document_view', {name: 'rules'}) }}">Règlement</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('user_profil', {role: role}) }}" title="Mon profil"><i class="fas fa-user"></i></a>
+                <a class="nav-link" href="{{ path('user_profil') }}" title="Mon profil"><i class="fas fa-user"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('maillog_index', {role: role}) }}" title="Voir mes mails"><i class="fas fa-mail-bulk"></i></a>
+                <a class="nav-link" href="{{ path('maillog_index') }}" title="Voir mes mails"><i class="fas fa-mail-bulk"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('contact_form', {role: role}) }}" title="Envoyer un mail"><i class="far fa-envelope"></i></a>
+                <a class="nav-link" href="{{ path('contact_form') }}" title="Envoyer un mail"><i class="far fa-envelope"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ path('user_view', {role: role}) }}" title="fiche contact des utilisateurs"><i class="fas fa-users"></i></a>
+                <a class="nav-link" href="{{ path('user_view') }}" title="fiche contact des utilisateurs"><i class="fas fa-users"></i></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ path('logout') }}" title="Se déconnecter"><i class="fas fa-sign-out-alt"></i></a>

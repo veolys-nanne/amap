@@ -40,3 +40,4 @@ security:
         - { path: ^/member, roles: ROLE_MEMBER }
         - { path: ^/referent, roles: ROLE_REFERENT }
         - { path: ^/producer, roles: ROLE_PRODUCER }
+        - { path: ^/logged, roles: IS_AUTHENTICATED_FULLY }

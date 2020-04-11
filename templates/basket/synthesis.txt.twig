@@ -1,14 +1,6 @@
-{% block header %}
-{% endblock %}
+{% extends 'emails/email.txt.twig' %}
 
 {% block body %}
-    {% if extra is defined %}
-{{ extra|raw|striptags }}
-    {% endif %}
-    {% if title is not defined %}
-{{ constant('App\\Form\\SynthesesType::LABELS')[form.type.vars.value] }}
-du {{ form.start.vars.value }} au {{ form.end.vars.value }}
-    {% endif %}
     {% set thead = {0: tableName} %}
     {% if table|first|first is iterable %}
         {% for name, column in table|first|first %}
@@ -56,5 +48,3 @@ du {{ form.start.vars.value }} au {{ form.end.vars.value }}
     {% endif %}
 {% endblock %}
 
-{% block footer %}
-{% endblock %}

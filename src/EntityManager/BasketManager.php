@@ -228,12 +228,7 @@ class BasketManager
             if (isset($extra[$id])) {
                 $parameters[$table]['extra'] = $extra[$id];
             }
-            if (isset($item['broadcastList'])) {
-                $parameters[$table]['broadcastList'] = $item['broadcastList'];
-            }
-            if (isset($item['email'])) {
-                $parameters[$table]['email'] = $item['email'];
-            }
+            $parameters[$table]['id'] = $id;
         }
 
         return [$tables, $parameters];
@@ -260,11 +255,6 @@ class BasketManager
                 'generate_credit[quantity]' => null,
             ]);
             $parameters[$line]['credit_text'] = $item['credit_line_text'] ?? '';
-        }
-        foreach ($item as $key => $value) {
-            if (preg_match('/^data_(.*)/', $key, $matches)) {
-                $parameters[$line]['data'][preg_replace('/_/', '-', $matches[1])] = $value;
-            }
         }
         if (isset($item['data'])) {
             $parameters[$line]['data'] = $item['data'];

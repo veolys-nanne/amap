@@ -11,11 +11,11 @@
         </thead>
         <tbody>
             {% for mailLog in mailLogs %}
-                <tr data-url="{{ path('maillog_view', {id: mailLog.id, role: role}) }}">
+                <tr data-url="{{ path('maillog_view', {id: mailLog.id}) }}">
                     <td>{{ mailLog.sentAt|date('d/m/Y') }}</td>
                     <td>{{ mailLog.subject }}</td>
                     <td>
-                        <a href="{{ path('maillog_delete', {id: mailLog.id, role: role}) }}" data-confirm="Confirmez-vous la suppression de ce mail?">
+                        <a href="{{ path('maillog_delete', {id: mailLog.id}) }}" data-confirm="Confirmez-vous la suppression de ce mail?">
                             <i class="fas fa-trash-alt text-danger"></i>
                         </a>
                     </td>
@@ -23,7 +23,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ path('contact_form', {role: role, user: app.user.id}) }}" class="btn btn-block btn-success">Nouveau</a>
+    <a href="{{ path('contact_form', {user: app.user.id}) }}" class="btn btn-block btn-success">Nouveau</a>
 {% endblock %}
 
 {% block javascripts %}

@@ -42,13 +42,12 @@ class UserType extends AbstractType
                 ],
             ]);
         }
-        if ('referent' == $options['role'] && !$options['isAccount']) {
+        if ('referent' == $options['role'] && 'producer' == $options['type']) {
             $builder->add('roles', ChoiceType::class, [
                 'label' => 'Role',
                 'multiple' => true,
                 'expanded' => true,
                 'choices' => [
-                    'référent/e' => 'ROLE_REFERENT',
                     'producteur/trice' => 'ROLE_PRODUCER',
                     'consom\'acteur/trice' => 'ROLE_MEMBER',
                 ],
@@ -63,7 +62,7 @@ class UserType extends AbstractType
                 'label' => 'Référent',
             ]);
         }
-        if ('producer' == $options['role'] || 'producer' == $options['type']) {
+        if ($options['isProducer']) {
             $builder
                 ->add('color', ColorType::class, ['label' => 'Couleur', 'required' => false])
                 ->add('denomination', TextType::class, ['label' => 'Dénomination', 'required' => false])
@@ -133,6 +132,7 @@ class UserType extends AbstractType
             'role',
             'type',
             'isAccount',
+            'isProducer',
         ]);
         $resolver->setDefaults([
             'data_class' => User::class,
