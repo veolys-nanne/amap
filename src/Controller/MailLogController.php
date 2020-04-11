@@ -13,17 +13,15 @@ class MailLogController extends AbstractController
 {
     /**
      * @Route(
-     *     "/{role}/admin/index",
+     *     "/logged/admin/index",
      *     name="maillog_index",
-     *     requirements={"role"="admin|referent|producer|member"},
      * )
      */
-    public function maillogListingAction(EntityManagerInterface $entityManager, string $role)
+    public function maillogListingAction(EntityManagerInterface $entityManager)
     {
         $mailLogs = $entityManager->getRepository(MailLog::class)->findByRecipients($this->getUser());
 
         return $this->render('maillog/index.html.twig', [
-            'role' => $role,
             'mailLogs' => $mailLogs,
             'title' => 'Mails',
         ]);
@@ -31,44 +29,42 @@ class MailLogController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/maillog/view/{id}",
+     *     "/logged/maillog/view/{id}",
      *     name="maillog_view",
-     *     requirements={"id"="\d+", "role"="admin|referent|producer|member"},
+     *     requirements={"id"="\d+"},
      * )
      */
-    public function maillogViewAction(MailLog $maillog, string $role)
+    public function maillogViewAction(MailLog $maillog)
     {
         return $this->render('maillog/view.html.twig', [
             'maillog' => $maillog,
             'title' => 'Consultation de mail',
-            'role' => $role,
         ]);
     }
 
     /**
      * @Route(
-     *     "/{role}/maillog/delete/{id}",
+     *     "/logged/maillog/delete/{id}",
      *     name="maillog_delete",
-     *     requirements={"id"="\d+", "role"="admin|referent|producer|member"},
+     *     requirements={"id"="\d+"},
      * )
      */
-    public function deleteAction(EntityManagerInterface $entityManager, MailLog $maillog, string $role)
+    public function deleteAction(EntityManagerInterface $entityManager, MailLog $maillog)
     {
         $maillog->setDeleted(true);
         $entityManager->flush();
         $this->addFlash('success', 'Le mail a été supprimé.');
 
-        return $this->forward('App\Controller\MailLogController::maillogListingAction', ['role' => $role]);
+        return $this->forward('App\Controller\MailLogController::maillogListingAction');
     }
 
     /**
      * @Route(
-     *     "/{role}/maillog/update",
+     *     "/logged/maillog/update",
      *     name="maillog_update",
-     *     requirements={"role"="admin|referent|producer|member"},
      * )
      */
-    public function updateAction(Request $request, EntityManagerInterface $entityManager, string $role)
+    public function updateAction(Request $request, EntityManagerInterface $entityManager)
     {
         $mailLog = $entityManager->getRepository(MailLog::class)->find($request->request->get('id'));
         $mailLog->setContent($request->request->get('content'));

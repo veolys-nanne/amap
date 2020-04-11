@@ -3,7 +3,7 @@
 {% block body %}
     {% if user.id is not empty and (app.user.id == user.id or is_granted('ROLE_ADMIN')) %}
         {% if isAccount %}
-            <a href="{{ path('user_profil_password', {role: role}) }}" class="btn btn-success">Changer les identifiants</a>
+            <a href="{{ path('user_profil_password') }}" class="btn btn-success">Changer les identifiants</a>
         {% else %}
             <a href="{{ path('user_password', {role: role, id: user.id}) }}" class="btn btn-success">Changer les identifiants</a>
         {% endif %}

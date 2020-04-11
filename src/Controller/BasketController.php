@@ -26,9 +26,8 @@ class BasketController extends AbstractController
 {
     /**
      * @Route(
-     *     "/{role}/basket/view",
+     *     "/member/basket/view",
      *     name="basket_view",
-     *     requirements={"role"="admin|referent|producer|member"},
      * )
      */
     public function basketViewAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
@@ -78,9 +77,8 @@ class BasketController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/basket/form",
+     *     "/member/basket/form",
      *     name="basket_form",
-     *     requirements={"role"="admin|referent|producer|member"},
      * )
      */
     public function basketEditAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager, string $role)
@@ -262,7 +260,13 @@ class BasketController extends AbstractController
             }
             $options['formCredit'] = $formCredit->createView();
         }
+        $subject = '';
         if ($form->isSubmitted() && $form->isValid()) {
+            $subject = sprintf('%s du %s au %s',
+                SynthesesType::LABELS[$form->get('type')->getData()],
+                $form->get('start')->getData()->format('d/m/Y'),
+                $form->get('end')->getData()->format('d/m/Y')
+            );
             $options['isPdf'] = $form->has('pdf') && $form->get('pdf')->isClicked();
             list($tables, $parameters) = $basketManager->generateSyntheses($form, $this->getUser());
             $options['tables'] = $tables;
@@ -272,9 +276,10 @@ class BasketController extends AbstractController
                 foreach ($tables as $tableName => $table) {
                     $mailsParameters['formMail'][$tableName] = [
                         'list' => [$parameters[$tableName]],
-                        'subject' => 'AMAP Hommes de terre '.SynthesesType::LABELS[$type],
+                        'subject' => $subject,
                         'template' => 'basket/synthesis',
                         'mailOptions' => [
+                            'email' => true,
                             'tableName' => $tableName,
                             'table' => $table,
                             'parameters' => $parameters[$tableName],
@@ -288,6 +293,7 @@ class BasketController extends AbstractController
                 $options = array_merge($options, $mailHelper->handleMailForm($mailsParameters, $form));
             }
         }
+        $options = array_merge($options, ['subject' => $subject]);
         $html = $this->renderView('basket/syntheses.html.twig', $options);
         if ($options['isPdf']) {
             $css = $form->has('css') ? $form->get('css')->getData() : 'pdf-color-page-break';

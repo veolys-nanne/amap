@@ -18,10 +18,9 @@ class ContactController extends AbstractController
 {
     /**
      * @Route(
-     *     "/{role}/contact/form/{user}",
+     *     "/logged/contact/form/{user}",
      *     name="contact_form",
      *     requirements={
-     *      "role"="admin|referent|producer|member",
      *      "user"="\d+",
      *     },
      *     defaults={
@@ -29,16 +28,16 @@ class ContactController extends AbstractController
      *     }
      * )
      */
-    public function contactEditAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, User $user = null)
+    public function contactEditAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null)
     {
         $form = $this->createForm(ContactType::class, null, [
             'user' => $user,
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            $return = $mailHelper->sendMessage($entityManager, $form, $this->getUser());
             if (null == $return) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return new Response($return);
@@ -52,10 +51,9 @@ class ContactController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/contact/form/product/{user}/{product}",
+     *     "/logged/contact/form/product/{user}/{product}",
      *     name="contact_form_product",
      *     requirements={
-     *      "role"="admin|referent|producer|member",
      *      "user"="\d+",
      *      "product"="\d+",
      *     },
@@ -65,7 +63,7 @@ class ContactController extends AbstractController
      *     }
      * )
      */
-    public function contactEditProductAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, User $user = null, Product $product = null)
+    public function contactEditProductAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null, Product $product = null)
     {
         $form = $this->createForm(ContactType::class, [
             'subject' => 'Question à propos du produit "'.$product->getName().'"',
@@ -75,9 +73,9 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            $return = $mailHelper->sendMessage($entityManager, $form, $this->getUser());
             if (null == $return) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return new Response($return);
@@ -117,9 +115,9 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $return = $mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser());
+            $return = $mailHelper->sendMessage($entityManager, $form, $this->getUser());
             if (null == $return) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => 'producer', 'name' => 'homepage']);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return new Response($return);
@@ -133,10 +131,9 @@ class ContactController extends AbstractController
 
     /**
      * @Route(
-     *     "/{role}/contact/form/planning/{user}/{planningElement}",
+     *     "/logged/contact/form/planning/{user}/{planningElement}",
      *     name="contact_form_planning_element",
      *     requirements={
-     *      "role"="admin|referent|producer|member",
      *      "user"="\d+",
      *      "planningElement"="\d+",
      *     },
@@ -146,7 +143,7 @@ class ContactController extends AbstractController
      *     }
      * )
      */
-    public function contactEditPlanningElementAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, string $role, User $user = null, PlanningElement $planningElement = null)
+    public function contactEditPlanningElementAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null, PlanningElement $planningElement = null)
     {
         $form = $this->createForm(ContactType::class, [
             'subject' => 'Question à propos de la permanence du '.$planningElement->getDate()->format('d/m/Y'),
@@ -156,9 +153,9 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $return = $mailHelper->sendMessage($entityManager, $role, $form, $this->getUser());
+            $return = $mailHelper->sendMessage($entityManager, $form, $this->getUser());
             if (null == $return) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => $role, 'name' => 'homepage']);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return new Response($return);
@@ -198,9 +195,9 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $return = $mailHelper->sendMessage($entityManager, 'producer', $form, $this->getUser());
+            $return = $mailHelper->sendMessage($entityManager, $form, $this->getUser());
             if (null == $return) {
-                return $this->forward('App\Controller\DocumentController::documentViewAction', ['role' => 'producer', 'name' => 'homepage']);
+                return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
             return new Response($return);

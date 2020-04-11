@@ -18,13 +18,10 @@
             {{ form(formCredit) }}
         {% endif %}
     {% endif %}
-    <h4>{{ title }}</h4>
+    <h4>{{ subject }}</h4>
     {% if tables is defined %}
         {% for tableName, table in tables %}
-            {% embed 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName], type: type} %}
-                {% block header '' %}
-                {% block footer '' %}
-            {% endembed %}
+            {% include 'basket/synthesis.html.twig' with {tableName: tableName, table: table, parameters: parameters[tableName], email: false} %}
             {% if not loop.last %}
                 <div class="new-page"></div>
             {% endif %}

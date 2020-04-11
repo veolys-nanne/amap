@@ -35,7 +35,7 @@
                 {% if loop.first or producer.id != products[loop.index0 - 1].producer.id %}
                     <tr style="background-color:{{ producer.color }}">
                         <td>
-                            <a class="nav-link text-dark" href="{{ path('contact_form', {role: role, user: producer.id}) }}"><i class="far fa-envelope"></i></a>
+                            <a class="nav-link text-dark" href="{{ path('contact_form', {user: producer.id}) }}"><i class="far fa-envelope"></i></a>
                         </td>
                         <td colspan="{{ 2 + basketCount }}">
                             <a href="#" class="toggle-producer"><i class="fa fa-arrow-up" aria-hidden="true" data-producer="{{ product.producer.id }}"></i></a>
@@ -47,7 +47,7 @@
                 {% endif %}
                 <tr style="background-color:{{ producer.color }}" data-producer-id="{{ product.producer.id }}">
                     <td>
-                        <a class="nav-link text-dark" href="{{ path('contact_form_product', {role: role, user: producer.id, product: product.id}) }}"><i class="far fa-envelope"></i></a>
+                        <a class="nav-link text-dark" href="{{ path('contact_form_product', {user: producer.id, product: product.id}) }}"><i class="far fa-envelope"></i></a>
                     </td>
                     <td>
                         {{ product.name }}

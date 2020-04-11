@@ -39,7 +39,7 @@
                                 <td>
                                     <span class="{{ app.user.id == member.id ? 'font-weight-bold text-danger' : '' }}">
                                         {% if app.user.id != member.id %}
-                                            <a class="nav-link text-dark" href="{{ path('contact_form_planning_element', {role: 'member', user: member.id, planningElement: element.id}) }}"><i class="far fa-envelope no-print"></i>&nbsp;{{ member }}</a>
+                                            <a class="nav-link text-dark" href="{{ path('contact_form_planning_element', {user: member.id, planningElement: element.id}) }}"><i class="far fa-envelope no-print"></i>&nbsp;{{ member }}</a>
                                         {% else %}
                                             {{ member }}
                                         {% endif %}

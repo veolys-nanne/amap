@@ -3,7 +3,7 @@
 {% block body %}
     <h3>{{ maillog.subject }}</h3>
     <i>{{ maillog.sentAt|date('d/m/Y') }}</i>
-    <div class="mail-log" data-id="{{ maillog.id }}" data-url="{{ path('maillog_update', {role: role}) }}">
+    <div class="mail-log" data-id="{{ maillog.id }}" data-url="{{ path('maillog_update') }}">
         {{ maillog.content|raw }}
     </div>
 {% endblock %}

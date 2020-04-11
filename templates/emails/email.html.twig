@@ -5,7 +5,10 @@
         <title>{{ message.subject }}</title>
     </head>
     <body>
-        {% if app.user is defined and app.user.email is defined %}<h4>Mail de {{ app.user }}</h4>{% endif %}
+        {% if app.user is defined and app.user.email is defined %}<h5>de: {{ app.user }}</h5>{% endif %}
+        <h5>à: {{ recipients|join(', ') }}</h5>
+        {% if app.user is defined and app.user.email is defined %}<p><a href="{{ url('contact_form', {user : app.user.id}) }}">Répondre</a></p>{% endif %}
+        <br>
         {% if extra is defined %}
             {{ extra|raw }}
         {% endif %}

@@ -17,11 +17,13 @@ use Twig\Environment;
 
 class MailHelper
 {
-    protected $adminEmail = '';
+    protected $adminEmail;
     protected $session;
     protected $mailer;
     protected $router;
     protected $formFactory;
+    protected $twigEnvironment;
+    protected $entityManager;
 
     public function __construct(
         string $adminEmail,
@@ -29,7 +31,8 @@ class MailHelper
         \Swift_Mailer $mailer,
         UrlGeneratorInterface $router,
         FormFactoryInterface $formFactory,
-        Environment $twigEnvironment
+        Environment $twigEnvironment,
+        EntityManagerInterface $entityManager
     ) {
         $this->adminEmail = $adminEmail;
         $this->session = $session;
@@ -37,15 +40,13 @@ class MailHelper
         $this->router = $router;
         $this->formFactory = $formFactory;
         $this->twigEnvironment = $twigEnvironment;
+        $this->entityManager = $entityManager;
     }
 
     public function createMessageFromArray(array $parameters): ?\Swift_Message
     {
-        foreach ($parameters['to'] as &$to) {
-            $to = ['email' => $to];
-        }
         $message = $this
-            ->getMailForList($parameters['subject'], $parameters['to'])
+            ->getMailForList($parameters['subject'], [], $parameters['to'])
             ->setBody(
                 $parameters['body'] ?? '',
                 'text/html'
@@ -58,14 +59,16 @@ class MailHelper
         return $message;
     }
 
-    public function getMailForList(string $subject, array $list): ?\Swift_Message
+    public function getMailForList(string $subject, array $recipients, array $broadcastList = null): ?\Swift_Message
     {
         $message = null;
-        $broadcastList = [$this->adminEmail];
-        array_walk($list, function ($data) use (&$broadcastList) {
-            $broadcastList = $data instanceof User ? array_merge($broadcastList, [$data->getEmail()], $data->getBroadcastList()) : array_merge($broadcastList, [$data['email'] ?? []], $data['broadcastList'] ?? []);
-        });
-        $broadcastList = array_unique(array_filter($broadcastList));
+        if (null == $broadcastList) {
+            $broadcastList = [$this->adminEmail];
+            array_walk($recipients, function ($data) use (&$broadcastList) {
+                $broadcastList = array_merge($broadcastList, [$data->getEmail()], $data->getBroadcastList());
+            });
+            $broadcastList = array_unique(array_filter($broadcastList));
+        }
         if (!empty($broadcastList)) {
             \Swift_Preferences::getInstance()->setCharset('utf-8');
             $message = (new \Swift_Message($subject))
@@ -83,7 +86,7 @@ class MailHelper
         return $message;
     }
 
-    public function sendMessage(EntityManagerInterface $entityManager, string $role, FormInterface $form, User $user): ?string
+    public function sendMessage(EntityManagerInterface $entityManager, FormInterface $form, User $user): ?string
     {
         $broadcastList = [];
         $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
@@ -193,12 +196,22 @@ class MailHelper
         $message = null;
         if (count($list) > 0) {
             $mailOptions['extra'] = $form->has('email') ? $form->get('email')->get('extra')->getData() : null;
-            $message = $this->getMailForList($subject, $list);
+            $recipients = [];
+            array_walk($list, function ($data) use (&$recipients) {
+                if ($data instanceof User) {
+                    $recipients[] = $data;
+                } elseif (isset($data['id'])) {
+                    $recipients[] = $this->entityManager->getRepository(User::class)->find($data['id']);
+                }
+            });
+            $message = $this->getMailForList($subject, $recipients);
             $mailOptions['message'] = $message;
             if (null !== $message) {
                 $message
                     ->setBody(
-                        $this->twigEnvironment->render($template.'.html.twig', $mailOptions),
+                        $this->twigEnvironment->render($template.'.html.twig', array_merge($mailOptions, [
+                            'recipients' => $recipients,
+                        ])),
                         'text/html'
                     )
                     ->addPart(
