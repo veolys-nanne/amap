@@ -215,7 +215,9 @@ class MailHelper
                         'text/html'
                     )
                     ->addPart(
-                        $this->twigEnvironment->render($template.'.txt.twig', $mailOptions),
+                        $this->twigEnvironment->render($template.'.txt.twig', array_merge($mailOptions, [
+                            'recipients' => $recipients,
+                        ])),
                         'text/plain'
                     );
             }

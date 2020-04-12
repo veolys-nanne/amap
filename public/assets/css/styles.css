@@ -19,6 +19,9 @@ body {
 .hidden {
     display: none;
 }
+a.btn-sm {
+    white-space: nowrap;
+}
 /*carousel*/
 .carousel-control-next, .carousel-control-prev {
     width: 10%;
@@ -152,8 +155,6 @@ ul.max-height li label {
     height: 600px;
     overflow: auto;
 }
-
-
 .scroll table thead th {
     position: sticky;
     top: 0;

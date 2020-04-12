@@ -14,12 +14,13 @@ class ThumbnailType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('description', TextareaType::class, [
-                'label' => 'Description',
-            ])
             ->add('file', VichImageType::class, [
+                'label' => 'Image',
                 'allow_delete' => true,
                 'download_uri' => true,
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
             ]);
     }
 

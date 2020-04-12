@@ -105,13 +105,8 @@ class ContactController extends AbstractController
     {
         $form = $this->createForm(ContactType::class, [
             'subject' => 'Demande de modification du prix du produit "'.$product->getName().'"',
-            'extra' => 'Merci de modifier le prix de <a href="'.$this->generateUrl('product_form', [
-                    'role' => 'referent',
-                    'id' => $product->getId(),
-                ]).'">'.$product->getName().'</a>.<br />Nouveau prix:',
-        ], [
-            'user' => $user,
-        ]);
+            'email' => ['extra' => 'Merci de modifier le prix de <a href="'.$this->generateUrl('product_form', ['role' => 'referent', 'id' => $product->getId()]).'">'.$product->getName().'</a>.<br />Nouveau prix:'],
+        ], ['user' => $user]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -147,9 +142,7 @@ class ContactController extends AbstractController
     {
         $form = $this->createForm(ContactType::class, [
             'subject' => 'Question à propos de la permanence du '.$planningElement->getDate()->format('d/m/Y'),
-        ], [
-            'user' => $user,
-        ]);
+        ], ['user' => $user]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -185,13 +178,8 @@ class ContactController extends AbstractController
     {
         $form = $this->createForm(ContactType::class, [
             'subject' => 'Demande de modification du montant d\'un avoir (identifiant:'.$credit->getId().')',
-            'extra' => 'Merci de modifier le montant de cet <a href="'.$this->generateUrl('credit_form', [
-                    'role' => 'referent',
-                    'id' => $credit->getId(),
-                ]).'">avoir</a>.<br />Nouveau montant:',
-        ], [
-            'user' => $user,
-        ]);
+            'email' => ['extra' => 'Merci de modifier le montant de cet <a href="'.$this->generateUrl('credit_form', ['role' => 'referent', 'id' => $credit->getId()]).'">avoir</a>.<br />Nouveau montant:'],
+        ], ['user' => $user]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
