@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
@@ -12,7 +13,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @ORM\Table(name="amap_thumbnail")
  * @Vich\Uploadable
  */
-class Thumbnail
+class Thumbnail implements \Serializable
 {
     /**
      * @ORM\Id()
@@ -23,12 +24,12 @@ class Thumbnail
 
     /**
      * @Vich\UploadableField(mapping="thumbnail", fileNameProperty="media")
+     * @Assert\NotBlank()
      */
     private $file;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
      */
     private $media;
 
@@ -40,6 +41,7 @@ class Thumbnail
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Portfolio", inversedBy="thumbnailCollection")
+     * @Assert\NotBlank()
      */
     private $portfolio;
 
@@ -88,9 +90,8 @@ class Thumbnail
     public function setFile(?File $file = null): self
     {
         $this->file = $file;
-
         if ($this->file instanceof UploadedFile) {
-            $this->setUdatedAt(new \DateTime('now'));
+            $this->setUpdatedAt(new \DateTime('now'));
         }
 
         return $this;
@@ -115,5 +116,25 @@ class Thumbnail
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+            $this->media,
+            $this->description,
+            $this->portfolio,
+        ));
+    }
+
+    public function unserialize($serialized)
+    {
+        list(
+            $this->id,
+            $this->media,
+            $this->description,
+            $this->portfolio
+            ) = unserialize($serialized, array('allowed_classes' => false));
     }
 }

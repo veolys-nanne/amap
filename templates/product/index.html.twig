@@ -57,7 +57,10 @@
                             </a>
                         </td>
                     {% endif %}
-                    <td class="move"></td>
+                    <td class="move">
+                        <i class="fa fa-arrow-circle-up text-dark"></i>
+                        <i class="fa fa-arrow-circle-down text-dark"></i>
+                    </td>
                     {% if is_granted('ROLE_ADMIN') %}
                         <td>
                             <a href="{{ path('product_delete', {id: product.id}) }}" data-confirm="Confirmez-vous la suppression de ce produit?">

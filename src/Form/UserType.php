@@ -79,7 +79,7 @@ class UserType extends AbstractType
                         'S4' => 4,
                         'S5' => 5,
                 ], ])
-                ->add('portfolio', PortfolioType::class, ['label' => false, 'required' => false]);
+                ->add('portfolio', PortfolioType::class, ['label' => false, 'required' => true]);
         }
         $builder
             ->add('address', TextType::class, ['label' => 'Adresse', 'required' => false])

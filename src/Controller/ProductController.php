@@ -28,7 +28,7 @@ class ProductController extends AbstractController
         $products = $entityManager->getRepository(Product::class)->findByProducers($userManager->getProducers($this->getUser()));
         $options = [
             'role' => $role,
-            'title' => 'Avoirs',
+            'title' => 'Produits',
             'products' => $products,
         ];
         if (!in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_REFERENT', $roles)) {

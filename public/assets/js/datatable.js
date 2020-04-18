@@ -19,32 +19,16 @@
             params.options.language = data;
             params.options.stateSave = true;
             params.options.responsive = true;
-            if ($('td.move', $context).length > 0) {
-                params.options.columnDefs = params.options.columnDefs || [];
-                params.options.columnDefs.push(
-                    {
-                        targets: [$('td.move', $context).index()],
-                        searchable: false,
-                        sortable: false,
-                        render: function (data, type, full, meta) {
-                            if (type === 'display') {
-                                return '<i class="fa fa-arrow-circle-up text-dark"></i><i class="fa fa-arrow-circle-down text-dark"></i>'
-                            }
-                            return data;
-                        }
-                    }
-                );
-                params.options.drawCallback = function (settings) {
-                    $('tbody tr.first .fa-arrow-circle-up', $context).remove();
-                    $('tbody tr.last .fa-arrow-circle-down', $context).remove();
-                }
-            }
             params.options['retrieve'] = true;
-            params.options['drawCallback'] = function( settings ) {
+            params.options['drawCallback'] = function(settings) {
                 $('tr[data-url] td:not(:has(a)):not(:has(button))', $(this)).each(function (){
                     $(this).attr('data-url', $(this).parent().data('url'));
                     $(this).initCommon('ajax');
                 });
+                if ($('td.move', $(this)).length > 0) {
+                    $('tbody tr.first .fa-arrow-circle-up', $context).remove();
+                    $('tbody tr.last .fa-arrow-circle-down', $context).remove();
+                }
             };
 
             var table = $context.DataTable(params.options);
@@ -56,7 +40,7 @@
                     }
                     $.post($context.data('urlMove'), { 'moves': data }, function(data) {
                         $.refreshFromAjax(data);
-                    })
+                    }, 'json');
                 });
             }
             if (params.options.order) {
