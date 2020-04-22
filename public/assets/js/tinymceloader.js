@@ -4,10 +4,8 @@
             if (null !== $(this).tinymce()) {
                 $(this).unwrap();
                 $(this).tinymce().remove();
-                $(this).val('');
             }
             $(this).tinymce({
-                script_url : '../../assets/js/tinymce.min.js',
                 height: 500,
                 plugins: [
                     "advlist autolink lists link image charmap print preview anchor",

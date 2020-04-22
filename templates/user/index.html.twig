@@ -41,7 +41,10 @@
                     </td>
                     {% if is_granted('ROLE_ADMIN') and type == 'producer' %}
                         <td>{{ user.parent }}</td>
-                        <td class="move"></td>
+                        <td class="move">
+                            <i class="fa fa-arrow-circle-up text-dark"></i>
+                            <i class="fa fa-arrow-circle-down text-dark"></i>
+                        </td>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
                         <td>

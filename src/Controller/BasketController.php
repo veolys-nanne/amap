@@ -81,7 +81,7 @@ class BasketController extends AbstractController
      *     name="basket_form",
      * )
      */
-    public function basketEditAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager, string $role)
+    public function basketEditAction(Request $request, BasketManager $basketManager, ProductManager $productManager, EntityManagerInterface $entityManager)
     {
         $modelBaskets = $entityManager->getRepository(Basket::class)->findByFrozenAndModel(0);
         $baskets = [];
@@ -105,13 +105,12 @@ class BasketController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Le panier a été mis à jour.');
 
-            return $this->forward('App\Controller\BasketController::basketViewAction', ['role' => $role]);
+            return $this->forward('App\Controller\BasketController::basketViewAction');
         }
 
         return $this->render('basket/form.html.twig', [
             'title' => 'Mise à jour panier',
             'form' => $form->createView(),
-            'role' => $role,
             'products' => $products,
             'isNew' => $isNew,
         ]);

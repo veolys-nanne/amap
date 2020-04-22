@@ -27,7 +27,7 @@ a.btn-sm {
     width: 10%;
 }
 .carousel-caption {
-    opacity: .5;
+    opacity: 1;
     top:0;
     bottom:initial;
     right: 10%;
@@ -35,6 +35,9 @@ a.btn-sm {
 }
 .carousel-caption:hover {
     opacity: .9;
+}
+.carousel-control-next, .carousel-control-prev {
+    opacity: 1;
 }
 /*datatable*/
 .page-item.active .page-link {

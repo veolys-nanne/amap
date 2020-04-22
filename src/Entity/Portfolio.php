@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity
@@ -20,7 +21,8 @@ class Portfolio
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Thumbnail", mappedBy="portfolio", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="App\Entity\Thumbnail", mappedBy="portfolio", cascade={"all"}, orphanRemoval=true)
+     * @Assert\Valid
      */
     private $thumbnailCollection;
 
@@ -39,13 +41,18 @@ class Portfolio
         return $this->thumbnailCollection;
     }
 
-    public function setThumbnailCollection(array $thumbnailCollection): self
+    public function addThumbnailCollection(Thumbnail $thumbnail): self
     {
-        $this->thumbnailCollection->clear();
-        foreach ($thumbnailCollection as $thumbnail) {
-            $this->thumbnailCollection->add($thumbnail);
-            $thumbnail->setPortfolio($this);
-        }
+        $thumbnail->setPortfolio($this);
+        $this->thumbnailCollection->add($thumbnail);
+
+        return $this;
+    }
+
+    public function removeThumbnailCollection(Thumbnail $thumbnail): self
+    {
+        $this->thumbnailCollection->removeElement($thumbnail);
+        $thumbnail->setPortfolio(null);
 
         return $this;
     }
