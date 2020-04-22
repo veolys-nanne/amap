@@ -191,7 +191,7 @@ class MailHelper
         return [];
     }
 
-    public function adminMailerForm(Form $form, array $list, string $subject, string $template, array $mailOptions = []): \Swift_Message
+    protected function adminMailerForm(Form $form, array $list, string $subject, string $template, array $mailOptions = []): \Swift_Message
     {
         $message = null;
         if (count($list) > 0) {
