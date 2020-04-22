@@ -85,7 +85,7 @@
 <script type="application/javascript">
     $(document).ready(function() {
         $.ajaxSetup({ cache: false });
-        $('body').initCommon({tinyMceUpload : '{{ path('document_form_image') }}'});
+        $('body').initCommon();
         window.history.replaceState({url: window.location.href}, document.title, window.location.href)
         window.addEventListener("popstate", function (event) {
             if (null !== event.state) {

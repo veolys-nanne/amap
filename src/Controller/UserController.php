@@ -179,6 +179,7 @@ class UserController extends AbstractController
      */
     public function userPasswordAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role = null, User $user = null)
     {
+        $options = [];
         $isAccount = null == $user;
         $user = $isAccount ? $this->getUser() : $user;
         $form = $this->createForm(NewPasswordType::class, $user, [
