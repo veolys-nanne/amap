@@ -126,7 +126,7 @@ class BasketController extends AbstractController
     {
         $baskets = $entityManager->getRepository(Basket::class)->findModel();
         $openModels = $entityManager->getRepository(Basket::class)->findByFrozenAndModel(0);
-        $list = $entityManager->getRepository(User::class)->countBasketByUser($openModels);
+        $list = $entityManager->getRepository(User::class)->findUserWithNoBasket($openModels);
         $getOpenModels = count($openModels) > 0;
         $options = [
             'baskets' => $baskets,

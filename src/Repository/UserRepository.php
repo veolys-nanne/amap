@@ -88,12 +88,10 @@ class UserRepository extends ServiceEntityRepository
             ;
     }
 
-    public function countBasketByUser(array $models)
+    public function findUserWithNoBasket(array $models)
     {
         if (count($models) > 0) {
             return $this->createQueryBuilder('u')
-                ->addSelect('u.email as email')
-                ->addSelect('u.broadcastList as broadcastList')
                 ->leftJoin('u.baskets', 'basket', Join::WITH, 'basket.parent IN (:models)')
                 ->where('u.roles LIKE :role')
                 ->andWhere('u.deleted  = 0')
