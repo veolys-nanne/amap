@@ -1,7 +1,7 @@
 (function( $ ) {
     var methods = {
         init : function(params) {
-            $('textarea:not(.form-popin)', $(this)).addTinymce();
+            $('textarea:not(.form-popin)', $(this)).addTinymce({tinyMceUpload : params.tinyMceUpload});
             $('input.date-picker', $(this)).datepicker($.datepicker.regional['fr']);
             $('a[data-confirm]', $(this)).addConfirm();
             $(this).addFormHelper();
@@ -14,7 +14,7 @@
                     remove: '<a href="#"><i class="far fa-minus-square"></i></a>',
                     drag_drop: false,
                     after_add: function (collection, element) {
-                        $(element).initCommon();
+                        $(element).initCommon({tinyMceUpload : params.tinyMceUpload});
                         return true;
                     },
                 });
