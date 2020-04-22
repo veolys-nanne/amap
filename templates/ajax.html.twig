@@ -34,9 +34,9 @@
 {% set script %}
     <script type="application/javascript">
         $(document).ready(function() {
-            $('#container-body').initCommon();
+            $('#container-body').initCommon({tinyMceUpload : '{{ path('document_form_image') }}'});
             {% if needNavbar|default(false) %}
-                $('#container-navbar').initCommon();
+                $('#container-navbar').initCommon({tinyMceUpload : '{{ path('document_form_image') }}'});
             {% endif %}
         });
     </script>
