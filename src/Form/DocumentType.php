@@ -12,9 +12,17 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Routing\RouterInterface;
 
 class DocumentType extends AbstractType
 {
+    protected $url;
+
+    public function __construct(RouterInterface $router)
+    {
+        $this->url = $router->generate('document_form_image');
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
@@ -38,7 +46,10 @@ class DocumentType extends AbstractType
         });
 
         $builder
-            ->add('text', TextareaType::class, ['label' => 'Texte'])
+            ->add('text', TextareaType::class, [
+                'label' => 'Texte',
+                'attr' => ['data-tiny-mce-url' => $this->url],
+            ])
             ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
     }
