@@ -48,7 +48,9 @@ class AjaxSubscriber implements EventSubscriberInterface
         }
         if (HttpKernelInterface::MASTER_REQUEST == $event->getRequestType()) {
             $roles = $this->security->getUser() ? $this->security->getUser()->getRoles() : [];
-            $this->twig->addGlobal('needNavbar', $this->session->get('roles') !== $roles);
+            if ($this->session->get('roles') !== $roles) {
+                $this->session->set('needNavbar', true);
+            }
             $this->session->set('roles', $roles);
         }
         $this->twig->addGlobal('url', preg_replace('/\?.*/', '', $url));
