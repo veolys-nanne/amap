@@ -179,12 +179,12 @@ class MailHelper
                 }
 
                 return $results;
-            }
-        }
+            } else {
+                if (isset($results['messages'])) {
+                    $this->sendMessages($results['messages']);
 
-        if ($isEmail) {
-            if (isset($results['messages'])) {
-                $this->sendMessages($results['messages']);
+                    return ['callback' => $mailsParameters[$index]['callback'] ?? ''];
+                }
             }
         }
 

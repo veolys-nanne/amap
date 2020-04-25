@@ -39,6 +39,25 @@ a.btn-sm {
 .carousel-control-next, .carousel-control-prev {
     opacity: 1;
 }
+.slideshow {
+    overflow: hidden;
+    width: 100%;
+}
+.slideshow ul {
+    padding:0; margin:0;
+    list-style: none;
+}
+.slideshow ul:not:first-child {
+    display: none;
+}
+.slideshow li {
+    float: left;
+}
+.slideshow .player {
+    display: none;
+    width: 100%;
+    text-align: center;
+}
 /*datatable*/
 .page-item.active .page-link {
     background-color: #28a745 !important;

@@ -45,6 +45,9 @@ class ProductController extends AbstractController
             }
             if (!empty($mailsParameters)) {
                 $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+                if (isset($options['callback']) && '' != $options['callback']) {
+                    return $this->redirect(urldecode($options['callback']));
+                }
             }
         }
 

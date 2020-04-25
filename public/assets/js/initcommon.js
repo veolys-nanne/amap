@@ -2,6 +2,7 @@
     var methods = {
         init : function(params) {
             $('textarea:not(.form-popin)', $(this)).addTinymce();
+            $('.slideshow', $(this)).addSlideShow();
             $('input.date-picker', $(this)).datepicker($.datepicker.regional['fr']);
             $('a[data-confirm]', $(this)).addConfirm();
             $(this).addFormHelper();
