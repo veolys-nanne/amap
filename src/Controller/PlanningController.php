@@ -68,6 +68,9 @@ class PlanningController extends AbstractController
 
         if (!empty($mailsParameters)) {
             $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            if (isset($options['callback']) && '' != $options['callback']) {
+                return $this->redirect(urldecode($options['callback']));
+            }
         }
 
         return $this->render('planning/index.html.twig', $options);
@@ -157,7 +160,7 @@ class PlanningController extends AbstractController
         }
 
         $options['isPdf'] = $request->query->has('pdf') && $request->query->get('pdf');
-        $plannings = $options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
+        $plannings = !$options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
         if (!empty($plannings)) {
             $options['plannings'] = $plannings;
         }

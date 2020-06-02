@@ -13,7 +13,7 @@ class DocumentRepository extends ServiceEntityRepository
         parent::__construct($registry, Document::class);
     }
 
-    public function findByNameAndRole(string $name, string $role): Document
+    public function findByNameAndRole(string $name, string $role): array
     {
         return $this->createQueryBuilder('d')
             ->where('d.name = :name')
@@ -24,6 +24,6 @@ class DocumentRepository extends ServiceEntityRepository
                 'role' => $role,
             ])
             ->getQuery()
-            ->getSingleResult();
+            ->getResult();
     }
 }

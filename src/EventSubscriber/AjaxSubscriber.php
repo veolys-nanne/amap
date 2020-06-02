@@ -5,7 +5,6 @@ namespace App\EventSubscriber;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
@@ -16,7 +15,6 @@ class AjaxSubscriber implements EventSubscriberInterface
     protected $twig;
     protected $router;
     protected $requestStack;
-    protected $httpKernel;
 
     public function __construct(Environment $twig, RouterInterface $router, Security $security, SessionInterface $session)
     {
@@ -44,9 +42,11 @@ class AjaxSubscriber implements EventSubscriberInterface
                     return $route->getDefault('_controller') == $controller;
                 }));
             }
-            $url = $this->router->generate($routeName, $event->getRequest()->attributes->all());
+            if (!empty($routeName)) {
+                $url = $this->router->generate($routeName, $event->getRequest()->attributes->all());
+            }
         }
-        if (HttpKernelInterface::MASTER_REQUEST == $event->getRequestType()) {
+        if ($event->isMasterRequest()) {
             $roles = $this->security->getUser() ? $this->security->getUser()->getRoles() : [];
             if ($this->session->get('roles') !== $roles) {
                 $this->session->set('needNavbar', true);
@@ -54,10 +54,7 @@ class AjaxSubscriber implements EventSubscriberInterface
             $this->session->set('roles', $roles);
         }
         $this->twig->addGlobal('url', preg_replace('/\?.*/', '', $url));
-        $this->twig->addGlobal('base', 'base.html.twig');
-        if ($event->getRequest()->isXmlHttpRequest()) {
-            $this->twig->addGlobal('base', 'ajax.html.twig');
-        }
+        $this->twig->addGlobal('base', $event->getRequest()->isXmlHttpRequest() ? 'ajax.html.twig' : 'base.html.twig');
     }
 
     public static function getSubscribedEvents()

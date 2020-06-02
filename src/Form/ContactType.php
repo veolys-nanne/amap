@@ -51,6 +51,7 @@ class ContactType extends AbstractType
         }
         if (in_array('ROLE_REFERENT', $roles)) {
             $this->choices['Liste de diffusion']['Mes producteurs/trices'] = self::MY_PRODUCERS;
+            $this->choices['Liste de diffusion']['Les référents/es'] = self::ALL_REFERENT;
             foreach ($this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_PRODUCER', $user) as $producer) {
                 $this->retrieveTo('Mon/ma Producteur/trice', $producer, 'mp_'.$producer->getId(), $options['user']);
             }

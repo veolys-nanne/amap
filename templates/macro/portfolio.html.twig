@@ -1,5 +1,5 @@
 {% macro portfolio(portfolio) %}
-    {% if portfolio is not null %}
+    {% if portfolio is not null and portfolio.thumbnailCollection is not null %}
         <a href="#" data-toggle="modal" data-target="#bs-portfolio-modal-lg-{{ portfolio.id }}" class="text-info"><i class="fa fa-eye"></i></a>
         <div class="modal fade" id="bs-portfolio-modal-lg-{{ portfolio.id }}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg">

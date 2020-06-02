@@ -94,11 +94,11 @@ class DocumentController extends AbstractController
         } elseif (in_array('ROLE_PRODUCER', $roles)) {
             $role = 'ROLE_PRODUCER';
         }
-        $document = $entityManager->getRepository(Document::class)->findByNameAndRole($name, $role);
+        $documents = $entityManager->getRepository(Document::class)->findByNameAndRole($name, $role);
 
         return $this->render('document/view.html.twig', [
-            'document' => $document,
-            'title' => $document->getName(),
+            'documents' => $documents,
+            'title' => $name,
         ]);
     }
 

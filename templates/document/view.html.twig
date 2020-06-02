@@ -1,5 +1,17 @@
 {% extends base %}
 
 {% block body %}
-    {{ document.text|raw }}
+    <div class="slideshow">
+        <div class="player">
+            <i class="fas fa-backward"></i>
+            <i class="fas fa-play"></i>
+            <i class="fas fa-pause"></i>
+            <i class="fas fa-forward"></i>
+        </div>
+        <ul>
+            {% for document in documents %}
+                <li>{{ document.text|raw }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
