@@ -21,7 +21,7 @@
                 });
             }
             $(this).addProductListing();
-            $('a', $(this)).initCommon('ajax');
+            $('a:not([target])', $(this)).initCommon('ajax');
             $('form', $(this)).initCommon('ajax');
             $("input[type=file]", $(this)).change(function () {
                 $(this).next(".custom-file-label").attr('data-content', this.files[0].name);

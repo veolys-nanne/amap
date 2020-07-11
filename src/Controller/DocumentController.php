@@ -47,7 +47,9 @@ class DocumentController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le document a été créé.' : 'Le document a été mis à jour.');
 
-            return $this->forward('App\Controller\DocumentController::documentListingAction');
+            return $form->get('submitandnew')->isClicked() ?
+                $this->redirectToRoute('document_form') :
+                $this->redirectToRoute('document_index');
         }
 
         return $this->render('document/form.html.twig', [

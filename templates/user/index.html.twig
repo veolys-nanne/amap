@@ -12,6 +12,9 @@
                     <th>Référent/e</th>
                     <th>Ordre</th>
                 {% endif %}
+                {% if is_granted('ROLE_ADMIN') and type == 'referent' %}
+                    <th>Producteurs/trices</th>
+                {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
                     <th>Supprimer</th>
                 {% endif %}
@@ -45,6 +48,15 @@
                             <i class="fa fa-arrow-circle-up text-dark"></i>
                             <i class="fa fa-arrow-circle-down text-dark"></i>
                         </td>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') and type == 'referent' %}
+                        {% set producers = [] %}
+                        {% for child in user.children %}
+                            {% if 'ROLE_PRODUCER' in child.roles %}
+                                {% set producers = producers|merge([child]) %}
+                            {% endif %}
+                        {% endfor %}
+                        <td>{{ producers|join(', ') }}</td>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
                         <td>

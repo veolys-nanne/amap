@@ -52,6 +52,7 @@ class CreditType extends AbstractType
             ])
             ->add('object', TextType::class, ['label' => 'Object'])
             ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
+            ->add('submitandnew', SubmitType::class, ['label' => 'Envoyer et créer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
     }
 

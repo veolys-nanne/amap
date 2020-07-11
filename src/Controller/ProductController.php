@@ -84,7 +84,9 @@ class ProductController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le produit a été créé.' : 'Le produit a été mis à jour.');
 
-            return $this->forward('App\Controller\ProductController::productListingAction', ['role' => $role]);
+            return $form->get('submitandnew')->isClicked() ?
+                $this->redirectToRoute('product_form', ['role' => $role]) :
+                $this->redirectToRoute('product_index', ['role' => $role]);
         }
 
         return $this->render('product/form.html.twig', [
