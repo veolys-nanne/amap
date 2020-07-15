@@ -112,6 +112,7 @@ class UserType extends AbstractType
                 'prototype' => true,
             ])
             ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
+            ->add('submitandnew', SubmitType::class, ['label' => 'Envoyer et créer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $user = $event->getData();

@@ -80,7 +80,9 @@ class CreditController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'L\'avoir a été créé.' : 'L\'avoir a été mis à jour.');
 
-            return $this->forward('App\Controller\CreditController::creditListingAction', ['role' => $role]);
+            return $form->get('submitandnew')->isClicked() ?
+                $this->redirectToRoute('credit_form', ['role' => $role]) :
+                $this->redirectToRoute('credit_index', ['role' => $role]);
         }
 
         return $this->render('credit/form.html.twig', [

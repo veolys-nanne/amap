@@ -242,7 +242,7 @@ class BasketController extends AbstractController
         ];
         $options[''] = false;
         $form = $this->createForm(SynthesesType::class, null, [
-            'light' => !in_array('ROLE_ADMIN', $roles),
+            'light' => !in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_REFERENT', $roles),
         ]);
         $form->handleRequest($request);
         $options['form'] = $form->createView();

@@ -51,6 +51,7 @@ class DocumentType extends AbstractType
                 'attr' => ['data-tiny-mce-url' => $this->url],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
+            ->add('submitandnew', SubmitType::class, ['label' => 'Envoyer et créer', 'attr' => ['class' => 'btn-success btn-block']])
         ;
     }
 

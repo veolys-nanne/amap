@@ -30,7 +30,7 @@ class ContactController extends AbstractController
      */
     public function contactEditAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper, User $user = null)
     {
-        $form = $this->createForm(ContactType::class, null, [
+        $form = $this->createForm(ContactType::class, $request->query->all(), [
             'user' => $user,
         ]);
         $form->handleRequest($request);

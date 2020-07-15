@@ -46,7 +46,10 @@ class ProductType extends AbstractType
         if (in_array('ROLE_PRODUCER', $options['user']->getRoles())) {
             $builder->add('portfolio', PortfolioType::class, ['label' => false, 'required' => false]);
         }
-        $builder->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']]);
+        $builder
+            ->add('submit', SubmitType::class, ['label' => 'Envoyer', 'attr' => ['class' => 'btn-success btn-block']])
+            ->add('submitandnew', SubmitType::class, ['label' => 'Envoyer et créer', 'attr' => ['class' => 'btn-success btn-block']])
+        ;
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $product = $event->getData();
             $builder = $event->getForm();

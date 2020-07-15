@@ -14,7 +14,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
@@ -100,7 +99,7 @@ class UserController extends AbstractController
      *     name="user_profil",
      * )
      */
-    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role = null, string $type = null, User $user = null, RouterInterface $router)
+    public function userEditAction(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, string $role = null, string $type = null, User $user = null)
     {
         $isAccount = null == $role;
         $user = $isAccount ? $this->getUser() : $user;
@@ -137,10 +136,9 @@ class UserController extends AbstractController
                 return $this->forward('App\Controller\DocumentController::documentViewAction', ['name' => 'homepage']);
             }
 
-            return $this->forward('App\Controller\UserController::userListingAction', [
-                'role' => $role,
-                'type' => $type,
-            ]);
+            return $form->get('submitandnew')->isClicked() ?
+                $this->redirectToRoute('user_form', ['role' => $role, 'type' => $type]) :
+                $this->redirectToRoute('user_index', ['role' => $role, 'type' => $type]);
         }
         $title = $isNew ? 'Inscription ' : 'Mise à jour ';
         if ('referent' == $type) {
