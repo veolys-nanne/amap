@@ -78,8 +78,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('basket_view') }}">Mes commandes</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('planning_availability') }}">Permanences</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Permanences
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                        <a class="dropdown-item" href="{{ path('unavailability') }}">Calendrier</a>
+                        <a class="dropdown-item" href="{{ path('planning') }}">Permanences</a>
+                    </div>
                 </li>
             {% endif %}
             <li class="nav-item">

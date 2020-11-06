@@ -3,6 +3,18 @@
     var methods = {
         init : function(params) {
             var $context = $(this);
+            jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                "extract-date-pre": function(value) {
+                    value = value.split('/');
+                    return Date.parse(value[1] + '/' + value[0] + '/' + value[2])
+                },
+                "extract-date-asc": function(a, b) {
+                    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+                },
+                "extract-date-desc": function(a, b) {
+                    return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+                }
+            });
             if (null == language) {
                 $.getJSON('/assets/json/datatable.json', function(data) {
                     language = data;
