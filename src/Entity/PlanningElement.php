@@ -28,14 +28,14 @@ class PlanningElement
     private $planning;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User")
+     * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="planningElements")
      * @ORM\JoinTable(name="amap_planning_element_user")
+     * @ORM\OrderBy({"lastname" = "ASC"})
      */
     private $members;
 
     /**
      * @ORM\Column(type="date")
-     * @Assert\GreaterThanOrEqual("today")
      * @Assert\NotBlank()
      */
     private $date;
@@ -72,7 +72,7 @@ class PlanningElement
         return $this;
     }
 
-    public function setMembers(array $members): self
+    public function setMembers($members): self
     {
         $this->members->clear();
 

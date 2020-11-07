@@ -2,26 +2,17 @@
 
 namespace App\Controller;
 
-use App\Entity\AvailabilitySchedule;
-use App\Entity\AvailabilityScheduleElement;
 use App\Entity\Planning;
+use App\Entity\PlanningElement;
+use App\Entity\Unavailability;
 use App\Entity\User;
-use App\Form\AvailabilityScheduleElementsType;
-use App\Form\PlanningType;
-use App\Form\PlanningWithMemberType;
 use App\EntityManager\PlanningManager;
+use App\Form\PlanningType;
 use App\Helper\MailHelper;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
-use Knp\Snappy\Pdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class PlanningController extends AbstractController
 {
@@ -31,43 +22,26 @@ class PlanningController extends AbstractController
      *     name="planning_index",
      * )
      */
-    public function planningListingAction(Request $request, EntityManagerInterface $entityManager, MailHelper $mailHelper)
+    public function planningListingAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, MailHelper $mailHelper)
     {
         $plannings = $entityManager->getRepository(Planning::class)->findByDeleted(false);
         $options = [
             'plannings' => $plannings,
             'title' => 'Plannings de permancence',
         ];
+
         $mailsParameters = [];
         foreach ($plannings as $planning) {
-            $state = $planning->getNextState();
-            if (isset(Planning::MAIL_TEMPLATES[$state])) {
-                $mailsParameters[$planning->getId()] = [
-                    'list' => $entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'),
-                    'subject' => Planning::MAIL_SUBJECTS[$state],
-                    'template' => Planning::MAIL_TEMPLATES[$state],
-                    'mailOptions' => ['period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
-                    'callback' => urlencode($this->generateUrl('planning_state', ['state' => $state, 'id' => $planning->getId()])),
-                ];
+            if ($parameters = $planningManager->getNextStateMail($planning)) {
+                $mailsParameters['nextStateMail_'.$planning->getId()] = $parameters;
             }
-        }
-        $options['formMailUp'] = false;
-        if (count($list = $entityManager->getRepository(AvailabilitySchedule::class)->findMemberByEmptyAvailability()) > 0) {
-            $options['formMailUp'] = true;
-            foreach ($plannings as $planning) {
-                $mailsParameters['formMailUp'][$planning->getId()] = [
-                    'list' => array_filter($list, function ($item) use ($planning) {
-                        return $item['planning'] == $planning->getId();
-                    }),
-                    'subject' => 'Relance Disponibilité AMAP hommes de terre',
-                    'template' => 'emails/upplanning',
-                    'mailOptions' => ['period' => $entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
-                ];
+            if ($parameters = $planningManager->getUpMail($planning)) {
+                $mailsParameters['upMail_'.$planning->getId()] = $parameters;
             }
         }
 
         if (!empty($mailsParameters)) {
-            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters));
+            $options = array_merge($options, $mailHelper->createMailForm($request, $mailsParameters), ['mailsParameters' => $mailsParameters]);
             if (isset($options['callback']) && '' != $options['callback']) {
                 return $this->redirect(urldecode($options['callback']));
             }
@@ -84,26 +58,21 @@ class PlanningController extends AbstractController
      *     defaults={"id"=0}
      * )
      */
-    public function planningEditAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, Planning $planning = null)
+    public function planningEditAction(Request $request, EntityManagerInterface $entityManager, Planning $planning = null)
     {
         $isNew = $planning ? false : true;
-        $planning = $planning ?? new Planning();
-        $isPlanningWithMember = Planning::STATE_CLOSE == $planning->getState() || Planning::STATE_ONLINE == $planning->getState();
-        $form = $this->createForm($isPlanningWithMember ? PlanningWithMemberType::class : PlanningType::class, $planning);
-        $originalElements = new ArrayCollection();
-        foreach ($planning->getElements() as $element) {
-            $originalElements->add($element);
-        }
+        $planning = $isNew ? new Planning() : $planning;
+        $originalElements = $planning->getElements()->toArray();
+        $form = $this->createForm(PlanningType::class, $planning);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->has('members')) {
-                $members = $form->get('members')->getData();
-                if ($members instanceof Collection) {
-                    $members = $members->toArray();
+            foreach ($planning->getElements() as $element) {
+                $element->setPlanning($planning);
+            }
+            foreach ($originalElements as $element) {
+                if (false === $planning->getElements()->contains($element)) {
+                    $entityManager->remove($element);
                 }
-                $planningManager->updatePlanning($planning, $members, $originalElements->toArray());
-            } else {
-                $planningManager->updateMembers($planning, $originalElements->toArray());
             }
             $entityManager->persist($planning);
             $entityManager->flush();
@@ -112,102 +81,16 @@ class PlanningController extends AbstractController
             return $this->forward('App\Controller\PlanningController::planningListingAction');
         }
 
-        return $this->render($isPlanningWithMember ? 'planning/formwithmember.html.twig' : 'planning/form.html.twig', [
+        $planningDates = array_column($entityManager->getRepository(PlanningElement::class)->findByActivePlanning($planning), 'date');
+        $planningDates = array_map(function (string $date) {
+            return \DateTime::createFromFormat('Y-m-d', $date);
+        }, $planningDates);
+
+        return $this->render('planning/form.html.twig', [
             'form' => $form->createView(),
             'title' => $isNew ? 'Création planning permanences' : 'Mise à jour planning permanences',
+            'planningDates' => $planningDates,
         ]);
-    }
-
-    /**
-     * @Route(
-     *     "/admin/planning/state/{state}/{id}",
-     *     name="planning_state",
-     * )
-     */
-    public function stateAction(Request $request, EntityManagerInterface $entityManager, PlanningManager $planningManager, string $state, Planning $planning)
-    {
-        $planning->setState($state);
-        if (!$request->request->get('preview')) {
-            $entityManager->persist($planning);
-            $entityManager->flush();
-            $this->addFlash('success', 'Le planning de permanences a été passé dans l\'état "'.Planning::LABELS[$state].'".');
-        }
-
-        return $this->forward('App\Controller\PlanningController::planningListingAction');
-    }
-
-    /**
-     * @Route(
-     *     "/member/planning/availability",
-     *     name="planning_availability",
-     * )
-     */
-    public function availabilityAction(Request $request, EntityManagerInterface $entityManager, Pdf $knpSnappy, ParameterBagInterface $parameterBag)
-    {
-        $options = ['title' => 'Permanences'];
-        $availabilityScheduleElements = $entityManager->getRepository(AvailabilityScheduleElement::class)->findByMemberAndByState($this->getUser(), Planning::STATE_OPEN);
-        if (count($availabilityScheduleElements) > 0) {
-            $form = $this->createForm(AvailabilityScheduleElementsType::class, $availabilityScheduleElements, ['label' => 'Mes disponibilités']);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                foreach ($availabilityScheduleElements as $availabilityScheduleElement) {
-                    $entityManager->persist($availabilityScheduleElement);
-                }
-                $entityManager->flush();
-                $this->addFlash('success', 'Vos diponibilités ont été mise à jour.');
-            }
-            $options['form'] = $form->createView();
-        }
-
-        $options['isPdf'] = $request->query->has('pdf') && $request->query->get('pdf');
-        $plannings = !$options['isPdf'] ? $entityManager->getRepository(Planning::class)->findByOnline() : [$entityManager->getRepository(Planning::class)->find($request->query->get('id'))];
-        if (!empty($plannings)) {
-            $options['plannings'] = $plannings;
-        }
-
-        $html = $this->renderView('planning/availability.html.twig', $options);
-        if ($options['isPdf']) {
-            return new PdfResponse(
-                $knpSnappy->getOutputFromHtml($html, ['user-style-sheet' => $parameterBag->get('kernel.project_dir').'/public/assets/css/pdf-color-page-break.css']),
-                'planning.pdf'
-            );
-        }
-
-        return new Response($html);
-    }
-
-    /**
-     * @Route(
-     *     "/admin/planning/availability/{date}/{id}",
-     *     name="change_planning_availability",
-     * )
-     * @ParamConverter("date", options={"format": "Y-m-d"})
-     */
-    public function changeAvailabilityAction(Request $request, EntityManagerInterface $entityManager, \DateTime $date, Planning $planning)
-    {
-        $options = ['title' => 'Permanences'];
-        $date->setTime(0, 0, 0);
-        $availabilityScheduleElements = $entityManager->getRepository(AvailabilityScheduleElement::class)->findByPlanningAndDate($planning, $date);
-        if (count($availabilityScheduleElements) > 0) {
-            $form = $this->createForm(AvailabilityScheduleElementsType::class, $availabilityScheduleElements, ['type' => 'member', 'label' => $availabilityScheduleElements[0]->getDate()->format('d/m/Y')]);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                foreach ($availabilityScheduleElements as $availabilityScheduleElement) {
-                    $entityManager->persist($availabilityScheduleElement);
-                }
-                $entityManager->flush();
-                $this->addFlash('success', 'Les diponibilités ont été mise à jour.');
-
-                return $this->forward('App\Controller\PlanningController::planningEditAction', ['id' => $planning->getId()]);
-            }
-            $options['form'] = $form->createView();
-        }
-        $plannings = $entityManager->getRepository(Planning::class)->findByOnline();
-        if (!empty($plannings)) {
-            $options['plannings'] = $plannings;
-        }
-
-        return $this->render('planning/availability.html.twig', $options);
     }
 
     /**
@@ -223,5 +106,55 @@ class PlanningController extends AbstractController
         $this->addFlash('success', 'Le planning a été supprimé.');
 
         return $this->forward('App\Controller\PlanningController::planningListingAction');
+    }
+
+    /**
+     * @Route(
+     *     "/admin/planning/state/{state}/{id}",
+     *     name="planning_state",
+     * )
+     */
+    public function stateAction(Request $request, EntityManagerInterface $entityManager, string $state, Planning $planning)
+    {
+        $planning->setState($state);
+        if (!$request->request->get('preview')) {
+            $entityManager->persist($planning);
+            $entityManager->flush();
+            if (Planning::STATE_OPEN == $state) {
+                $users = $entityManager->getRepository(User::class)->findMemberActiveWithOtherRole();
+                foreach ($users as $user) {
+                    foreach ($planning->getElements() as $element) {
+                        $unavailability = $entityManager->getRepository(Unavailability::class)->findByUserAndDate($user, $element->getDate()) ?? new Unavailability();
+                        $unavailability->setDate($element->getDate());
+                        $unavailability->setMember($user);
+                        $entityManager->persist($unavailability);
+                    }
+                }
+                $entityManager->flush();
+            }
+            $this->addFlash('success', 'Le planning de permanences a été passé dans l\'état "'.PlanningManager::LABELS[$state].'".');
+        }
+
+        return $this->forward('App\Controller\PlanningController::planningListingAction');
+    }
+
+    /**
+     * @Route(
+     *     "/logged/planning",
+     *     name="planning",
+     * )
+     */
+    public function planningViewAction(EntityManagerInterface $entityManager)
+    {
+        $planningElements = $entityManager->getRepository(PlanningElement::class)->findByOnline();
+        $nbrColumn = 0;
+        foreach ($planningElements as $planningElement) {
+            $nbrColumn = max($nbrColumn, count($planningElement->getMembers()));
+        }
+
+        return $this->render('planning/view.html.twig', [
+            'planningElements' => $planningElements,
+            'nbrColumn' => $nbrColumn,
+        ]);
     }
 }

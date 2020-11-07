@@ -58,13 +58,34 @@ class UserRepository extends ServiceEntityRepository
         return $queryBuilder;
     }
 
-    public function findOnlyMemberActive()
+    public function getQueryBuilderForPlanning()
+    {
+        return $this->getQueryBuilderForFindByRoleAndActive('ROLE_MEMBER')
+            ->leftJoin('u.planningElements', 'pe')
+            ->groupBy('u.id')
+            ->orderBy('count(pe)', 'asc')
+            ->addOrderBy('u.lastname', 'asc');
+    }
+
+    public function findMemberActive()
     {
         return $this->createQueryBuilder('u')
             ->where('u.roles = \'a:1:{i:0;s:11:"ROLE_MEMBER";}\'')
             ->andWhere('u.deleted = 0')
             ->andWhere('u.active = 1')
             ->orderBy('u.lastname', 'asc')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findMemberActiveWithOtherRole()
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles != \'a:1:{i:0;s:11:"ROLE_MEMBER";}\'')
+            ->andWhere('u.roles LIKE :role')
+            ->andWhere('u.deleted = 0')
+            ->andWhere('u.active = 1')
+            ->setParameter('role', '%"ROLE_MEMBER"%')
             ->getQuery()
             ->getResult();
     }

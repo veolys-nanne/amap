@@ -65,7 +65,9 @@ class MailHelper
         if (null == $broadcastList) {
             $broadcastList = [$this->adminEmail];
             array_walk($recipients, function ($data) use (&$broadcastList) {
-                $broadcastList = array_merge($broadcastList, [$data->getEmail()], $data->getBroadcastList());
+                $emails = $data instanceof User ? array_merge([$data->getEmail()], $data->getBroadcastList()) : [];
+                $emails = is_array($data) ? array_merge([$data['email']], $data['broadcastList']) : $emails;
+                $broadcastList = array_merge($broadcastList, $emails);
             });
             $broadcastList = array_unique(array_filter($broadcastList));
         }
@@ -162,14 +164,8 @@ class MailHelper
         $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
         if ($isEmail || $isPreview) {
             $index = $form->get('email')->get('reference')->getData();
-            if (is_numeric($index)) {
-                $mailsParameter = $mailsParameters[$index];
-                $results['messages'] = [$this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? [])];
-            } else {
-                foreach ($mailsParameters[$index] as $mailsParameter) {
-                    $results['messages'][] = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? []);
-                }
-            }
+            $mailsParameter = $mailsParameters[$index];
+            $results['messages'] = [$this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? [])];
             if ($isPreview) {
                 if (isset($results['messages'])) {
                     $url = $this->router->generate('preview', ['url' => $mailsParameters[$index]['callback'] ?? '']);

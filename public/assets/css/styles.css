@@ -225,3 +225,16 @@ ul.max-height li label {
 .full-width {
     width: 100%;
 }
+/*datepicker*/
+.ui-datepicker-calendar .in-planning {
+    border: thick double #ffd700;
+}
+.ui-datepicker-calendar .in-current-planning {
+    border: thick double #ff4500;
+}
+.ui-datepicker-calendar td.availability a.ui-state-default {
+    background-color: rgba(00, 255, 69, 0.5);
+}
+.ui-datepicker-calendar td.unavailability a.ui-state-default {
+    background-color: rgba(255, 69, 00, 0.5);
+}

@@ -1,0 +1,51 @@
+{% extends base %}
+
+{% block body %}
+    {{ form_start(form) }}
+    <div class="widget-date-choice form-group">
+        <div class="calendar">
+        </div>
+        <div class="values" data-prototype="{{ form_widget(form.elements.vars.prototype)|e }}" data-widget-counter="{{ form.elements|length }}">
+            {% for element in form.elements %}
+                {{ form_widget(element) }}
+            {% endfor %}
+       </div>
+    </div>
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script type="application/javascript">
+        $(document).ready(function() {
+            var options = [];
+            options['onSelect'] = (function($context)
+            {
+                return function(dateText) {
+                    if (-1 == $.inArray(dateText, $context.data('unavailabilityDates'))) {
+                        $context.trigger('create-widget', [dateText, 'unavailabilityDates']);
+                    } else {
+                        $context.trigger('remove-widget', [dateText, 'unavailabilityDates']);
+                    }
+                }
+            })($('.widget-date-choice .calendar'));
+            $('.widget-date-choice .calendar')
+                .data('unavailabilityDates', [
+                    {% for element in form.elements %}
+                    '{{ element.vars.data.date|date('d/m/Y') }}',
+                    {% endfor %}
+                ])
+                .data('planningDates', [
+                    {% for planningDate in planningDates %}
+                    '{{ planningDate|date('d/m/Y') }}',
+                    {% endfor %}
+                ])
+                .data('unselectableDates', [
+                    {% for unselectableDate in unselectableDates %}
+                    '{{ unselectableDate|date('d/m/Y') }}',
+                    {% endfor %}
+                ])
+                .drawDatepicker(options);
+        });
+    </script>
+{% endblock %}

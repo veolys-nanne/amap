@@ -8,6 +8,7 @@
                 <th>Date de fin</th>
                 <th>Statut</th>
                 <th>Aller vers</th>
+                <th>Relancer</th>
                 <th>Supprimer</th>
             </tr>
         </thead>
@@ -27,19 +28,34 @@
                         <td></td>
                         <td></td>
                     {% endif %}
-                    <td>{{ constant('App\\Entity\\Planning::LABELS')[planning.state] }}</td>
+                    <td>{{ constant('App\\EntityManager\\PlanningManager::LABELS')[planning.state] }}</td>
                     <td>
-                        {% if constant('App\\Entity\\Planning::MAIL_TEMPLATES')[planning.nextState] is defined %}
+                        {% set nextState = constant('App\\EntityManager\\PlanningManager::TRANSITIONS')[planning.state]|default(false) %}
+                        {% if nextState %}
+                            {% if mailsParameters['nextStateMail_'~planning.id] is defined %}
+                                <button
+                                        class="btn btn-sm btn-success"
+                                        data-button=".email-formMail"
+                                        data-sub-form=".extra-formMail"
+                                        data-form="[name='formMail']"
+                                        data-form-values="{&quot;formMail[email][reference]&quot;:&quot;nextStateMail_{{ planning.id }}&quot;}">
+                                    {{ constant('App\\EntityManager\\PlanningManager::LABELS')[nextState] }}
+                                </button>
+                            {% else %}
+                                <a href="{{ path('planning_state', {state: nextState, id: planning.id }) }}" class="btn btn-sm btn-success">{{ constant('App\\EntityManager\\PlanningManager::LABELS')[nextState] }}</a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mailsParameters['upMail_'~planning.id] is defined %}
                             <button
-                               class="btn btn-sm btn-success"
-                               data-button=".email-formMail"
-                               data-sub-form=".extra-formMail"
-                               data-form="[name='formMail']"
-                               data-form-values="{&quot;formMail[email][reference]&quot;:{{ planning.id}}}">
-                                {{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}
+                                    class="btn btn-sm btn-success"
+                                    data-button=".email-formMail"
+                                    data-sub-form=".extra-formMail"
+                                    data-form="[name='formMail']"
+                                    data-form-values="{&quot;formMail[email][reference]&quot;:&quot;upMail_{{ planning.id }}&quot;}">
+                                Mail de relance
                             </button>
-                        {% else %}
-                            <a href="{{ path('planning_state', {state: planning.nextState, id: planning.id }) }}" class="btn btn-sm btn-success">{{ constant('App\\Entity\\Planning::LABELS')[planning.nextState] }}</a>
                         {% endif %}
                     </td>
                     <td>
@@ -54,16 +70,6 @@
     <div class="form-group">
         <a href="{{ path('planning_form') }}" class="btn btn-block btn-success">Nouveau</a>
     </div>
-    {% if formMailUp %}
-        <button
-           class="btn btn-block btn-success"
-           data-button=".email-formMail"
-           data-sub-form=".extra-formMail"
-           data-form="[name='formMail']"
-           data-form-values="{&quot;formMail[email][reference]&quot;:&quot;formMailUp&quot;}">
-            Envoyer un mail de relance pour les disponibilités
-        </button>
-    {% endif %}
     {% if formMail is defined %}
         {{ form(formMail) }}
     {% endif %}

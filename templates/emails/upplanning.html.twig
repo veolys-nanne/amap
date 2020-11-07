@@ -2,7 +2,7 @@
 
 {% block body %}
     <p>
-        Vous n'avez saisi aucune disponibilité pour le planning sur la période du {{ period.min|date('d/m/Y') }} au {{ period.max|date('d/m/Y') }}.
+        Le planning sur la période du {{ period.min|date('d/m/Y') }} au {{ period.max|date('d/m/Y') }} va bientôt être clôturé.
     </p>
-    <p>Veuillez vous connecter sur <a href="{{ url('planning_availability') }}">"Permanences"</a> pour les saisir.</p>
+    <p>Merci de vérifier vos disponibilités sur <a href="{{ url('unavailability') }}">"Calendrier"</a> pour les saisir.</p>
 {% endblock %}

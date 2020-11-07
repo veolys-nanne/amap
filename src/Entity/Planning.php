@@ -20,26 +20,6 @@ class Planning
     const STATE_OPEN = 1;
     const STATE_CLOSE = 2;
     const STATE_ONLINE = 3;
-    const LABELS = [
-        self::STATE_INACTIVE => 'Paramétrage',
-        self::STATE_OPEN => 'Saisie des disponibilités',
-        self::STATE_CLOSE => 'Création du planning définitif',
-        self::STATE_ONLINE => 'En ligne',
-    ];
-    const TRANSITIONS = [
-        self::STATE_INACTIVE => self::STATE_OPEN,
-        self::STATE_OPEN => self::STATE_CLOSE,
-        self::STATE_CLOSE => self::STATE_ONLINE,
-        self::STATE_ONLINE => false,
-    ];
-    const MAIL_TEMPLATES = [
-        self::STATE_OPEN => 'emails/availabilities',
-        self::STATE_ONLINE => 'emails/planning',
-    ];
-    const MAIL_SUBJECTS = [
-        self::STATE_OPEN => 'Disponibilités pour le planning des permanences AMAP Hommes de terre',
-        self::STATE_ONLINE => 'Planning des permanences AMAP Hommes de terre',
-    ];
 
     /**
      * @ORM\Id()
@@ -55,15 +35,11 @@ class Planning
     private $elements;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\AvailabilitySchedule", mappedBy="planning")
-     */
-    private $availabilitySchedules;
-
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
      */
-    private $state = 0;
+    private $state = self::STATE_INACTIVE;
 
     public function __construct()
     {
@@ -90,7 +66,7 @@ class Planning
         return self::TRANSITIONS[$this->state];
     }
 
-    public function setElements(array $elements): self
+    public function setElements($elements): self
     {
         $this->elements->clear();
 
@@ -98,22 +74,6 @@ class Planning
             $element->setPlanning($this);
             $this->elements->add($element);
         }
-
-        return $this;
-    }
-
-    public function addElement(PlanningElement $element): self
-    {
-        foreach ($this->elements as $currentElement) {
-            if ($currentElement->getDate() == $element->getDate()) {
-                $currentElement->setMembers($element->getMembers()->toArray());
-
-                return $this;
-            }
-        }
-
-        $element->setPlanning($this);
-        $this->elements->add($element);
 
         return $this;
     }

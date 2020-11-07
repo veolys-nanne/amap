@@ -145,6 +145,16 @@ class User implements UserInterface
      */
     private $deleveries = [];
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Unavailability", mappedBy="member")
+     */
+    private $unavailabilities;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\PlanningElement", mappedBy="members")
+     */
+    private $planningElements;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();

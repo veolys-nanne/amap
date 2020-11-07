@@ -2,106 +2,74 @@
 
 namespace App\EntityManager;
 
-use App\Entity\AvailabilitySchedule;
-use App\Entity\AvailabilityScheduleElement;
 use App\Entity\Planning;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 class PlanningManager
 {
-    protected $entityManager;
+    const LABELS = [
+        Planning::STATE_INACTIVE => 'Paramétrage',
+        Planning::STATE_OPEN => 'Saisie des disponibilités',
+        Planning::STATE_CLOSE => 'Création du planning définitif',
+        Planning::STATE_ONLINE => 'En ligne',
+    ];
+    const TRANSITIONS = [
+        Planning::STATE_INACTIVE => Planning::STATE_OPEN,
+        Planning::STATE_OPEN => Planning::STATE_CLOSE,
+        Planning::STATE_CLOSE => Planning::STATE_ONLINE,
+    ];
+    const MAIL = [
+        Planning::STATE_OPEN => [
+            'template' => 'emails/availabilities',
+            'subject' => 'Disponibilités pour le planning des permanences AMAP Hommes de terre',
+        ],
+        Planning::STATE_ONLINE => [
+            'template' => 'emails/planning',
+            'subject' => 'Planning des permanences AMAP Hommes de terre',
+        ],
+    ];
 
-    public function __construct(EntityManagerInterface $entityManager)
+    protected $entityManager;
+    protected $router;
+
+    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router)
     {
         $this->entityManager = $entityManager;
+        $this->router = $router;
     }
 
-    public function updatePlanning(Planning $planning, array $members, array $originalElements)
+    public function getNextStateMail(Planning $planning): ?array
     {
-        $availabilitySchedules = $this->entityManager->getRepository(AvailabilitySchedule::class)->findByPlanning($planning);
-        $previousMembers = [];
-        foreach ($availabilitySchedules as $availabilitySchedule) {
-            $previousMembers[] = $availabilitySchedule->getMember();
-        }
-        $removeMembers = array_diff($previousMembers, $members);
-        $addMembers = array_diff($members, $previousMembers);
-        $updateMembers = array_intersect($members, $previousMembers);
+        $nextState = self::TRANSITIONS[$planning->getState()] ?? false;
 
-        /*remove*/
-        foreach ($availabilitySchedules as $availabilitySchedule) {
-            if (in_array($availabilitySchedule->getMember(), $removeMembers)) {
-                $this->entityManager->remove($availabilitySchedule);
-            }
-        }
-        /*add*/
-        foreach ($addMembers as $member) {
-            $availabilitySchedule = new AvailabilitySchedule();
-            $availabilitySchedule->setPlanning($planning);
-            $availabilitySchedule->setMember($member);
-            foreach ($planning->getElements() as $element) {
-                $availabilityScheduleElement = new AvailabilityScheduleElement();
-                $availabilityScheduleElement->setDate($element->getDate());
-                $availabilityScheduleElement->setIsAvailable(false);
-                $availabilityScheduleElement->setAvailabilitySchedule($availabilitySchedule);
-                $availabilitySchedule->addElement($availabilityScheduleElement);
-                $this->entityManager->persist($availabilityScheduleElement);
-            }
-            $this->entityManager->persist($availabilitySchedule);
-        }
-        /*update*/
-        $dates = [];
-        foreach ($planning->getElements() as $element) {
-            $dates[] = $element->getDate()->format('Y-m-d');
-        }
-        foreach ($availabilitySchedules as $availabilitySchedule) {
-            if (in_array($availabilitySchedule->getMember(), $updateMembers)) {
-                $elements = $availabilitySchedule->getElements();
-                $previousDates = [];
-                foreach ($elements as $element) {
-                    $previousDates[] = $element->getDate()->format('Y-m-d');
-                }
-                $removeDates = array_diff($previousDates, $dates);
-                $addDates = array_diff($dates, $previousDates);
-                foreach ($addDates as $date) {
-                    $availabilityScheduleElement = new AvailabilityScheduleElement();
-                    $availabilityScheduleElement->setDate(\DateTime::createFromFormat('Y-m-d', $date));
-                    $availabilityScheduleElement->setIsAvailable(false);
-                    $availabilityScheduleElement->setAvailabilitySchedule($availabilitySchedule);
-                    $availabilitySchedule->addElement($availabilityScheduleElement);
-                    $this->entityManager->persist($availabilityScheduleElement);
-                }
-                foreach ($availabilitySchedule->getElements() as $element) {
-                    if (in_array($element->getDate()->format('Y-m-d'), $removeDates)) {
-                        $availabilitySchedule->getElements()->removeElement($element);
-                        $this->entityManager->remove($element);
-                    }
-                }
-                $this->entityManager->persist($availabilitySchedule);
-            }
-        }
-        foreach ($originalElements as $element) {
-            if (false === $planning->getElements()->contains($element)) {
-                $this->entityManager->remove($element);
-            }
-        }
-        foreach ($planning->getElements() as $element) {
-            $element->setPlanning($planning);
+        $parameters = null;
+        if ($nextState && (self::MAIL[$nextState] ?? false)) {
+            $parameters = [
+                'list' => $this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'),
+                'subject' => self::MAIL[$nextState]['subject'],
+                'template' => self::MAIL[$nextState]['template'],
+                'mailOptions' => ['period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
+                'callback' => urlencode($this->router->generate('planning_state', ['state' => $nextState, 'id' => $planning->getId()])),
+            ];
         }
 
-        return $planning;
+        return $parameters;
     }
 
-    public function updateMembers(Planning $planning, array $originalElements)
+    public function getUpMail(Planning $planning): ?array
     {
-        $removeElements = array_diff($originalElements, $planning->getElements()->toArray());
-        $addElements = array_diff($planning->getElements()->toArray(), $originalElements);
-
-        foreach ($removeElements as $element) {
-            $this->entityManager->remove($element);
+        $parameters = null;
+        if (Planning::STATE_OPEN === $planning->getState()) {
+            $parameters = [
+                'list' => $this->entityManager->getRepository(User::class)->findByRoleAndActive('ROLE_MEMBER'),
+                'subject' => 'Relance Disponibilité AMAP hommes de terre',
+                'template' => 'emails/upplanning',
+                'mailOptions' => ['period' => $this->entityManager->getRepository(Planning::class)->findPeriodByPlanning($planning)[0]],
+            ];
         }
 
-        foreach ($addElements as $element) {
-            $this->entityManager->persist($element);
-        }
+        return $parameters;
     }
 }

@@ -3,5 +3,5 @@
 {% block body %}
 Un nouveau planning des permanences est disponible pour la période du {{ period.min|date('d/m/Y') }} au {{ period.max|date('d/m/Y') }}.
 
-Veuillez vous connecter sur {{ url('planning_availability') }} pour saisir vos disponibilités.
+Veuillez vous connecter sur {{ url('unavailability') }} pour saisir vos disponibilités.
 {% endblock %}

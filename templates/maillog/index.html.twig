@@ -32,6 +32,12 @@
             $('.table').drawDataTable({
                 options : {
                     order: [[0, 'desc']],
+                    columnDefs: [
+                        {
+                            type: 'extract-date',
+                            targets: [0]
+                        }
+                    ],
                 }
             });
         });
