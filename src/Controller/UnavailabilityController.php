@@ -68,7 +68,7 @@ class UnavailabilityController extends AbstractController
 
         return $this->render('unavailability/form.html.twig', [
             'form' => $form->createView(),
-            'title' => 'Gestion de mon calendrier de disponibilités',
+            'title' => 'Calendrier de disponibilités',
             'planningDates' => $planningDates,
             'unselectableDates' => $unselectableDates,
         ]);
