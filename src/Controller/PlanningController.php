@@ -78,7 +78,9 @@ class PlanningController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', $isNew ? 'Le planning de permanences a été créé.' : 'Le planning de permanences a été mis à jour.');
 
-            return $this->forward('App\Controller\PlanningController::planningListingAction');
+            if (Planning::STATE_CLOSE !== $planning->getState()) {
+                return $this->forward('App\Controller\PlanningController::planningListingAction');
+            }
         }
 
         $planningDates = array_column($entityManager->getRepository(PlanningElement::class)->findByActivePlanning($planning), 'date');
@@ -146,15 +148,8 @@ class PlanningController extends AbstractController
      */
     public function planningViewAction(EntityManagerInterface $entityManager)
     {
-        $planningElements = $entityManager->getRepository(PlanningElement::class)->findByOnline();
-        $nbrColumn = 0;
-        foreach ($planningElements as $planningElement) {
-            $nbrColumn = max($nbrColumn, count($planningElement->getMembers()));
-        }
-
         return $this->render('planning/view.html.twig', [
-            'planningElements' => $planningElements,
-            'nbrColumn' => $nbrColumn,
+            'planningElements' => $entityManager->getRepository(PlanningElement::class)->findByOnline(),
         ]);
     }
 }

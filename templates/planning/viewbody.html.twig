@@ -1,0 +1,19 @@
+{% set nbrColumn = 0 %}
+{% for planningElement in planningElements %}
+    {% set nbrColumn = max(nbrColumn, planningElement.members|length) %}
+{% endfor%}
+<table class="table table-striped table-hover">
+    <tbody>
+    {% for planningElement in planningElements %}
+        <tr>
+            <td>{{ planningElement.date|date('d/m/Y') }}</td>
+            {% for member in planningElement.members %}
+                <td class="{{ member == app.user ? 'text-danger' : '' }}">{{ member }}</td>
+            {% endfor %}
+            {% if planningElement.members|length < nbrColumn %}
+                <td colspan="{{ nbrColumn - planningElement.members|length }}"></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

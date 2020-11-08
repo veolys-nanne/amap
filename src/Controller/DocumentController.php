@@ -60,7 +60,7 @@ class DocumentController extends AbstractController
 
     /**
      * @Route(
-     *     "/admin/document/form/tinyMceImage",
+     *     "/logged/document/form/tinyMceImage",
      *     name="document_form_image",
      * )
      */

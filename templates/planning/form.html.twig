@@ -14,6 +14,10 @@
     </div>
     {{ form_rest(form) }}
     {{ form_end(form) }}
+    {% set planning = form.vars.data %}
+    {%  if planning %}
+        {% include 'planning/viewbody.html.twig' with {'planningElements': planning.elements} %}
+    {% endif %}
 {% endblock %}
 
 {% block javascripts %}
@@ -23,6 +27,7 @@
             options['onSelect'] = (function($context)
             {
                 return function(dateText) {
+                    localStorage.setItem('datepicker_{{ form.vars.data.id }}', dateText);
                     if (-1 == $.inArray(dateText, $context.data('currentPlanningDates'))) {
                         $context.trigger('create-widget', [dateText, 'currentPlanningDates']);
                     }
@@ -37,9 +42,14 @@
                             $('input[type="text"]', $container).each(function() {
                                 if ($(this).val() == dateText) {
                                     var id = $(this).attr('id').replace(/^(.*)_date$/, '$1_members');
-                                    for (var i in data) {
-                                        $('#' + id + ' option[value="'+ data[i] +'"]').addClass('text-danger');
-                                    }
+                                    var $select = $('#' + id);
+                                    $('option', $select).each(function() {
+                                       if (-1 !== data.indexOf(parseInt($(this).attr('value')))) {
+                                           $(this).addClass('text-danger');
+                                           $(this).remove();
+                                           $select.append($(this));
+                                       }
+                                    });
                                     $('#' + id).multiSelect();
                                     $('.delete-date', $container)
                                         .toggleClass('hidden', false)
@@ -55,7 +65,7 @@
                 }
             })($('.widget-date-choice .calendar'));
             {% if form.elements|length > 0 %}
-                options['defaultDate'] = '{{ form.elements|first.vars.data.date|date('d/m/Y') }}';
+                options['defaultDate'] = localStorage.getItem('datepicker_{{ form.vars.data.id }}') || '{{ form.elements|first.vars.data.date|date('d/m/Y') }}';
             {% endif %}
             $('.widget-date-choice .calendar')
                 .data('currentPlanningDates', [

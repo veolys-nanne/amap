@@ -42,7 +42,7 @@
             $(this).data(target, values);
             $container.data('widget-counter', $container.data('widget-counter') + 1);
             $('input[type="text"]', $newWidget).val(dateText);
-            $container.append($newWidget);
+            $container.prepend($newWidget);
             $(this)
                 .datepicker('refresh')
                 .datepicker('setDate', dateText);
