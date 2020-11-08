@@ -39,6 +39,7 @@ class UserType extends AbstractType
                     'référent/e' => 'ROLE_REFERENT',
                     'producteur/trice' => 'ROLE_PRODUCER',
                     'consom\'acteur/trice' => 'ROLE_MEMBER',
+                    'hors permanence' => 'ROLE_NO_PLANNING',
                 ],
             ]);
         }
