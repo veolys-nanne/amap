@@ -34,7 +34,7 @@ class PlanningEmailCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate((new \DateTime())->add(new \DateInterval('P3D'))));
+        $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate((new \DateTime())->add(new \DateInterval('P4D'))));
         $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate(new \DateTime()));
     }
 

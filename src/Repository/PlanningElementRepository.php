@@ -79,4 +79,23 @@ class PlanningElementRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findMembersByDate(\DateTime $date): ?array
+    {
+        return $this->createQueryBuilder('pe')
+            ->innerJoin('pe.planning', 'p')
+            ->innerJoin('pe.members', 'u')
+            ->select('pe.date as date')
+            ->addSelect('u.email as email')
+            ->addSelect('u.broadcastList as broadcastList')
+            ->where('p.deleted = 0')
+            ->andWhere('p.state = :state')
+            ->andWhere('pe.date = :date')
+            ->setParameters([
+                'state' => Planning::STATE_ONLINE,
+                'date' => $date->format('Y-m-d'),
+            ])
+            ->getQuery()
+            ->getResult();
+    }
 }
