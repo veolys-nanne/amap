@@ -147,6 +147,8 @@ class UserRepository extends ServiceEntityRepository
             ->where('u.deleveries IS NOT NULL')
             ->andWhere("u.deleveries <> 'a:0:{}'")
             ->andWhere('u.deleted = 0')
+            ->orderBy('u.order', 'asc')
+            ->addOrderBy('u.lastname', 'asc')
             ->getQuery()
             ->getResult()
             ;

@@ -164,8 +164,13 @@ class MailHelper
         $isPreview = $form->has('email') && $form->get('email')->get('preview')->isClicked();
         if ($isEmail || $isPreview) {
             $index = $form->get('email')->get('reference')->getData();
-            $mailsParameter = $mailsParameters[$index];
-            $results['messages'] = [$this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? [])];
+            $mailsParameters = $mailsParameters[$index];
+            if (isset($mailsParameters['list'])) {
+                $mailsParameters = [$mailsParameters];
+            }
+            foreach ($mailsParameters as $mailsParameter) {
+                $results['messages'][] = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? []);
+            }
             if ($isPreview) {
                 if (isset($results['messages'])) {
                     $url = $this->router->generate('preview', ['url' => $mailsParameters[$index]['callback'] ?? '']);
@@ -187,7 +192,7 @@ class MailHelper
         return [];
     }
 
-    protected function adminMailerForm(Form $form, array $list, string $subject, string $template, array $mailOptions = []): \Swift_Message
+    protected function adminMailerForm(Form $form, array $list, string $subject, string $template, array $mailOptions = []): ?\Swift_Message
     {
         $message = null;
         if (count($list) > 0) {

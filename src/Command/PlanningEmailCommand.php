@@ -34,30 +34,32 @@ class PlanningEmailCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate((new \DateTime())->add(new \DateInterval('P4D'))));
+        $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate((new \DateTime())->add(new \DateInterval('P5D'))));
         $this->sendMail($this->entityManager->getRepository(PlanningElement::class)->findMembersByDate(new \DateTime()));
     }
 
     protected function sendMail($list)
     {
-        $message = $this->mailHelper->getMailForList('Permanence AMAP hommes de terre', $list);
-        if (null !== $message) {
-            $message
-                ->setBody(
-                    $this->twigEnvironment->render('emails/permanence.html.twig', [
-                        'message' => $message,
-                        'date' => $list[0]['date'],
-                    ]),
-                    'text/html'
-                )
-                ->addPart(
-                    $this->twigEnvironment->render('emails/permanence.txt.twig', [
-                        'message' => $message,
-                        'date' => $list[0]['date'],
-                    ]),
-                    'text/plain'
-                );
-            $this->mailer->send($message);
+        if (0 < count($list)) {
+            $message = $this->mailHelper->getMailForList('Permanence AMAP hommes de terre', $list);
+            if (null !== $message) {
+                $message
+                    ->setBody(
+                        $this->twigEnvironment->render('emails/permanence.html.twig', [
+                            'message' => $message,
+                            'date' => $list[0]['date'],
+                        ]),
+                        'text/html'
+                    )
+                    ->addPart(
+                        $this->twigEnvironment->render('emails/permanence.txt.twig', [
+                            'message' => $message,
+                            'date' => $list[0]['date'],
+                        ]),
+                        'text/plain'
+                    );
+                $this->mailer->send($message);
+            }
         }
     }
 }
