@@ -4,6 +4,7 @@ namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -14,9 +15,13 @@ class UnavailabilityCollectionType extends AbstractType
         $builder
             ->add('elements', CollectionType::class, [
                 'label' => false,
-                'entry_type' => UnavailabilityType::class,
+                'entry_type' => DateType::class,
                 'entry_options' => [
                     'label' => false,
+                    'widget' => 'single_text',
+                    'format' => 'dd/MM/y',
+                    'attr' => ['class' => 'hidden'],
+                    'required' => false,
                 ],
                 'allow_add' => true,
                 'allow_delete' => true,

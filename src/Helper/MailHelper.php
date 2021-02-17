@@ -168,12 +168,14 @@ class MailHelper
             if (isset($mailsParameters['list'])) {
                 $mailsParameters = [$mailsParameters];
             }
+            $callback = '';
             foreach ($mailsParameters as $mailsParameter) {
                 $results['messages'][] = $this->adminMailerForm($form, $mailsParameter['list'] ?? [], $mailsParameter['subject'] ?? '', $mailsParameter['template'] ?? '', $mailsParameter['mailOptions'] ?? []);
+                $callback = $mailsParameter['callback'] ?? $callback;
             }
             if ($isPreview) {
                 if (isset($results['messages'])) {
-                    $url = $this->router->generate('preview', ['url' => $mailsParameters[$index]['callback'] ?? '']);
+                    $url = $this->router->generate('preview', ['url' => $callback ?? '']);
                     $results['formPreview'] = $this->formFactory->create(PreviewEmailsType::class, ['messages' => $results['messages']], [
                         'action' => $url,
                     ])->createView();
@@ -184,7 +186,7 @@ class MailHelper
                 if (isset($results['messages'])) {
                     $this->sendMessages($results['messages']);
 
-                    return ['callback' => $mailsParameters[$index]['callback'] ?? ''];
+                    return ['callback' => $callback ?? ''];
                 }
             }
         }

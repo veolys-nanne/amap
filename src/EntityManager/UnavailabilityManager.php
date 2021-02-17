@@ -20,19 +20,19 @@ class UnavailabilityManager
     public function recordDates($newDates, $oldDates)
     {
         $user = $this->tokenStorage->getToken()->getUser();
+        $this->entityManager->getRepository(Unavailability::class)->remove($user,
+            array_udiff($oldDates, $newDates, function (\DateTime $dateA, \DateTime $dateB) {
+                return $dateA->getTimestamp() - $dateB->getTimestamp();
+            })
+        );
         $addDates = array_udiff($newDates, $oldDates, function (\DateTime $dateA, \DateTime $dateB) {
-            return $dateA->format('Y-m-d') != $dateB->format('Y-m-d');
+            return $dateA->getTimestamp() - $dateB->getTimestamp();
         });
-        foreach ($addDates as $addDate) {
+        foreach ($addDates as $date) {
             $unavailability = new Unavailability();
-            $unavailability->setDate($addDate);
+            $unavailability->setDate($date);
             $unavailability->setMember($user);
             $this->entityManager->persist($unavailability);
         }
-        $this->entityManager->getRepository(Unavailability::class)->remove($user,
-            array_udiff($oldDates, $newDates, function (\DateTime $dateA, \DateTime $dateB) {
-                return $dateA->format('Y-m-d') != $dateB->format('Y-m-d');
-            })
-        );
     }
 }

@@ -32,7 +32,7 @@
             $('.widget-date-choice .calendar')
                 .data('unavailabilityDates', [
                     {% for element in form.elements %}
-                    '{{ element.vars.data.date|date('d/m/Y') }}',
+                    '{{ element.vars.data|date('d/m/Y') }}',
                     {% endfor %}
                 ])
                 .data('planningDates', [

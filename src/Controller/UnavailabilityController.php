@@ -49,17 +49,16 @@ class UnavailabilityController extends AbstractController
         $unselectableDates = array_map(function (string $date) {
             return \DateTime::createFromFormat('Y-m-d', $date);
         }, $unselectableDates);
-
-        $form = $this->createForm(UnavailabilityCollectionType::class, ['elements' => $unavailabilities]);
+        $oldDates = array_map(function (Unavailability $unavailability) {
+            return $unavailability->getDate();
+        }, $unavailabilities);
+        $form = $this->createForm(UnavailabilityCollectionType::class, ['elements' => $oldDates]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $newDates = [];
             foreach ($form->get('elements')->all() as $child) {
-                $newDates[] = $child->get('date')->getData();
+                $newDates[] = $child->getData();
             }
-            $oldDates = array_map(function (Unavailability $unavailability) {
-                return $unavailability->getDate();
-            }, $unavailabilities);
             $unavailabilityManager->recordDates($newDates, $oldDates);
             $entityManager->flush();
 
