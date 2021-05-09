@@ -25,6 +25,7 @@ security:
             logout:
                 path:  /logout
                 target: /
+            switch_user: { role: ROLE_ADMIN }
         password_reset:
             pattern: ^/password/reset.*
             anonymous: true

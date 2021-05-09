@@ -201,9 +201,11 @@ class UserController extends AbstractController
                         in_array('ROLE_PRODUCER', $user->getRoles()) ? 'producer' : 'member'
                 ));
                 $options['role'] = $role;
+
+                return $this->redirectToRoute('user_form', $options);
             }
 
-            return $this->forward('App\Controller\UserController::userEditAction', $options);
+            return $this->redirectToRoute('user_profil');
         }
         $title = 'Mise à jour du mot de passe';
 

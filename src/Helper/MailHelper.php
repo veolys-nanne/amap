@@ -63,18 +63,21 @@ class MailHelper
     {
         $message = null;
         if (null == $broadcastList) {
-            $broadcastList = [$this->adminEmail];
+            $broadcastList = [];
             array_walk($recipients, function ($data) use (&$broadcastList) {
-                $emails = $data instanceof User ? array_merge([$data->getEmail()], $data->getBroadcastList()) : [];
+                $emails = $data instanceof User ? array_merge(
+                    [$data->getEmail() => $data->__toString()],
+                    array_combine($data->getBroadcastList(), array_fill(0, count($data->getBroadcastList()), $data->__toString()))
+                ) : [];
                 $emails = is_array($data) ? array_merge([$data['email']], $data['broadcastList']) : $emails;
                 $broadcastList = array_merge($broadcastList, $emails);
             });
-            $broadcastList = array_unique(array_filter($broadcastList));
         }
         if (!empty($broadcastList)) {
             \Swift_Preferences::getInstance()->setCharset('utf-8');
-            $message = (new \Swift_Message($subject))
-                ->setFrom([$this->adminEmail])
+            $message = (new \Swift_Message('[AMAP] '.$subject))
+                ->setFrom([$this->adminEmail => 'AMAP Hommes de terre'])
+                ->setTo([$this->adminEmail => 'AMAP Hommes de terre'])
                 ->setBcc($broadcastList)
             ;
             $headers = $message->getHeaders();

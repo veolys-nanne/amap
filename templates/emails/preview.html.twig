@@ -8,18 +8,21 @@
                 </div>
                 <div class="modal-body">
                     {% for message in messages %}
+                        {% set bcc = message.bcc|reduce(
+                            (bcc, item) => item in bcc ? bcc : bcc|merge([item]), []
+                            ) %}
                         <div class="display-table">
                             <div class="display-row">
                                 <div class="display-cell">De : </div>
-                                <div class="display-cell">{{ message.getFrom|keys|join(', ') }}</div>
+                                <div class="display-cell">{{ message.from|keys|join(', ') }}</div>
                             </div>
                             <div class="display-row">
                                 <div class="display-cell">À: </div>
-                                <div class="display-cell">{{ message.getBcc|keys|join(', ') }}</div>
+                                <div class="display-cell">{{ message.bcc|keys|join(', ') }}</div>
                             </div>
                             <div class="display-row">
                                 <div class="display-cell">Sujet: </div>
-                                <div class="display-cell">{{ message.getSubject }}</div>
+                                <div class="display-cell">{{ message.subject }}</div>
                             </div>
                         </div>
                         <div class="body">{{ message.getBody|raw }}</div>

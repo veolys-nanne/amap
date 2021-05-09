@@ -41,13 +41,12 @@
             values.push(dateText);
             $(this).data(target, values);
             $container.data('widget-counter', $container.data('widget-counter') + 1);
+            $('input[type="text"]', $newWidget).val(dateText);
             $newWidget.val(dateText);
             $container.prepend($newWidget);
             $(this)
                 .datepicker('refresh')
                 .datepicker('setDate', dateText);
-
-
         },
         removeWidget: function (dateText, target) {
             var $context = $(this);

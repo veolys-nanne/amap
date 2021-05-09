@@ -21,11 +21,11 @@ class UnavailabilityManager
     {
         $user = $this->tokenStorage->getToken()->getUser();
         $this->entityManager->getRepository(Unavailability::class)->remove($user,
-            array_udiff($oldDates, $newDates, function (\DateTime $dateA, \DateTime $dateB) {
+            array_udiff(array_filter($oldDates), array_filter($newDates), function (\DateTime $dateA, \DateTime $dateB) {
                 return $dateA->getTimestamp() - $dateB->getTimestamp();
             })
         );
-        $addDates = array_udiff($newDates, $oldDates, function (\DateTime $dateA, \DateTime $dateB) {
+        $addDates = array_udiff(array_filter($newDates), array_filter($oldDates), function (\DateTime $dateA, \DateTime $dateB) {
             return $dateA->getTimestamp() - $dateB->getTimestamp();
         });
         foreach ($addDates as $date) {

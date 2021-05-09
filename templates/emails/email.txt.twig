@@ -1,7 +1,10 @@
+{% set bcc = message.bcc|reduce(
+    (bcc, item) => item in bcc ? bcc : bcc|merge([item]), []
+    ) %}
 {{ message.subject }}
 
 De: {% if app.user is defined and app.user.email is defined %}{{ app.user }}{% else %}{{admin_email}}{% endif %}
-À: {{ message.bcc|keys|join(', ') }}
+À: {{ bcc|join(', ') }}
 {% if app.user is defined and app.user.email is defined %}Répondre : {{ url('contact_form', {user : app.user.id}) }}{% endif %}
 
 {% block body %}

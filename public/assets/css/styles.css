@@ -232,9 +232,9 @@ ul.max-height li label {
 .ui-datepicker-calendar .in-current-planning {
     border: thick double #ff4500;
 }
-.ui-datepicker-calendar td.availability a.ui-state-default {
+.ui-datepicker-calendar td.availability .ui-state-default {
     background-color: rgba(00, 255, 69, 0.5);
 }
-.ui-datepicker-calendar td.unavailability a.ui-state-default {
+.ui-datepicker-calendar td.unavailability .ui-state-default {
     background-color: rgba(255, 69, 00, 0.5);
 }
