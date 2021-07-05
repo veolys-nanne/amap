@@ -109,6 +109,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ path('logout') }}" title="Se déconnecter"><i class="fas fa-sign-out-alt"></i></a>
             </li>
+            {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('home') }}?_switch_user=_exit" title="actuellement : {{ app.user }}">Mon compte</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
 {% endif %}

@@ -75,6 +75,7 @@ class SecurityController extends AbstractController
                     return $this->forward('App\Controller\SecurityController::login');
                 }
             }
+            $this->addFlash('danger', 'Aucun compte trouvé pour cette adresse email! Veuillez saisir votre adresse de connexion.');
 
             return $this->forward('App\Controller\SecurityController::login');
         }

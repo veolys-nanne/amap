@@ -16,6 +16,7 @@
                     <th>Producteurs/trices</th>
                 {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
+                    <th>Se connecter</th>
                     <th>Supprimer</th>
                 {% endif %}
             </tr>
@@ -59,6 +60,11 @@
                         <td>{{ producers|join(', ') }}</td>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <a href="{{ path('home', {_switch_user: user.email}) }}">
+                                <i class="fas fa-random"></i>
+                            </a>
+                        </td>
                         <td>
                             <a href="{{ path('user_delete', {id: user.id, type: type}) }}" data-confirm="Confirmez-vous la suppression de cet utilisateur?">
                                 <i class="fas fa-trash-alt text-danger"></i>

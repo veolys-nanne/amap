@@ -2,15 +2,27 @@
 
 {% block body %}
     {{ form_start(form) }}
-    <div class="widget-date-choice form-group">
+    <div class="widget-date-choice form-group" style="float: left;">
         <div class="calendar">
         </div>
         <div class="values" data-prototype="{{ form_widget(form.elements.vars.prototype)|e }}" data-widget-counter="{{ form.elements|length }}">
             {% for element in form.elements %}
                 {{ form_widget(element) }}
             {% endfor %}
-       </div>
+        </div>
     </div>
+    <p>
+        Pour modifier vos disponibilités, il suffit de cliquer sur la case concernée.<br />
+        En rouge, cela signifie que vous n'êtes pas disponible.<br />
+        En vert, cela signifie que vous êtes disponible.<br />
+        N'oubliez pas de valider vos modifications en appuyant sur le bouton "Envoyer".<br />
+        Un message doit vous informer que vos modifications ont bien été prises en compte.<br />
+    </p>
+    <p>
+        Les cases "grisées" ne sont plus accessibles à la modifications:<br />
+        - il s'agit d'une date antérieure à la date du jour,<br />
+        - le/la responsable du planning a clotûré la modification pour établir le planning définitif.
+    </p>
     {{ form_rest(form) }}
     {{ form_end(form) }}
 {% endblock %}

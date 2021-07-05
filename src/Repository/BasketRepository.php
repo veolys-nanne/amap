@@ -154,10 +154,10 @@ class BasketRepository extends ServiceEntityRepository
     ): array {
         switch ($type) {
             case SynthesesType::INVOICE_BY_MEMBER:
-                return ['Total', 'Avoir'];
+                return ['Total', 'Avoir', 'Règlement'];
                 break;
             case SynthesesType::INVOICE_BY_PRODUCER_BY_MEMBER:
-                return ['Total', 'Avoir'];
+                return ['Total', 'Avoir', 'Règlement'];
                 break;
             default:
                 return array_column($this->createQueryBuilder('b')
@@ -303,8 +303,11 @@ class BasketRepository extends ServiceEntityRepository
                 ->getArrayResult();
             $results = array_merge_recursive(
                 array_column($results, null, 'index'),
-                array_column($extraResults, null, 'index')
+                array_column($extraResults, null, 'index'),
             );
+            $results = array_map(function ($item) {
+                return array_merge($item, ['Règlement' => ($item['Total'] ?? 0) - ($item['Avoir'] ?? 0)]);
+            }, $results);
         }
 
         return $results;
